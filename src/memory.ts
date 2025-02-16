@@ -24,10 +24,11 @@ namespace Il2Cpp {
     }
 
     /**
-     * @param dereference If a pointer, dereference before reading? Usually `true`, but `false` for parameters for example.
+     * @param options.derefPointer If a pointer, dereference before reading? Usually `true`, but `false` for parameters for example.
      */
-    export function read(pointer: NativePointer, type: Il2Cpp.Type, derefPointer: boolean=true): Il2Cpp.Field.Type {
-        const dereferenced = derefPointer ? pointer.readPointer() : pointer;
+    export function read(pointer: NativePointer, type: Il2Cpp.Type, options: { derefPointer?: boolean } = {}): Il2Cpp.Field.Type {
+        options = { derefPointer: true, ...options };
+        const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
 
         switch (type.typeEnum) {
             case Il2Cpp.Type.enum.boolean:

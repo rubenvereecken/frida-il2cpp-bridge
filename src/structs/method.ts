@@ -1,5 +1,8 @@
 namespace Il2Cpp {
-    type ImplementationCallback<T extends Il2Cpp.Method.ReturnType>  = (this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType, ...parameters: Il2Cpp.Parameter.Type[]) => T;
+    type ImplementationCallback<T extends Il2Cpp.Method.ReturnType> = (
+        this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
+        ...parameters: Il2Cpp.Parameter.Type[]
+    ) => T;
     type OnEnterCallback = (this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType, ...parameters: Il2Cpp.Parameter.Type[]) => void;
     type OnLeaveCallback<T extends Il2Cpp.Method.ReturnType> = (this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType, retval: T) => T | void;
 
@@ -350,7 +353,7 @@ ${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toStr
         }
 
         /** @internal */
-        wrapOnEnter(block: OnEnterCallback): ((this: InvocationContext, args: InvocationArguments) => void) {
+        wrapOnEnter(block: OnEnterCallback): (this: InvocationContext, args: InvocationArguments) => void {
             const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
             return (args: InvocationArguments) => {
                 const thisObject = this.isStatic
@@ -360,28 +363,28 @@ ${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toStr
                     : new Il2Cpp.Object(args[0] as NativePointer);
                 // As opposed to `Interceptor.replace`, `Interceptor.attach` doesn't
                 // interpret pointers, so use `read` instead of `fromFridaValue`
-                const parameters = this.parameters.map((_, i) => read(args[i + startIndex], _.type, false));
+                const parameters = this.parameters.map((_, i) => read(args[i + startIndex], _.type, { derefPointer: false }));
                 block.call(thisObject, ...parameters);
-            }
+            };
         }
 
         /** @internal */
-        wrapOnLeave(block: OnLeaveCallback<T>): ((this: InvocationContext, retval: InvocationReturnValue) => void) {
+        wrapOnLeave(block: OnLeaveCallback<T>): (this: InvocationContext, retval: InvocationReturnValue) => void {
             return (retval: InvocationReturnValue) => {
                 // TODO grab `this` pointer during `onEnter`
-                const thisObject = this.class
+                const thisObject = this.class;
 
                 // `retval` is always a pointer, even if a primitive type
-                const returnValue = this.returnType.typeEnum != Il2Cpp.Type.enum.void ? read(retval, this.returnType) as T : undefined as T;
+                const returnValue = this.returnType.typeEnum != Il2Cpp.Type.enum.void ? (read(retval, this.returnType) as T) : (undefined as T);
                 const newReturnValue = block.call(thisObject, returnValue);
 
-                // If callback returned nothing, replace nothing, leave the old return value
-                if (newReturnValue == null) return;
+                // If callback returned nothing, don't replace, leave the old return value
+                if (newReturnValue === undefined) return;
 
                 const handle = Memory.alloc(this.returnType.class.valueTypeSize);
                 write(handle, newReturnValue, this.returnType);
                 retval.replace(handle);
-            }
+            };
         }
     }
 
