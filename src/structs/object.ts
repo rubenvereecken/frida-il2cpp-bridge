@@ -1,5 +1,28 @@
 namespace Il2Cpp {
     export class Object extends Il2Cpp.ObjectLike {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Object",
+                enumerable: true
+            });
+        }
+
+        valueToString(): string {
+            if (this.isNull()) return "null";
+            return this.method<Il2Cpp.String>("ToString", 0).invoke().content ?? "null";
+        }
+
+        toString(): string {
+            return `${this.valueToString()} (${this.type.name})`;
+        }
+
         /** Gets the Il2CppObject struct size, possibly equal to `Process.pointerSize * 2`. */
         @lazy
         static get headerSize(): number {
@@ -37,11 +60,6 @@ namespace Il2Cpp {
         /** Gets the correct virtual method from the given virtual method. */
         virtualMethod<T extends Il2Cpp.Method.ReturnType>(method: Il2Cpp.Method): Il2Cpp.BoundMethod<T> {
             return new Il2Cpp.Method<T>(Il2Cpp.exports.objectGetVirtualMethod(this, method)).bind(this);
-        }
-
-        /** */
-        toString(): string {
-            return this.isNull() ? "null" : this.method<Il2Cpp.String>("ToString", 0).invoke().content ?? "null";
         }
 
         /** Unboxes the value type (either a primitive, a struct or an enum) out of this object. */

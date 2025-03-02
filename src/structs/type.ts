@@ -1,6 +1,24 @@
 namespace Il2Cpp {
     @recycle
     export class Type extends NativeStruct {
+        constructor(handle: NativePointerValue) {
+            super(handle);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Type",
+                enumerable: true
+            });
+        }
+
+        toString(): string {
+            return this.name;
+        }
+
         /** */
         @lazy
         static get enum() {
@@ -149,11 +167,6 @@ namespace Il2Cpp {
         @lazy
         get typeEnum(): number {
             return Il2Cpp.exports.typeGetTypeEnum(this);
-        }
-
-        /** */
-        toString(): string {
-            return this.name;
         }
 
         isSame(other: Il2Cpp.Type): boolean {

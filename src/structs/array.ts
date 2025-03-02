@@ -1,5 +1,27 @@
 namespace Il2Cpp {
     export class Array<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct implements Iterable<T> {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Array",
+                enumerable: true
+            });
+        }
+
+        valueToString(): string {
+            return this.isNull() ? "null" : `[${this.elements.read(this.length, 0)}]`;
+        }
+
+        toString(): string {
+            return `${this.valueToString()} (${this.elementType.name}[])`;
+        }
+
         /** Gets the Il2CppArray struct size, possibly equal to `Process.pointerSize * 4`. */
         @lazy
         static get headerSize(): number {
@@ -65,11 +87,6 @@ namespace Il2Cpp {
             }
 
             this.elements.set(index, value);
-        }
-
-        /** */
-        toString(): string {
-            return this.isNull() ? "null" : `[${this.elements.read(this.length, 0)}]`;
         }
 
         /** Iterable. */

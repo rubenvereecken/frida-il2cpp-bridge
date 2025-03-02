@@ -2,6 +2,24 @@ namespace Il2Cpp {
     export class Pointer<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
         constructor(handle: NativePointer, readonly type: Il2Cpp.Type) {
             super(handle);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Pointer",
+                enumerable: true
+            });
+        }
+
+        valueToString(): string {
+            return this.handle.toString();
+        }
+
+        toString(): string {
+            return `${this.valueToString()} (${this.type.name})`;
         }
 
         /** Gets the element at the given index. */
@@ -23,11 +41,6 @@ namespace Il2Cpp {
         /** Sets the given element at the given index */
         set(index: number, value: T): void {
             write(this.handle.add(index * this.type.class.arrayElementSize), value, this.type);
-        }
-
-        /** */
-        toString(): string {
-            return this.handle.toString();
         }
 
         /** Writes the given elements starting at the given index. */

@@ -1,5 +1,24 @@
 namespace Il2Cpp {
     export class Field<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => (this instanceof Il2Cpp.BoundField ? "Il2Cpp.BoundField" : "Il2Cpp.Field"),
+                enumerable: true
+            });
+        }
+
+        /** */
+        toString(): string {
+            return `${this.type.name} ${this.class.type.name}::${this.name}`;
+        }
+
         /** Gets the class in which this field is defined. */
         @lazy
         get class(): Il2Cpp.Class {
@@ -110,17 +129,6 @@ namespace Il2Cpp {
             Il2Cpp.exports.fieldSetStaticValue(this.handle, handle);
         }
 
-        /** */
-        toString(): string {
-            return `\
-${this.isThreadStatic ? `[ThreadStatic] ` : ``}\
-${this.isStatic ? `static ` : ``}\
-${this.type.name} \
-${this.name}\
-${this.isLiteral ? ` = ${this.type.class.isEnum ? read((this.value as Il2Cpp.ValueType).handle, this.type.class.baseType!) : this.value}` : ``};\
-${this.isThreadStatic || this.isLiteral ? `` : ` // 0x${this.offset.toString(16)}`}`;
-        }
-
         /** Derive a BoundField for access to this field's value for `instance`. */
         bind(instance: Il2Cpp.ObjectLike): Il2Cpp.BoundField<T> {
             if (this.isStatic) {
@@ -154,6 +162,10 @@ ${this.isThreadStatic || this.isLiteral ? `` : ` // 0x${this.offset.toString(16)
         /** @internal */
         constructor(handle: NativePointerValue, public instance: Il2Cpp.ObjectLike) {
             super(handle);
+        }
+
+        toString(): string {
+            return `${super.toString()} (bound @ ${this.instance.handle})`;
         }
 
         get valueHandle(): NativePointer {

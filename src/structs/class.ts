@@ -1,6 +1,24 @@
 namespace Il2Cpp {
     @recycle
     export class Class extends NativeStruct {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Class",
+                enumerable: true
+            });
+        }
+
+        toString(): string {
+            return `${this.image.assembly.name}::${this.fullName}`;
+        }
+
         /** Gets the actual size of the instance of the current class. */
         get actualInstanceSize(): number {
             const SystemString = Il2Cpp.corlib.class("System.String");
@@ -343,21 +361,6 @@ namespace Il2Cpp {
         @lazy
         get m(): Il2Cpp.DynamicMethods {
             return Il2Cpp.DynamicMethodsLookup.from(this, true);
-        }
-
-        /** */
-        toString(): string {
-            const inherited = [this.parent].concat(this.interfaces);
-
-            return `\
-// ${this.assemblyName}
-${this.isEnum ? `enum` : this.isStruct ? `struct` : this.isInterface ? `interface` : `class`} \
-${this.type.name}\
-${inherited ? ` : ${inherited.map(_ => _?.type.name).join(`, `)}` : ``}
-{
-    ${this.fields.join(`\n    `)}
-    ${this.methods.join(`\n    `)}
-}`;
         }
 
         /** Executes a callback for every defined class. */

@@ -1,6 +1,24 @@
 namespace Il2Cpp {
     @recycle
     export class Assembly extends NativeStruct {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Assembly",
+                enumerable: true
+            });
+        }
+
+        toString(): string {
+            return this.name;
+        }
+
         /** Gets the image of this assembly. */
         get image(): Il2Cpp.Image {
             let get = function (this: Il2Cpp.Assembly) {

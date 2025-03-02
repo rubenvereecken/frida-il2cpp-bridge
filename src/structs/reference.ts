@@ -1,7 +1,17 @@
 namespace Il2Cpp {
     export class Reference<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
-        constructor(handle: NativePointer, readonly type: Il2Cpp.Type) {
+        constructor(handle: NativePointerValue, readonly type: Il2Cpp.Type) {
             super(handle);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => "Il2Cpp.Reference",
+                enumerable: true
+            });
         }
 
         /** Gets the element referenced by the current reference. */
@@ -15,8 +25,12 @@ namespace Il2Cpp {
         }
 
         /** */
+        valueToString(): string {
+            return this.isNull() ? "null" : `${this.value}`;
+        }
+
         toString(): string {
-            return this.isNull() ? "null" : `->${this.value}`;
+            return `->${this.valueToString()} (&${this.type.name})`;
         }
     }
 

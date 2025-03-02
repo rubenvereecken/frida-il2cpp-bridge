@@ -7,6 +7,24 @@ namespace Il2Cpp {
     type OnLeaveCallback<T extends Il2Cpp.Method.ReturnType> = (this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType, retval: T) => T | void;
 
     export class Method<T extends Il2Cpp.Method.ReturnType = Il2Cpp.Method.ReturnType> extends NativeStruct {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, "__toString", {
+                get: () => this.toString(),
+                enumerable: true
+            });
+            globalThis.Object.defineProperty(this, "_il2cpp", {
+                get: () => (this instanceof Il2Cpp.BoundMethod ? "Il2Cpp.BoundMethod" : "Il2Cpp.Method"),
+                enumerable: true
+            });
+        }
+
+        toString(): string {
+            return `${this.returnType.name} ${this.class.type.name}::${this.name}(${this.parameters.map(p => p.type.name).join(", ")})`;
+        }
+
         /** Gets the class in which this method is defined. */
         @lazy
         get class(): Il2Cpp.Class {
@@ -315,16 +333,6 @@ namespace Il2Cpp {
             return this.parameters.find(_ => _.name == name);
         }
 
-        /** */
-        toString(): string {
-            return `\
-${this.isStatic ? `static ` : ``}\
-${this.returnType.name} \
-${this.name}\
-(${this.parameters.join(`, `)});\
-${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toString(16).padStart(8, `0`)}`}`;
-        }
-
         /** Derive a BoundMethod so this method can be invoked for `instance`. */
         bind(instance: Il2Cpp.ObjectLike): Il2Cpp.BoundMethod<T> {
             if (this.isStatic) {
@@ -413,6 +421,10 @@ ${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toStr
         /** @internal */
         constructor(handle: NativePointerValue, public instance: Il2Cpp.ObjectLike) {
             super(handle);
+        }
+
+        toString(): string {
+            return `${super.toString()} (bound @ ${this.instance.handle})`;
         }
 
         /** Invokes this method. */

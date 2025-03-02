@@ -51,11 +51,7 @@ namespace Il2Cpp {
         const file = new File(destination, "w");
 
         for (const assembly of Il2Cpp.domain.assemblies) {
-            inform(`dumping ${assembly.name}...`);
-
-            for (const klass of assembly.image.classes) {
-                file.write(`${klass}\n\n`);
-            }
+            file.write(Il2Cpp.PseudoCsharpGenerator.generate(assembly.image));
         }
 
         file.flush();
@@ -77,7 +73,7 @@ namespace Il2Cpp {
      * ```
      */
     export function dumpTree(path?: string, ignoreAlreadyExistingDirectory: boolean = false): void {
-        if (!path?.startsWith("/")) path = `${Il2Cpp.application.dataPath!}/${path}`;
+        if (path && !path?.startsWith("/")) path = `${Il2Cpp.application.dataPath!}/${path}`;
         path = path ?? `${Il2Cpp.application.dataPath!}/${Il2Cpp.application.identifier ?? "unknown"}_${Il2Cpp.application.version ?? "unknown"}`;
 
         if (!ignoreAlreadyExistingDirectory && directoryExists(path)) {
@@ -93,10 +89,7 @@ namespace Il2Cpp {
 
             const file = new File(destination, "w");
 
-            for (const klass of assembly.image.classes) {
-                file.write(`${klass}\n\n`);
-            }
-
+            file.write(Il2Cpp.PseudoCsharpGenerator.generate(assembly.image));
             file.flush();
             file.close();
         }
