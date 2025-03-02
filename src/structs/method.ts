@@ -256,6 +256,8 @@ namespace Il2Cpp {
                     raise("an unexpected native invocation exception occurred, this is due to parameter types mismatch");
                 }
 
+                (globalThis as any).console.log(e);
+
                 switch (e.message) {
                     case "bad argument count":
                         raise(`couldn't invoke method ${this.name} as it needs ${this.parameterCount} parameter(s), not ${parameters.length}`);

@@ -19,7 +19,6 @@ namespace Il2Cpp {
                 long: _("System.Int64"),
                 unsignedLong: _("System.UInt64"),
 
-                
                 nativePointer: _("System.IntPtr"),
                 unsignedNativePointer: _("System.UIntPtr"),
                 float: _("System.Single"),
