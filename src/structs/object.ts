@@ -35,8 +35,8 @@ namespace Il2Cpp {
         }
 
         /** Gets the correct virtual method from the given virtual method. */
-        virtualMethod<T extends Il2Cpp.Method.ReturnType>(method: Il2Cpp.Method): Il2Cpp.HeldMethod<T> {
-            return new Il2Cpp.Method<T>(Il2Cpp.exports.objectGetVirtualMethod(this, method)).withHolder(this);
+        virtualMethod<T extends Il2Cpp.Method.ReturnType>(method: Il2Cpp.Method): Il2Cpp.BoundMethod<T> {
+            return new Il2Cpp.Method<T>(Il2Cpp.exports.objectGetVirtualMethod(this, method)).bind(this);
         }
 
         /** */

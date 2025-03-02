@@ -325,13 +325,32 @@ ${this.name}\
 ${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toString(16).padStart(8, `0`)}`}`;
         }
 
-        /** @internal */
-        withHolder(instance: Il2Cpp.ObjectLike): Il2Cpp.HeldMethod<T> {
+        /** Derive a BoundMethod so this method can be invoked for `instance`. */
+        bind(instance: Il2Cpp.ObjectLike): Il2Cpp.BoundMethod<T> {
             if (this.isStatic) {
-                raise(`cannot access static method ${this.class.type.name}::${this.name} from an object, use a class instead`);
+                raise(`cannot bind static method ${this.class.type.name}::${this.name} to an object`);
             }
 
-            return HeldMethod.from<T>(this, instance);
+            const bound = new Il2Cpp.BoundMethod<T>(this.handle, instance);
+
+            // Ensure this method and its bound version have a shared @lazy cache
+            if (!(this as unknown & { _propertyCache?: Record<PropertyKey, any> })._propertyCache) {
+                globalThis.Object.defineProperty(this, "_propertyCache", {
+                    value: {},
+                    configurable: false,
+                    enumerable: false,
+                    writable: true
+                });
+            }
+
+            globalThis.Object.defineProperty(bound, "_propertyCache", {
+                value: (this as unknown & { _propertyCache?: Record<PropertyKey, any> })._propertyCache,
+                configurable: false,
+                enumerable: false,
+                writable: true
+            });
+
+            return bound;
         }
 
         /** @internal */
@@ -390,14 +409,10 @@ ${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toStr
         }
     }
 
-    export class HeldMethod<T extends Il2Cpp.Method.ReturnType = Il2Cpp.Method.ReturnType> extends Method<T> {
+    export class BoundMethod<T extends Il2Cpp.Method.ReturnType = Il2Cpp.Method.ReturnType> extends Il2Cpp.Method<T> {
         /** @internal */
         constructor(handle: NativePointerValue, public instance: Il2Cpp.ObjectLike) {
             super(handle);
-        }
-
-        static from<T extends Il2Cpp.Method.ReturnType = Il2Cpp.Method.ReturnType>(method: Il2Cpp.Method<T>, instance: Il2Cpp.ObjectLike): HeldMethod<T> {
-            return new HeldMethod(method.handle, instance);
         }
 
         /** Invokes this method. */
@@ -424,22 +439,18 @@ ${this.virtualAddress.isNull() ? `` : ` // 0x${this.relativeVirtualAddress.toStr
         }
 
         /** Creates a generic instance of the current generic method. */
-        inflate<R extends Il2Cpp.Method.ReturnType = T>(...classes: Il2Cpp.Class[]): Il2Cpp.HeldMethod<R> {
-            return super.inflate<R>(...classes).withHolder(this.instance);
+        inflate<R extends Il2Cpp.Method.ReturnType = T>(...classes: Il2Cpp.Class[]): Il2Cpp.BoundMethod<R> {
+            return super.inflate<R>(...classes).bind(this.instance);
         }
 
         /** Gets the overloaded method with the given parameter types. */
-        overload(...parameterTypes: string[]): Il2Cpp.HeldMethod<T> {
-            return super.overload(...parameterTypes).withHolder(this.instance);
+        overload(...parameterTypes: string[]): Il2Cpp.BoundMethod<T> {
+            return super.overload(...parameterTypes).bind(this.instance);
         }
 
         /** Gets the overloaded method with the given parameter types. */
-        tryOverload<U extends Il2Cpp.Method.ReturnType = T>(...parameterTypes: string[]): Il2Cpp.HeldMethod<U> | undefined {
-            return super.tryOverload<U>(...parameterTypes)?.withHolder(this.instance);
-        }
-
-        detach(): Il2Cpp.Method<T> {
-            return new Il2Cpp.Method(this.handle);
+        tryOverload<U extends Il2Cpp.Method.ReturnType = T>(...parameterTypes: string[]): Il2Cpp.BoundMethod<U> | undefined {
+            return super.tryOverload<U>(...parameterTypes)?.bind(this.instance);
         }
     }
 

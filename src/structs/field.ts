@@ -121,24 +121,39 @@ ${this.isLiteral ? ` = ${this.type.class.isEnum ? read((this.value as Il2Cpp.Val
 ${this.isThreadStatic || this.isLiteral ? `` : ` // 0x${this.offset.toString(16)}`}`;
         }
 
-        /** @internal */
-        withHolder(instance: Il2Cpp.ObjectLike): Il2Cpp.HeldField<T> {
+        /** Derive a BoundField for access to this field's value for `instance`. */
+        bind(instance: Il2Cpp.ObjectLike): Il2Cpp.BoundField<T> {
             if (this.isStatic) {
-                raise(`cannot access static field ${this.class.type.name}::${this.name} from an object, use a class instead`);
+                raise(`cannot bind static field ${this.class.type.name}::${this.name} to an object`);
             }
 
-            return HeldField.from<T>(this, instance);
+            const bound = new Il2Cpp.BoundField<T>(this.handle, instance);
+
+            // Ensure this field and its bound version have a shared @lazy cache
+            if (!(this as unknown & { _propertyCache?: Record<PropertyKey, any> })._propertyCache) {
+                globalThis.Object.defineProperty(this, "_propertyCache", {
+                    value: {},
+                    configurable: false,
+                    enumerable: false,
+                    writable: true
+                });
+            }
+
+            globalThis.Object.defineProperty(bound, "_propertyCache", {
+                value: (this as unknown & { _propertyCache?: Record<PropertyKey, any> })._propertyCache,
+                configurable: false,
+                enumerable: false,
+                writable: true
+            });
+
+            return bound;
         }
     }
 
-    export class HeldField<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends Field<T> {
+    export class BoundField<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends Il2Cpp.Field<T> {
         /** @internal */
         constructor(handle: NativePointerValue, public instance: Il2Cpp.ObjectLike) {
             super(handle);
-        }
-
-        static from<T extends Il2Cpp.Field.Type>(field: Il2Cpp.Field<T>, instance: Il2Cpp.ObjectLike): HeldField<T> {
-            return new HeldField(field.handle, instance);
         }
 
         get valueHandle(): NativePointer {
@@ -153,10 +168,6 @@ ${this.isThreadStatic || this.isLiteral ? `` : ` // 0x${this.offset.toString(16)
         /** Sets the value of this field. Thread static or literal values cannot be altered yet. */
         set value(value: T) {
             write(this.valueHandle, value, this.type);
-        }
-
-        detach(): Il2Cpp.Field<T> {
-            return new Field(this.handle);
         }
     }
 
