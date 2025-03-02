@@ -1,10 +1,10 @@
 namespace Il2Cpp {
     export type DynamicMethods = {
-        [K in Exclude<string, ["constructor" | "#invokeMethod"]>]: (...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Type)[]) => any;
+        [K in Exclude<string, ["constructor" | "#invokeMethod"]>]: (...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Type)[]) => unknown;
     };
 
     export class DynamicMethodsLookup {
-        constructor(public readonly target: Il2Cpp.ObjectLike | Il2Cpp.Class, isStatic: boolean) {
+        constructor(private readonly target: Il2Cpp.ObjectLike | Il2Cpp.Class, isStatic: boolean) {
             this.class.methods
                 .filter(m => !m.isStatic === !isStatic)
                 .forEach(m => {

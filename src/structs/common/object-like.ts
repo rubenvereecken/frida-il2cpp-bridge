@@ -35,5 +35,10 @@ namespace Il2Cpp {
         get m(): Il2Cpp.DynamicMethods {
             return Il2Cpp.DynamicMethodsLookup.from(this, false);
         }
+
+        @lazy
+        get f(): Il2Cpp.DynamicFields {
+            return Il2Cpp.DynamicFieldsLookup.from(this, false);
+        }
     }
 }

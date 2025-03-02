@@ -363,6 +363,11 @@ namespace Il2Cpp {
             return Il2Cpp.DynamicMethodsLookup.from(this, true);
         }
 
+        @lazy
+        get f(): Il2Cpp.DynamicFields {
+            return Il2Cpp.DynamicFieldsLookup.from(this, true);
+        }
+
         /** Executes a callback for every defined class. */
         static enumerate(block: (klass: Il2Cpp.Class) => void): void {
             const callback = new NativeCallback(_ => block(new Il2Cpp.Class(_)), "void", ["pointer", "pointer"]);
