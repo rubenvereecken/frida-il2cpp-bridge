@@ -1,16 +1,19 @@
 namespace Il2Cpp {
     export class Pointer<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
-        constructor(handle: NativePointer, readonly type: Il2Cpp.Type) {
+        constructor(
+            handle: NativePointer,
+            readonly type: Il2Cpp.Type
+        ) {
             super(handle);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Pointer",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Pointer',
+                enumerable: true,
             });
         }
 

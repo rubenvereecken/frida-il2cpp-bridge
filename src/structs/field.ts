@@ -4,13 +4,14 @@ namespace Il2Cpp {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => (this instanceof Il2Cpp.BoundField ? "Il2Cpp.BoundField" : "Il2Cpp.Field"),
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () =>
+                    this instanceof Il2Cpp.BoundField ? 'Il2Cpp.BoundField' : 'Il2Cpp.Field',
+                enumerable: true,
             });
         }
 
@@ -46,7 +47,9 @@ namespace Il2Cpp {
         /** Determines whether this field is thread static. */
         @lazy
         get isThreadStatic(): boolean {
-            const offset = Il2Cpp.corlib.class("System.AppDomain").field("type_resolve_in_progress").offset;
+            const offset = Il2Cpp.corlib
+                .class('System.AppDomain')
+                .field('type_resolve_in_progress').offset;
 
             // prettier-ignore
             getter(Il2Cpp.Field.prototype, "isThreadStatic", function (this: Il2Cpp.Field) {
@@ -61,17 +64,17 @@ namespace Il2Cpp {
         get modifier(): string | undefined {
             switch (this.flags & Il2Cpp.Field.Attributes.FieldAccessMask) {
                 case Il2Cpp.Field.Attributes.Private:
-                    return "private";
+                    return 'private';
                 case Il2Cpp.Field.Attributes.FamilyAndAssembly:
-                    return "private protected";
+                    return 'private protected';
                 case Il2Cpp.Field.Attributes.Assembly:
-                    return "internal";
+                    return 'internal';
                 case Il2Cpp.Field.Attributes.Family:
-                    return "protected";
+                    return 'protected';
                 case Il2Cpp.Field.Attributes.FamilyOrAssembly:
-                    return "protected internal";
+                    return 'protected internal';
                 case Il2Cpp.Field.Attributes.Public:
-                    return "public";
+                    return 'public';
             }
         }
 
@@ -96,7 +99,9 @@ namespace Il2Cpp {
         /** Gets the value of this field. */
         get value(): T {
             if (!this.isStatic) {
-                raise(`cannot access instance field ${this.class.type.name}::${this.name} from a class, use an object instead`);
+                raise(
+                    `cannot access instance field ${this.class.type.name}::${this.name} from a class, use an object instead`
+                );
             }
 
             const handle = Memory.alloc(Process.pointerSize);
@@ -108,11 +113,15 @@ namespace Il2Cpp {
         /** Sets the value of this field. Thread static or literal values cannot be altered yet. */
         set value(value: T) {
             if (!this.isStatic) {
-                raise(`cannot access instance field ${this.class.type.name}::${this.name} from a class, use an object instead`);
+                raise(
+                    `cannot access instance field ${this.class.type.name}::${this.name} from a class, use an object instead`
+                );
             }
 
             if (this.isThreadStatic || this.isLiteral) {
-                raise(`cannot write the value of field ${this.name} as it's thread static or literal`);
+                raise(
+                    `cannot write the value of field ${this.name} as it's thread static or literal`
+                );
             }
 
             const handle =
@@ -121,10 +130,10 @@ namespace Il2Cpp {
                 value instanceof Il2Cpp.Object && this.type.class.isValueType
                     ? value.unbox()
                     : value instanceof NativeStruct
-                    ? value.handle
-                    : value instanceof NativePointer
-                    ? value
-                    : write(Memory.alloc(this.type.class.valueTypeSize), value, this.type);
+                      ? value.handle
+                      : value instanceof NativePointer
+                        ? value
+                        : write(Memory.alloc(this.type.class.valueTypeSize), value, this.type);
 
             Il2Cpp.exports.fieldSetStaticValue(this.handle, handle);
         }
@@ -132,35 +141,43 @@ namespace Il2Cpp {
         /** Derive a BoundField for access to this field's value for `instance`. */
         bind(instance: Il2Cpp.ObjectLike): Il2Cpp.BoundField<T> {
             if (this.isStatic) {
-                raise(`cannot bind static field ${this.class.type.name}::${this.name} to an object`);
+                raise(
+                    `cannot bind static field ${this.class.type.name}::${this.name} to an object`
+                );
             }
 
             const bound = new Il2Cpp.BoundField<T>(this.handle, instance);
 
             // Ensure this field and its bound version have a shared @lazy cache
             if (!(this as unknown & { _propertyCache?: Record<PropertyKey, any> })._propertyCache) {
-                globalThis.Object.defineProperty(this, "_propertyCache", {
+                globalThis.Object.defineProperty(this, '_propertyCache', {
                     value: {},
                     configurable: false,
                     enumerable: false,
-                    writable: true
+                    writable: true,
                 });
             }
 
-            globalThis.Object.defineProperty(bound, "_propertyCache", {
-                value: (this as unknown & { _propertyCache?: Record<PropertyKey, any> })._propertyCache,
+            globalThis.Object.defineProperty(bound, '_propertyCache', {
+                value: (this as unknown & { _propertyCache?: Record<PropertyKey, any> })
+                    ._propertyCache,
                 configurable: false,
                 enumerable: false,
-                writable: true
+                writable: true,
             });
 
             return bound;
         }
     }
 
-    export class BoundField<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends Il2Cpp.Field<T> {
+    export class BoundField<
+        T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type,
+    > extends Il2Cpp.Field<T> {
         /** @internal */
-        constructor(handle: NativePointerValue, public instance: Il2Cpp.ObjectLike) {
+        constructor(
+            handle: NativePointerValue,
+            public instance: Il2Cpp.ObjectLike
+        ) {
             super(handle);
         }
 
@@ -169,7 +186,10 @@ namespace Il2Cpp {
         }
 
         get valueHandle(): NativePointer {
-            return this.instance.handle.add(this.offset - (this.instance instanceof Il2Cpp.ValueType ? Il2Cpp.Object.headerSize : 0));
+            return this.instance.handle.add(
+                this.offset -
+                    (this.instance instanceof Il2Cpp.ValueType ? Il2Cpp.Object.headerSize : 0)
+            );
         }
 
         /** Gets the value of this field. */
@@ -184,7 +204,17 @@ namespace Il2Cpp {
     }
 
     export namespace Field {
-        export type Type = boolean | number | Int64 | UInt64 | NativePointer | Il2Cpp.Pointer | Il2Cpp.ValueType | Il2Cpp.Object | Il2Cpp.String | Il2Cpp.Array;
+        export type Type =
+            | boolean
+            | number
+            | Int64
+            | UInt64
+            | NativePointer
+            | Il2Cpp.Pointer
+            | Il2Cpp.ValueType
+            | Il2Cpp.Object
+            | Il2Cpp.String
+            | Il2Cpp.Array;
 
         export const enum Attributes {
             FieldAccessMask = 0x0007,
@@ -205,7 +235,7 @@ namespace Il2Cpp {
             RTSpecialName = 0x0400,
             HasFieldMarshal = 0x1000,
             HasDefault = 0x8000,
-            HasFieldRVA = 0x0100
+            HasFieldRVA = 0x0100,
         }
     }
 }

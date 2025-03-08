@@ -1,16 +1,19 @@
 namespace Il2Cpp {
     export class Reference<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
-        constructor(handle: NativePointerValue, readonly type: Il2Cpp.Type) {
+        constructor(
+            handle: NativePointerValue,
+            readonly type: Il2Cpp.Type
+        ) {
             super(handle);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Reference",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Reference',
+                enumerable: true,
             });
         }
 
@@ -26,7 +29,7 @@ namespace Il2Cpp {
 
         /** */
         valueToString(): string {
-            return this.isNull() ? "null" : `${this.value}`;
+            return this.isNull() ? 'null' : `${this.value}`;
         }
 
         toString(): string {
@@ -34,18 +37,29 @@ namespace Il2Cpp {
         }
     }
 
-    export function reference<T extends number | NativePointer>(value: T, type: Il2Cpp.Type): Il2Cpp.Reference<T>;
+    export function reference<T extends number | NativePointer>(
+        value: T,
+        type: Il2Cpp.Type
+    ): Il2Cpp.Reference<T>;
 
-    export function reference<T extends Exclude<Il2Cpp.Field.Type, number | NativePointer>>(value: T): Il2Cpp.Reference<T>;
+    export function reference<T extends Exclude<Il2Cpp.Field.Type, number | NativePointer>>(
+        value: T
+    ): Il2Cpp.Reference<T>;
 
     /** Creates a reference to the specified value. */
-    export function reference<T extends Il2Cpp.Field.Type>(value: T, type?: Il2Cpp.Type): Il2Cpp.Reference<T> {
+    export function reference<T extends Il2Cpp.Field.Type>(
+        value: T,
+        type?: Il2Cpp.Type
+    ): Il2Cpp.Reference<T> {
         const handle = Memory.alloc(Process.pointerSize);
 
         switch (typeof value) {
-            case "boolean":
-                return new Il2Cpp.Reference(handle.writeS8(+value), Il2Cpp.corlib.class("System.Boolean").type);
-            case "number":
+            case 'boolean':
+                return new Il2Cpp.Reference(
+                    handle.writeS8(+value),
+                    Il2Cpp.corlib.class('System.Boolean').type
+                );
+            case 'number':
                 switch (type?.typeEnum) {
                     case Il2Cpp.Type.enum.unsignedByte:
                         return new Il2Cpp.Reference<T>(handle.writeU8(value), type);
@@ -69,13 +83,16 @@ namespace Il2Cpp {
                     case Il2Cpp.Type.enum.double:
                         return new Il2Cpp.Reference<T>(handle.writeDouble(value), type);
                 }
-            case "object":
+            case 'object':
                 if (value instanceof Il2Cpp.ValueType || value instanceof Il2Cpp.Pointer) {
                     return new Il2Cpp.Reference<T>(value.handle, value.type);
                 } else if (value instanceof Il2Cpp.Object) {
                     return new Il2Cpp.Reference<T>(handle.writePointer(value), value.class.type);
                 } else if (value instanceof Il2Cpp.String || value instanceof Il2Cpp.Array) {
-                    return new Il2Cpp.Reference<T>(handle.writePointer(value), value.object.class.type);
+                    return new Il2Cpp.Reference<T>(
+                        handle.writePointer(value),
+                        value.object.class.type
+                    );
                 } else if (value instanceof NativePointer) {
                     switch (type?.typeEnum) {
                         case Il2Cpp.Type.enum.unsignedNativePointer:
@@ -83,12 +100,20 @@ namespace Il2Cpp {
                             return new Il2Cpp.Reference<T>(handle.writePointer(value), type);
                     }
                 } else if (value instanceof Int64) {
-                    return new Il2Cpp.Reference<T>(handle.writeS64(value), Il2Cpp.corlib.class("System.Int64").type);
+                    return new Il2Cpp.Reference<T>(
+                        handle.writeS64(value),
+                        Il2Cpp.corlib.class('System.Int64').type
+                    );
                 } else if (value instanceof UInt64) {
-                    return new Il2Cpp.Reference<T>(handle.writeU64(value), Il2Cpp.corlib.class("System.UInt64").type);
+                    return new Il2Cpp.Reference<T>(
+                        handle.writeU64(value),
+                        Il2Cpp.corlib.class('System.UInt64').type
+                    );
                 }
             default:
-                raise(`couldn't create a reference to ${value} using an unhandled type ${type?.name}`);
+                raise(
+                    `couldn't create a reference to ${value} using an unhandled type ${type?.name}`
+                );
         }
     }
 }

@@ -42,13 +42,15 @@ namespace Il2Cpp {
      * ```
      */
     export function dump(fileName?: string, path?: string): void {
-        fileName = fileName ?? `${Il2Cpp.application.identifier ?? "unknown"}_${Il2Cpp.application.version ?? "unknown"}.cs`;
+        fileName =
+            fileName ??
+            `${Il2Cpp.application.identifier ?? 'unknown'}_${Il2Cpp.application.version ?? 'unknown'}.cs`;
         path = path ?? Il2Cpp.application.dataPath!;
 
         createDirectoryRecursively(path);
 
         const destination = `${path}/${fileName}`;
-        const file = new File(destination, "w");
+        const file = new File(destination, 'w');
 
         for (const assembly of Il2Cpp.domain.assemblies) {
             file.write(Il2Cpp.PseudoCsharpGenerator.generate(assembly.image));
@@ -73,21 +75,25 @@ namespace Il2Cpp {
      * ```
      */
     export function dumpTree(path?: string, ignoreAlreadyExistingDirectory: boolean = false): void {
-        if (path && !path?.startsWith("/")) path = `${Il2Cpp.application.dataPath!}/${path}`;
-        path = path ?? `${Il2Cpp.application.dataPath!}/${Il2Cpp.application.identifier ?? "unknown"}_${Il2Cpp.application.version ?? "unknown"}`;
+        if (path && !path?.startsWith('/')) path = `${Il2Cpp.application.dataPath!}/${path}`;
+        path =
+            path ??
+            `${Il2Cpp.application.dataPath!}/${Il2Cpp.application.identifier ?? 'unknown'}_${Il2Cpp.application.version ?? 'unknown'}`;
 
         if (!ignoreAlreadyExistingDirectory && directoryExists(path)) {
-            raise(`directory ${path} already exists - pass ignoreAlreadyExistingDirectory = true to skip this check`);
+            raise(
+                `directory ${path} already exists - pass ignoreAlreadyExistingDirectory = true to skip this check`
+            );
         }
 
         for (const assembly of Il2Cpp.domain.assemblies) {
             inform(`dumping ${assembly.name}...`);
 
-            const destination = `${path}/${assembly.name.replaceAll(".", "/")}.cs`;
+            const destination = `${path}/${assembly.name.replaceAll('.', '/')}.cs`;
 
-            createDirectoryRecursively(destination.substring(0, destination.lastIndexOf("/")));
+            createDirectoryRecursively(destination.substring(0, destination.lastIndexOf('/')));
 
-            const file = new File(destination, "w");
+            const file = new File(destination, 'w');
 
             file.write(Il2Cpp.PseudoCsharpGenerator.generate(assembly.image));
             file.flush();
@@ -98,10 +104,16 @@ namespace Il2Cpp {
     }
 
     function directoryExists(path: string): boolean {
-        return Il2Cpp.corlib.class("System.IO.Directory").method<boolean>("Exists").invoke(Il2Cpp.string(path));
+        return Il2Cpp.corlib
+            .class('System.IO.Directory')
+            .method<boolean>('Exists')
+            .invoke(Il2Cpp.string(path));
     }
 
     function createDirectoryRecursively(path: string) {
-        Il2Cpp.corlib.class("System.IO.Directory").method("CreateDirectory").invoke(Il2Cpp.string(path));
+        Il2Cpp.corlib
+            .class('System.IO.Directory')
+            .method('CreateDirectory')
+            .invoke(Il2Cpp.string(path));
     }
 }

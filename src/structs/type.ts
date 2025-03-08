@@ -5,13 +5,13 @@ namespace Il2Cpp {
             super(handle);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Type",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Type',
+                enumerable: true,
             });
         }
 
@@ -22,33 +22,40 @@ namespace Il2Cpp {
         /** */
         @lazy
         static get enum() {
-            const _ = (_: string, block = (_: Il2Cpp.Class): { type: Il2Cpp.Type } => _) => block(Il2Cpp.corlib.class(_)).type.typeEnum;
+            const _ = (_: string, block = (_: Il2Cpp.Class): { type: Il2Cpp.Type } => _) =>
+                block(Il2Cpp.corlib.class(_)).type.typeEnum;
 
             return {
-                void: _("System.Void"),
-                boolean: _("System.Boolean"),
-                char: _("System.Char"),
-                byte: _("System.SByte"),
-                unsignedByte: _("System.Byte"),
-                short: _("System.Int16"),
-                unsignedShort: _("System.UInt16"),
-                int: _("System.Int32"),
-                unsignedInt: _("System.UInt32"),
-                long: _("System.Int64"),
-                unsignedLong: _("System.UInt64"),
+                void: _('System.Void'),
+                boolean: _('System.Boolean'),
+                char: _('System.Char'),
+                byte: _('System.SByte'),
+                unsignedByte: _('System.Byte'),
+                short: _('System.Int16'),
+                unsignedShort: _('System.UInt16'),
+                int: _('System.Int32'),
+                unsignedInt: _('System.UInt32'),
+                long: _('System.Int64'),
+                unsignedLong: _('System.UInt64'),
 
-                nativePointer: _("System.IntPtr"),
-                unsignedNativePointer: _("System.UIntPtr"),
-                float: _("System.Single"),
-                double: _("System.Double"),
-                pointer: _("System.IntPtr", _ => _.field("m_value")),
-                valueType: _("System.Decimal"),
-                object: _("System.Object"),
-                string: _("System.String"),
-                class: _("System.Array"),
-                array: _("System.Void", _ => _.arrayClass),
-                multidimensionalArray: _("System.Void", _ => new Il2Cpp.Class(Il2Cpp.exports.classGetArrayClass(_, 2))),
-                genericInstance: _("System.Int32", _ => _.interfaces.find(_ => _.name.endsWith("`1"))!)
+                nativePointer: _('System.IntPtr'),
+                unsignedNativePointer: _('System.UIntPtr'),
+                float: _('System.Single'),
+                double: _('System.Double'),
+                pointer: _('System.IntPtr', _ => _.field('m_value')),
+                valueType: _('System.Decimal'),
+                object: _('System.Object'),
+                string: _('System.String'),
+                class: _('System.Array'),
+                array: _('System.Void', _ => _.arrayClass),
+                multidimensionalArray: _(
+                    'System.Void',
+                    _ => new Il2Cpp.Class(Il2Cpp.exports.classGetArrayClass(_, 2))
+                ),
+                genericInstance: _(
+                    'System.Int32',
+                    _ => _.interfaces.find(_ => _.name.endsWith('`1'))!
+                ),
             };
         }
 
@@ -63,62 +70,70 @@ namespace Il2Cpp {
         get fridaAlias(): NativeCallbackArgumentType {
             function getValueTypeFields(type: Il2Cpp.Type): NativeCallbackArgumentType {
                 const instanceFields = type.class.fields.filter(_ => !_.isStatic);
-                return instanceFields.length == 0 ? ["char"] : instanceFields.map(_ => _.type.fridaAlias);
+                return instanceFields.length == 0
+                    ? ['char']
+                    : instanceFields.map(_ => _.type.fridaAlias);
             }
 
             if (this.isByReference) {
-                return "pointer";
+                return 'pointer';
             }
 
             switch (this.typeEnum) {
                 case Il2Cpp.Type.enum.void:
-                    return "void";
+                    return 'void';
                 case Il2Cpp.Type.enum.boolean:
-                    return "bool";
+                    return 'bool';
                 case Il2Cpp.Type.enum.char:
-                    return "uchar";
+                    return 'uchar';
                 case Il2Cpp.Type.enum.byte:
-                    return "int8";
+                    return 'int8';
                 case Il2Cpp.Type.enum.unsignedByte:
-                    return "uint8";
+                    return 'uint8';
                 case Il2Cpp.Type.enum.short:
-                    return "int16";
+                    return 'int16';
                 case Il2Cpp.Type.enum.unsignedShort:
-                    return "uint16";
+                    return 'uint16';
                 case Il2Cpp.Type.enum.int:
-                    return "int32";
+                    return 'int32';
                 case Il2Cpp.Type.enum.unsignedInt:
-                    return "uint32";
+                    return 'uint32';
                 case Il2Cpp.Type.enum.long:
-                    return "int64";
+                    return 'int64';
                 case Il2Cpp.Type.enum.unsignedLong:
-                    return "uint64";
+                    return 'uint64';
                 case Il2Cpp.Type.enum.float:
-                    return "float";
+                    return 'float';
                 case Il2Cpp.Type.enum.double:
-                    return "double";
+                    return 'double';
                 case Il2Cpp.Type.enum.nativePointer:
                 case Il2Cpp.Type.enum.unsignedNativePointer:
                 case Il2Cpp.Type.enum.pointer:
                 case Il2Cpp.Type.enum.string:
                 case Il2Cpp.Type.enum.array:
                 case Il2Cpp.Type.enum.multidimensionalArray:
-                    return "pointer";
+                    return 'pointer';
                 case Il2Cpp.Type.enum.valueType:
-                    return this.class.isEnum ? this.class.baseType!.fridaAlias : getValueTypeFields(this);
+                    return this.class.isEnum
+                        ? this.class.baseType!.fridaAlias
+                        : getValueTypeFields(this);
                 case Il2Cpp.Type.enum.class:
                 case Il2Cpp.Type.enum.object:
                 case Il2Cpp.Type.enum.genericInstance:
-                    return this.class.isStruct ? getValueTypeFields(this) : this.class.isEnum ? this.class.baseType!.fridaAlias : "pointer";
+                    return this.class.isStruct
+                        ? getValueTypeFields(this)
+                        : this.class.isEnum
+                          ? this.class.baseType!.fridaAlias
+                          : 'pointer';
                 default:
-                    return "pointer";
+                    return 'pointer';
             }
         }
 
         /** Determines whether this type is passed by reference. */
         @lazy
         get isByReference(): boolean {
-            return this.name.endsWith("&");
+            return this.name.endsWith('&');
         }
 
         /** Determines whether this type is primitive. */
@@ -176,15 +191,15 @@ namespace Il2Cpp {
         static fromValue(value: Il2Cpp.Parameter.Type): Il2Cpp.Type {
             const _ = (kls: string) => Il2Cpp.corlib.class(kls).type;
 
-            if (typeof value === "boolean") return _("System.Boolean");
-            if (typeof value === "number")
-                if (Number.isInteger(value)) return _("System.Int32");
-                else return _("System.Double");
-            if (value instanceof Int64) return _("System.Int64");
-            if (value instanceof UInt64) return _("System.UInt64");
-            if (value instanceof NativePointer) return _("System.IntPtr");
+            if (typeof value === 'boolean') return _('System.Boolean');
+            if (typeof value === 'number')
+                if (Number.isInteger(value)) return _('System.Int32');
+                else return _('System.Double');
+            if (value instanceof Int64) return _('System.Int64');
+            if (value instanceof UInt64) return _('System.UInt64');
+            if (value instanceof NativePointer) return _('System.IntPtr');
             if (value instanceof Il2Cpp.Object) return value.class.type;
-            if (value instanceof Il2Cpp.String) return _("System.String");
+            if (value instanceof Il2Cpp.String) return _('System.String');
             if (value instanceof Il2Cpp.Array) return value.object.class.type;
 
             return value.type;

@@ -4,18 +4,18 @@ namespace Il2Cpp {
             super(handle);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.String",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.String',
+                enumerable: true,
             });
         }
 
         valueToString(): string {
-            return this.isNull() ? "null" : `${this.content}`;
+            return this.isNull() ? 'null' : `${this.content}`;
         }
 
         toString(): string {
@@ -33,11 +33,11 @@ namespace Il2Cpp {
             const offset = Il2Cpp.string("vfsfitvnm").handle.offsetOf(_ => _.readInt() == 9) 
                 ?? raise("couldn't find the length offset in the native string struct");
 
-            globalThis.Object.defineProperty(Il2Cpp.String.prototype, "content", {
+            globalThis.Object.defineProperty(Il2Cpp.String.prototype, 'content', {
                 set(this: Il2Cpp.String, value: string | null) {
-                    Il2Cpp.exports.stringGetChars(this).writeUtf16String(value ?? "");
+                    Il2Cpp.exports.stringGetChars(this).writeUtf16String(value ?? '');
                     this.handle.add(offset).writeS32(value?.length ?? 0);
-                }
+                },
             });
 
             this.content = value;
@@ -56,6 +56,6 @@ namespace Il2Cpp {
 
     /** Creates a new string with the specified content. */
     export function string(content: string | null): Il2Cpp.String {
-        return new Il2Cpp.String(Il2Cpp.exports.stringNew(Memory.allocUtf8String(content ?? "")));
+        return new Il2Cpp.String(Il2Cpp.exports.stringNew(Memory.allocUtf8String(content ?? '')));
     }
 }

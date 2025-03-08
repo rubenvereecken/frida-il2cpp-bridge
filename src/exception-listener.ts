@@ -23,11 +23,16 @@ namespace Il2Cpp {
      *   at UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) [0x00000] in <00000000000000000000000000000000>:0
      * ```
      */
-    export function installExceptionListener(targetThread: "current" | "all" = "current"): InvocationListener {
+    export function installExceptionListener(
+        targetThread: 'current' | 'all' = 'current'
+    ): InvocationListener {
         const currentThread = Il2Cpp.exports.threadGetCurrent();
 
-        return Interceptor.attach(Il2Cpp.module.getExportByName("__cxa_throw"), function (args) {
-            if (targetThread == "current" && !Il2Cpp.exports.threadGetCurrent().equals(currentThread)) {
+        return Interceptor.attach(Il2Cpp.module.getExportByName('__cxa_throw'), function (args) {
+            if (
+                targetThread == 'current' &&
+                !Il2Cpp.exports.threadGetCurrent().equals(currentThread)
+            ) {
                 return;
             }
 

@@ -5,13 +5,13 @@ namespace Il2Cpp {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Class",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Class',
+                enumerable: true,
             });
         }
 
@@ -21,7 +21,7 @@ namespace Il2Cpp {
 
         /** Gets the actual size of the instance of the current class. */
         get actualInstanceSize(): number {
-            const SystemString = Il2Cpp.corlib.class("System.String");
+            const SystemString = Il2Cpp.corlib.class('System.String');
 
             // prettier-ignore
             const offset = SystemString.handle.offsetOf(_ => _.readInt() == SystemString.instanceSize - 2) 
@@ -50,7 +50,7 @@ namespace Il2Cpp {
         /** Gets the name of the assembly in which the current class is defined. */
         @lazy
         get assemblyName(): string {
-            return Il2Cpp.exports.classGetAssemblyName(this).readUtf8String()!.replace(".dll", "");
+            return Il2Cpp.exports.classGetAssemblyName(this).readUtf8String()!.replace('.dll', '');
         }
 
         /** Gets the class that declares the current nested class. */
@@ -74,7 +74,9 @@ namespace Il2Cpp {
         /** Gets the fields of the current class. */
         @lazy
         get fields(): Il2Cpp.Field[] {
-            return readNativeIterator(_ => Il2Cpp.exports.classGetFields(this, _)).map(_ => new Il2Cpp.Field(_));
+            return readNativeIterator(_ => Il2Cpp.exports.classGetFields(this, _)).map(
+                _ => new Il2Cpp.Field(_)
+            );
         }
 
         /** Gets the flags of the current class. */
@@ -96,8 +98,12 @@ namespace Il2Cpp {
                 return [];
             }
 
-            const types = this.type.object.method<Il2Cpp.Array<Il2Cpp.Object>>("GetGenericArguments").invoke();
-            return globalThis.Array.from(types).map(_ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_)));
+            const types = this.type.object
+                .method<Il2Cpp.Array<Il2Cpp.Object>>('GetGenericArguments')
+                .invoke();
+            return globalThis.Array.from(types).map(
+                _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
+            );
         }
 
         /** Determines whether the GC has tracking references to the current class instances. */
@@ -109,7 +115,7 @@ namespace Il2Cpp {
         /** Determines whether ther current class has a valid static constructor. */
         @lazy
         get hasStaticConstructor(): boolean {
-            const staticConstructor = this.tryMethod(".cctor");
+            const staticConstructor = this.tryMethod('.cctor');
             return staticConstructor != null && !staticConstructor.virtualAddress.isNull();
         }
 
@@ -175,13 +181,17 @@ namespace Il2Cpp {
         /** Gets the interfaces implemented or inherited by the current class. */
         @lazy
         get interfaces(): Il2Cpp.Class[] {
-            return readNativeIterator(_ => Il2Cpp.exports.classGetInterfaces(this, _)).map(_ => new Il2Cpp.Class(_));
+            return readNativeIterator(_ => Il2Cpp.exports.classGetInterfaces(this, _)).map(
+                _ => new Il2Cpp.Class(_)
+            );
         }
 
         /** Gets the methods implemented by the current class. */
         @lazy
         get methods(): Il2Cpp.Method[] {
-            return readNativeIterator(_ => Il2Cpp.exports.classGetMethods(this, _)).map(_ => new Il2Cpp.Method(_));
+            return readNativeIterator(_ => Il2Cpp.exports.classGetMethods(this, _)).map(
+                _ => new Il2Cpp.Method(_)
+            );
         }
 
         /** Gets the name of the current class. */
@@ -199,7 +209,9 @@ namespace Il2Cpp {
         /** Gets the classes nested inside the current class. */
         @lazy
         get nestedClasses(): Il2Cpp.Class[] {
-            return readNativeIterator(_ => Il2Cpp.exports.classGetNestedClasses(this, _)).map(_ => new Il2Cpp.Class(_));
+            return readNativeIterator(_ => Il2Cpp.exports.classGetNestedClasses(this, _)).map(
+                _ => new Il2Cpp.Class(_)
+            );
         }
 
         /** Gets the class from which the current class directly inherits. */
@@ -217,9 +229,9 @@ namespace Il2Cpp {
             for (let i = this.name.length - 1; i > 0; i--) {
                 const c = name[i];
 
-                if (c == "]") rank++;
-                else if (c == "[" || rank == 0) break;
-                else if (c == ",") rank++;
+                if (c == ']') rank++;
+                else if (c == '[' || rank == 0) break;
+                else if (c == ',') rank++;
                 else break;
             }
 
@@ -251,7 +263,10 @@ namespace Il2Cpp {
 
         /** Gets the field identified by the given name. */
         field<T extends Il2Cpp.Field.Type>(name: string): Il2Cpp.Field<T> {
-            return this.tryField<T>(name) ?? raise(`couldn't find field ${name} in class ${this.type.name}`);
+            return (
+                this.tryField<T>(name) ??
+                raise(`couldn't find field ${name} in class ${this.type.name}`)
+            );
         }
 
         /** Builds a generic instance of the current generic class. */
@@ -261,13 +276,17 @@ namespace Il2Cpp {
             }
 
             if (this.generics.length != classes.length) {
-                raise(`cannot inflate class ${this.type.name} as it needs ${this.generics.length} generic parameter(s), not ${classes.length}`);
+                raise(
+                    `cannot inflate class ${this.type.name} as it needs ${this.generics.length} generic parameter(s), not ${classes.length}`
+                );
             }
 
             const types = classes.map(_ => _.type.object);
-            const typeArray = Il2Cpp.array(Il2Cpp.corlib.class("System.Type"), types);
+            const typeArray = Il2Cpp.array(Il2Cpp.corlib.class('System.Type'), types);
 
-            const inflatedType = this.type.object.method<Il2Cpp.Object>("MakeGenericType", 1).invoke(typeArray);
+            const inflatedType = this.type.object
+                .method<Il2Cpp.Object>('MakeGenericType', 1)
+                .invoke(typeArray);
             return new Il2Cpp.Class(Il2Cpp.exports.classFromObject(inflatedType));
         }
 
@@ -288,20 +307,34 @@ namespace Il2Cpp {
         }
 
         /** Gets the method identified by the given name and parameter count. */
-        method<T extends Il2Cpp.Method.ReturnType>(name: string, parameterCount: number = -1): Il2Cpp.Method<T> {
-            return this.tryMethod<T>(name, parameterCount) ?? raise(`couldn't find method ${name} in class ${this.type.name}`);
+        method<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            parameterCount: number = -1
+        ): Il2Cpp.Method<T> {
+            return (
+                this.tryMethod<T>(name, parameterCount) ??
+                raise(`couldn't find method ${name} in class ${this.type.name}`)
+            );
         }
 
-        methodWithSignature<T extends Il2Cpp.Method.ReturnType>(name: string, ...paramTypes: Il2Cpp.Type[]): Il2Cpp.Method<T> {
+        methodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramTypes: Il2Cpp.Type[]
+        ): Il2Cpp.Method<T> {
             return (
                 this.tryMethodWithSignature<T>(name, ...paramTypes) ??
-                raise(`couldn't find method ${name} in class ${this.type.name} for parameter types [${paramTypes.map(_ => _.name).join(", ")}]`)
+                raise(
+                    `couldn't find method ${name} in class ${this.type.name} for parameter types [${paramTypes.map(_ => _.name).join(', ')}]`
+                )
             );
         }
 
         /** Gets the nested class with the given name. */
         nested(name: string): Il2Cpp.Class {
-            return this.tryNested(name) ?? raise(`couldn't find nested class ${name} in class ${this.type.name}`);
+            return (
+                this.tryNested(name) ??
+                raise(`couldn't find nested class ${name} in class ${this.type.name}`)
+            );
         }
 
         /** Allocates a new object of the current class and calls its default constructor. */
@@ -329,22 +362,36 @@ namespace Il2Cpp {
             if (parameters.length == 0) return this.defaultNew();
 
             const object = this.alloc();
-            object.m[".ctor"](...parameters);
+            object.m['.ctor'](...parameters);
 
             return object;
         }
 
         /** Gets the field with the given name. */
         tryField<T extends Il2Cpp.Field.Type>(name: string): Il2Cpp.Field<T> | null {
-            return new Il2Cpp.Field<T>(Il2Cpp.exports.classGetFieldFromName(this, Memory.allocUtf8String(name))).asNullable();
+            return new Il2Cpp.Field<T>(
+                Il2Cpp.exports.classGetFieldFromName(this, Memory.allocUtf8String(name))
+            ).asNullable();
         }
 
         /** Gets the method with the given name and parameter count. */
-        tryMethod<T extends Il2Cpp.Method.ReturnType>(name: string, parameterCount: number = -1): Il2Cpp.Method<T> | null {
-            return new Il2Cpp.Method<T>(Il2Cpp.exports.classGetMethodFromName(this, Memory.allocUtf8String(name), parameterCount)).asNullable();
+        tryMethod<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            parameterCount: number = -1
+        ): Il2Cpp.Method<T> | null {
+            return new Il2Cpp.Method<T>(
+                Il2Cpp.exports.classGetMethodFromName(
+                    this,
+                    Memory.allocUtf8String(name),
+                    parameterCount
+                )
+            ).asNullable();
         }
 
-        tryMethodWithSignature<T extends Il2Cpp.Method.ReturnType>(name: string, ...paramTypes: Il2Cpp.Type[]): Il2Cpp.Method<T> | undefined {
+        tryMethodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramTypes: Il2Cpp.Type[]
+        ): Il2Cpp.Method<T> | undefined {
             return this.methods.find(
                 m =>
                     m.name == name &&
@@ -370,7 +417,10 @@ namespace Il2Cpp {
 
         /** Executes a callback for every defined class. */
         static enumerate(block: (klass: Il2Cpp.Class) => void): void {
-            const callback = new NativeCallback(_ => block(new Il2Cpp.Class(_)), "void", ["pointer", "pointer"]);
+            const callback = new NativeCallback(_ => block(new Il2Cpp.Class(_)), 'void', [
+                'pointer',
+                'pointer',
+            ]);
             return Il2Cpp.exports.classForEach(callback, NULL);
         }
     }

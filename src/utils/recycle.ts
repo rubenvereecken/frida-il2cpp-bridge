@@ -9,6 +9,6 @@ function recycle<T extends ObjectWrapper, U extends new (handle: NativePointer) 
                 this.cache.set(handle, new Target(argArray[0]));
             }
             return this.cache.get(handle)!;
-        }
+        },
     } as ProxyHandler<U> & { cache: Map<number, T> });
 }

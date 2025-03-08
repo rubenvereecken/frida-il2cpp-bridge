@@ -26,7 +26,11 @@ namespace Il2Cpp {
     /**
      * @param options.derefPointer If a pointer, dereference before reading? Usually `true`, but `false` for parameters for example.
      */
-    export function read(pointer: NativePointer, type: Il2Cpp.Type, options: { derefPointer?: boolean } = {}): Il2Cpp.Field.Type {
+    export function read(
+        pointer: NativePointer,
+        type: Il2Cpp.Type,
+        options: { derefPointer?: boolean } = {}
+    ): Il2Cpp.Field.Type {
         options = { derefPointer: true, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
 
@@ -67,7 +71,9 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.class:
                 return new Il2Cpp.Object(dereferenced);
             case Il2Cpp.Type.enum.genericInstance:
-                return type.class.isValueType ? new Il2Cpp.ValueType(pointer, type) : new Il2Cpp.Object(dereferenced);
+                return type.class.isValueType
+                    ? new Il2Cpp.ValueType(pointer, type)
+                    : new Il2Cpp.Object(dereferenced);
             case Il2Cpp.Type.enum.string:
                 return new Il2Cpp.String(dereferenced);
             case Il2Cpp.Type.enum.array:
@@ -75,7 +81,9 @@ namespace Il2Cpp {
                 return new Il2Cpp.Array(dereferenced);
         }
 
-        raise(`couldn't read the value from ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`);
+        raise(
+            `couldn't read the value from ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+        );
     }
 
     export function write(pointer: NativePointer, value: any, type: Il2Cpp.Type): NativePointer {
@@ -116,17 +124,27 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.object:
             case Il2Cpp.Type.enum.class:
             case Il2Cpp.Type.enum.genericInstance:
-                return value instanceof Il2Cpp.ValueType ? (Memory.copy(pointer, value, type.class.valueTypeSize), pointer) : pointer.writePointer(value);
+                return value instanceof Il2Cpp.ValueType
+                    ? (Memory.copy(pointer, value, type.class.valueTypeSize), pointer)
+                    : pointer.writePointer(value);
         }
 
-        raise(`couldn't write value ${value} to ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`);
+        raise(
+            `couldn't write value ${value} to ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+        );
     }
 
     /** @internal */
-    export function fromFridaValue(value: NativeCallbackArgumentValue, type: Il2Cpp.Type): Il2Cpp.Parameter.Type;
+    export function fromFridaValue(
+        value: NativeCallbackArgumentValue,
+        type: Il2Cpp.Type
+    ): Il2Cpp.Parameter.Type;
 
     /** @internal */
-    export function fromFridaValue(value: NativeFunctionReturnValue, type: Il2Cpp.Type): Il2Cpp.Method.ReturnType;
+    export function fromFridaValue(
+        value: NativeFunctionReturnValue,
+        type: Il2Cpp.Type
+    ): Il2Cpp.Method.ReturnType;
 
     /** @internal */
     export function fromFridaValue(
@@ -139,7 +157,11 @@ namespace Il2Cpp {
 
             for (let i = 0; i < fields.length; i++) {
                 const convertedValue = fromFridaValue(value[i], fields[i].type);
-                write(handle.add(fields[i].offset).sub(Il2Cpp.Object.headerSize), convertedValue, fields[i].type);
+                write(
+                    handle.add(fields[i].offset).sub(Il2Cpp.Object.headerSize),
+                    convertedValue,
+                    fields[i].type
+                );
             }
 
             return new Il2Cpp.ValueType(handle, type);
@@ -179,14 +201,18 @@ namespace Il2Cpp {
     export function toFridaValue(value: Il2Cpp.Parameter.Type): NativeFunctionArgumentValue;
 
     /** @internal */
-    export function toFridaValue(value: Il2Cpp.Parameter.Type | Il2Cpp.Method.ReturnType): NativeFunctionArgumentValue | NativeFunctionReturnValue {
-        if (typeof value == "boolean") {
+    export function toFridaValue(
+        value: Il2Cpp.Parameter.Type | Il2Cpp.Method.ReturnType
+    ): NativeFunctionArgumentValue | NativeFunctionReturnValue {
+        if (typeof value == 'boolean') {
             return +value;
         } else if (value instanceof Il2Cpp.ValueType) {
             if (value.type.class.isEnum) {
-                return value.field<number | Int64 | UInt64>("value__").value;
+                return value.field<number | Int64 | UInt64>('value__').value;
             } else {
-                const _ = value.type.class.fields.filter(_ => !_.isStatic).map(_ => toFridaValue(_.bind(value).value));
+                const _ = value.type.class.fields
+                    .filter(_ => !_.isStatic)
+                    .map(_ => toFridaValue(_.bind(value).value));
                 return _.length == 0 ? [0] : _;
             }
         } else {

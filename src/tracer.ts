@@ -7,7 +7,7 @@ namespace Il2Cpp {
             history: new Set(),
             flush: () => {
                 if (this.#state.depth == 0) {
-                    const message = `\n${this.#state.buffer.join("\n")}\n`;
+                    const message = `\n${this.#state.buffer.join('\n')}\n`;
 
                     if (this.#verbose) {
                         inform(message);
@@ -21,7 +21,7 @@ namespace Il2Cpp {
 
                     this.#state.buffer.length = 0;
                 }
-            }
+            },
         };
 
         /** @internal */
@@ -65,7 +65,9 @@ namespace Il2Cpp {
         }
 
         /** */
-        thread(thread: Il2Cpp.Thread): Pick<Il2Cpp.Tracer, "verbose"> & Il2Cpp.Tracer.ChooseTargets {
+        thread(
+            thread: Il2Cpp.Thread
+        ): Pick<Il2Cpp.Tracer, 'verbose'> & Il2Cpp.Tracer.ChooseTargets {
             this.#threadId = thread.id;
             return this;
         }
@@ -101,7 +103,9 @@ namespace Il2Cpp {
         }
 
         /** Filters the assemblies where to find the target methods. */
-        filterAssemblies(filter: (assembly: Il2Cpp.Assembly) => boolean): Il2Cpp.Tracer.FilterClasses {
+        filterAssemblies(
+            filter: (assembly: Il2Cpp.Assembly) => boolean
+        ): Il2Cpp.Tracer.FilterClasses {
             this.#assemblyFilter = filter;
             return this;
         }
@@ -119,13 +123,15 @@ namespace Il2Cpp {
         }
 
         /** Filters the target methods. */
-        filterParameters(filter: (parameter: Il2Cpp.Parameter) => boolean): Pick<Il2Cpp.Tracer, "and"> {
+        filterParameters(
+            filter: (parameter: Il2Cpp.Parameter) => boolean
+        ): Pick<Il2Cpp.Tracer, 'and'> {
             this.#parameterFilter = filter;
             return this;
         }
 
         /** Commits the current changes by finding the target methods. */
-        and(): Il2Cpp.Tracer.ChooseTargets & Pick<Il2Cpp.Tracer, "attach"> {
+        and(): Il2Cpp.Tracer.ChooseTargets & Pick<Il2Cpp.Tracer, 'attach'> {
             const filterMethod = (method: Il2Cpp.Method): void => {
                 if (this.#parameterFilter == undefined) {
                     this.#targets.push(method);
@@ -200,12 +206,12 @@ namespace Il2Cpp {
             this.#methods
                 ? filterMethods(this.#methods)
                 : this.#classes
-                ? filterClasses(this.#classes)
-                : this.#assemblies
-                ? filterAssemblies(this.#assemblies)
-                : this.#domain
-                ? filterDomain(this.#domain)
-                : undefined;
+                  ? filterClasses(this.#classes)
+                  : this.#assemblies
+                    ? filterAssemblies(this.#assemblies)
+                    : this.#domain
+                      ? filterDomain(this.#domain)
+                      : undefined;
 
             this.#assemblies = undefined;
             this.#classes = undefined;
@@ -226,8 +232,10 @@ namespace Il2Cpp {
                         this.#applier(target, this.#state, this.#threadId);
                     } catch (e: any) {
                         switch (e.message) {
-                            case /unable to intercept function at \w+; please file a bug/.exec(e.message)?.input:
-                            case "already replaced this function":
+                            case /unable to intercept function at \w+; please file a bug/.exec(
+                                e.message
+                            )?.input:
+                            case 'already replaced this function':
                                 break;
                             default:
                                 throw e;
@@ -239,17 +247,22 @@ namespace Il2Cpp {
     }
 
     export declare namespace Tracer {
-        export type Configure = Pick<Il2Cpp.Tracer, "thread" | "verbose"> & Il2Cpp.Tracer.ChooseTargets;
+        export type Configure = Pick<Il2Cpp.Tracer, 'thread' | 'verbose'> &
+            Il2Cpp.Tracer.ChooseTargets;
 
-        export type ChooseTargets = Pick<Il2Cpp.Tracer, "domain" | "assemblies" | "classes" | "methods">;
+        export type ChooseTargets = Pick<
+            Il2Cpp.Tracer,
+            'domain' | 'assemblies' | 'classes' | 'methods'
+        >;
 
-        export type FilterAssemblies = FilterClasses & Pick<Il2Cpp.Tracer, "filterAssemblies">;
+        export type FilterAssemblies = FilterClasses & Pick<Il2Cpp.Tracer, 'filterAssemblies'>;
 
-        export type FilterClasses = FilterMethods & Pick<Il2Cpp.Tracer, "filterClasses">;
+        export type FilterClasses = FilterMethods & Pick<Il2Cpp.Tracer, 'filterClasses'>;
 
-        export type FilterMethods = FilterParameters & Pick<Il2Cpp.Tracer, "filterMethods">;
+        export type FilterMethods = FilterParameters & Pick<Il2Cpp.Tracer, 'filterMethods'>;
 
-        export type FilterParameters = Pick<Il2Cpp.Tracer, "and"> & Pick<Il2Cpp.Tracer, "filterParameters">;
+        export type FilterParameters = Pick<Il2Cpp.Tracer, 'and'> &
+            Pick<Il2Cpp.Tracer, 'filterParameters'>;
 
         export interface State {
             depth: number;
@@ -258,13 +271,19 @@ namespace Il2Cpp {
             flush: () => void;
         }
 
-        export type Apply = (method: Il2Cpp.Method, state: Il2Cpp.Tracer.State, threadId: number) => void;
+        export type Apply = (
+            method: Il2Cpp.Method,
+            state: Il2Cpp.Tracer.State,
+            threadId: number
+        ) => void;
     }
 
     /** */
     export function trace(parameters: boolean = false): Il2Cpp.Tracer.Configure {
         const applier = (): Il2Cpp.Tracer.Apply => (method, state, threadId) => {
-            const paddedVirtualAddress = method.relativeVirtualAddress.toString(16).padStart(8, "0");
+            const paddedVirtualAddress = method.relativeVirtualAddress
+                .toString(16)
+                .padStart(8, '0');
 
             Interceptor.attach(method.virtualAddress, {
                 onEnter() {
@@ -279,19 +298,25 @@ namespace Il2Cpp {
                         state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(--state.depth)}└─\x1b[33m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m`);
                         state.flush();
                     }
-                }
+                },
             });
         };
 
         const applierWithParameters = (): Il2Cpp.Tracer.Apply => (method, state, threadId) => {
-            const paddedVirtualAddress = method.relativeVirtualAddress.toString(16).padStart(8, "0");
+            const paddedVirtualAddress = method.relativeVirtualAddress
+                .toString(16)
+                .padStart(8, '0');
 
             const startIndex = +!method.isStatic | +Il2Cpp.unityVersionIsBelow201830;
 
             const callback = function (this: CallbackContext | InvocationContext, ...args: any[]) {
                 if ((this as InvocationContext).threadId == threadId) {
-                    const thisParameter = method.isStatic ? undefined : new Il2Cpp.Parameter("this", -1, method.class.type);
-                    const parameters = thisParameter ? [thisParameter].concat(method.parameters) : method.parameters;
+                    const thisParameter = method.isStatic
+                        ? undefined
+                        : new Il2Cpp.Parameter('this', -1, method.class.type);
+                    const parameters = thisParameter
+                        ? [thisParameter].concat(method.parameters)
+                        : method.parameters;
 
                     // prettier-ignore
                     state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(state.depth++)}┌─\x1b[35m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m(${parameters.map(e => `\x1b[32m${e.name}\x1b[0m = \x1b[31m${fromFridaValue(args[e.position + startIndex], e.type)}\x1b[0m`).join(", ")})`);
@@ -309,7 +334,11 @@ namespace Il2Cpp {
             };
 
             method.revert();
-            const nativeCallback = new NativeCallback(callback, method.returnType.fridaAlias, method.fridaSignature);
+            const nativeCallback = new NativeCallback(
+                callback,
+                method.returnType.fridaAlias,
+                method.fridaSignature
+            );
             Interceptor.replace(method.virtualAddress, nativeCallback);
         };
 
@@ -319,7 +348,9 @@ namespace Il2Cpp {
     /** */
     export function backtrace(mode?: Backtracer): Il2Cpp.Tracer.Configure {
         const methods = Il2Cpp.domain.assemblies
-            .flatMap(_ => _.image.classes.flatMap(_ => _.methods.filter(_ => !_.virtualAddress.isNull())))
+            .flatMap(_ =>
+                _.image.classes.flatMap(_ => _.methods.filter(_ => !_.virtualAddress.isNull()))
+            )
             .sort((_, __) => _.virtualAddress.compare(__.virtualAddress));
 
         const searchInsert = (target: NativePointer): Il2Cpp.Method => {
@@ -348,7 +379,10 @@ namespace Il2Cpp {
                     handles.unshift(method.virtualAddress);
 
                     for (const handle of handles) {
-                        if (handle.compare(Il2Cpp.module.base) > 0 && handle.compare(Il2Cpp.module.base.add(Il2Cpp.module.size)) < 0) {
+                        if (
+                            handle.compare(Il2Cpp.module.base) > 0 &&
+                            handle.compare(Il2Cpp.module.base.add(Il2Cpp.module.size)) < 0
+                        ) {
                             const method = searchInsert(handle);
 
                             if (method) {

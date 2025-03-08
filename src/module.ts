@@ -24,7 +24,7 @@ namespace Il2Cpp {
      * ```
      */
     export declare const module: Module;
-    getter(Il2Cpp, "module", () => {
+    getter(Il2Cpp, 'module', () => {
         const [moduleName, fallback] = getExpectedModuleNames();
         return Process.findModuleByName(moduleName) ?? Process.getModuleByName(fallback);
     });
@@ -34,12 +34,12 @@ namespace Il2Cpp {
      * Waits for the IL2CPP native library to be loaded and initialized.
      */
     export async function initialize(blocking = false): Promise<boolean> {
-        Reflect.defineProperty(Il2Cpp, "module", {
+        Reflect.defineProperty(Il2Cpp, 'module', {
             // prettier-ignore
             value: Process.platform == "darwin"
                 ? Process.findModuleByAddress(DebugSymbol.fromName("il2cpp_init").address) 
                     ?? await forModule(...getExpectedModuleNames())
-                : await forModule(...getExpectedModuleNames())
+                : await forModule(...getExpectedModuleNames()),
         });
 
         // At this point, the IL2CPP native library has been loaded, but we
@@ -52,7 +52,7 @@ namespace Il2Cpp {
                     onLeave() {
                         interceptor.detach();
                         blocking ? resolve(true) : setImmediate(() => resolve(false));
-                    }
+                    },
                 });
             });
         }
@@ -66,12 +66,12 @@ namespace Il2Cpp {
         }
 
         switch (Process.platform) {
-            case "linux":
-                return [Android.apiLevel ? "libil2cpp.so" : "GameAssembly.so"];
-            case "windows":
-                return ["GameAssembly.dll"];
-            case "darwin":
-                return ["UnityFramework", "GameAssembly.dylib"];
+            case 'linux':
+                return [Android.apiLevel ? 'libil2cpp.so' : 'GameAssembly.so'];
+            case 'windows':
+                return ['GameAssembly.dll'];
+            case 'darwin':
+                return ['UnityFramework', 'GameAssembly.dylib'];
         }
 
         raise(`${Process.platform} is not supported yet`);

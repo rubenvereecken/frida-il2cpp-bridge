@@ -4,19 +4,19 @@ namespace Il2Cpp {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Object",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Object',
+                enumerable: true,
             });
         }
 
         valueToString(): string {
-            if (this.isNull()) return "null";
-            return this.method<Il2Cpp.String>("ToString", 0).invoke().content ?? "null";
+            if (this.isNull()) return 'null';
+            return this.method<Il2Cpp.String>('ToString', 0).invoke().content ?? 'null';
         }
 
         toString(): string {
@@ -26,7 +26,7 @@ namespace Il2Cpp {
         /** Gets the Il2CppObject struct size, possibly equal to `Process.pointerSize * 2`. */
         @lazy
         static get headerSize(): number {
-            return Il2Cpp.corlib.class("System.Object").instanceSize;
+            return Il2Cpp.corlib.class('System.Object').instanceSize;
         }
 
         /** Gets the class of this object. */
@@ -58,15 +58,21 @@ namespace Il2Cpp {
         }
 
         /** Gets the correct virtual method from the given virtual method. */
-        virtualMethod<T extends Il2Cpp.Method.ReturnType>(method: Il2Cpp.Method): Il2Cpp.BoundMethod<T> {
-            return new Il2Cpp.Method<T>(Il2Cpp.exports.objectGetVirtualMethod(this, method)).bind(this);
+        virtualMethod<T extends Il2Cpp.Method.ReturnType>(
+            method: Il2Cpp.Method
+        ): Il2Cpp.BoundMethod<T> {
+            return new Il2Cpp.Method<T>(Il2Cpp.exports.objectGetVirtualMethod(this, method)).bind(
+                this
+            );
         }
 
         /** Unboxes the value type (either a primitive, a struct or an enum) out of this object. */
         unbox(): Il2Cpp.ValueType {
             return this.class.isValueType
                 ? new Il2Cpp.ValueType(Il2Cpp.exports.objectUnbox(this), this.class.type)
-                : raise(`couldn't unbox instances of ${this.class.type.name} as they are not value types`);
+                : raise(
+                      `couldn't unbox instances of ${this.class.type.name} as they are not value types`
+                  );
         }
 
         /** Creates a weak reference to this object. */

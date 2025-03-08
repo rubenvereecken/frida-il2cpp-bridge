@@ -21,6 +21,8 @@
 /// <reference path="./module.ts">/>
 /// <reference path="./perform.ts">/>
 /// <reference path="./tracer.ts">/>
+/// <reference path="./codegen/pseudo-csharp.ts">/>
+/// <reference path="./codegen/typescript.ts">/>
 
 /// <reference path="./structs/common/object-like.ts">/>
 /// <reference path="./structs/common/dynamic-methods.ts">/>

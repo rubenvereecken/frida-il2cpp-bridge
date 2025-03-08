@@ -1,21 +1,24 @@
 namespace Il2Cpp {
-    export class Array<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct implements Iterable<T> {
+    export class Array<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type>
+        extends NativeStruct
+        implements Iterable<T>
+    {
         constructor(native: NativePointerValue) {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Array",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Array',
+                enumerable: true,
             });
         }
 
         valueToString(): string {
-            return this.isNull() ? "null" : `[${this.elements.read(this.length, 0)}]`;
+            return this.isNull() ? 'null' : `[${this.elements.read(this.length, 0)}]`;
         }
 
         toString(): string {
@@ -25,7 +28,7 @@ namespace Il2Cpp {
         /** Gets the Il2CppArray struct size, possibly equal to `Process.pointerSize * 4`. */
         @lazy
         static get headerSize(): number {
-            return Il2Cpp.corlib.class("System.Array").instanceSize;
+            return Il2Cpp.corlib.class('System.Array').instanceSize;
         }
 
         /** @internal Gets a pointer to the first element of the current array. */
@@ -33,7 +36,7 @@ namespace Il2Cpp {
             // We previosly obtained an array whose content is known by calling
             // 'System.String::Split(NULL)' on a known string. However, that
             // method invocation somehow blows things up in Unity 2018.3.0f1.
-            const array = Il2Cpp.string("v").object.method<Il2Cpp.Array>("ToCharArray", 0).invoke();
+            const array = Il2Cpp.string('v').object.method<Il2Cpp.Array>('ToCharArray', 0).invoke();
 
             // prettier-ignore
             const offset = array.handle.offsetOf(_ => _.readS16() == 118) ??
@@ -98,14 +101,24 @@ namespace Il2Cpp {
     }
 
     /** Creates a new empty array of the given length. */
-    export function array<T extends Il2Cpp.Field.Type>(klass: Il2Cpp.Class, length: number): Il2Cpp.Array<T>;
+    export function array<T extends Il2Cpp.Field.Type>(
+        klass: Il2Cpp.Class,
+        length: number
+    ): Il2Cpp.Array<T>;
 
     /** Creates a new array with the given elements. */
-    export function array<T extends Il2Cpp.Field.Type>(klass: Il2Cpp.Class, elements: T[]): Il2Cpp.Array<T>;
+    export function array<T extends Il2Cpp.Field.Type>(
+        klass: Il2Cpp.Class,
+        elements: T[]
+    ): Il2Cpp.Array<T>;
 
     /** @internal */
-    export function array<T extends Il2Cpp.Field.Type>(klass: Il2Cpp.Class, lengthOrElements: number | T[]): Il2Cpp.Array<T> {
-        const length = typeof lengthOrElements == "number" ? lengthOrElements : lengthOrElements.length;
+    export function array<T extends Il2Cpp.Field.Type>(
+        klass: Il2Cpp.Class,
+        lengthOrElements: number | T[]
+    ): Il2Cpp.Array<T> {
+        const length =
+            typeof lengthOrElements == 'number' ? lengthOrElements : lengthOrElements.length;
         const array = new Il2Cpp.Array<T>(Il2Cpp.exports.arrayNew(klass, length));
 
         if (globalThis.Array.isArray(lengthOrElements)) {

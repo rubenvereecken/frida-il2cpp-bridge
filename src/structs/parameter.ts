@@ -1,14 +1,18 @@
 namespace Il2Cpp {
     export class Parameter {
-        constructor(public readonly name: string, public readonly position: number, public readonly type: Il2Cpp.Type) {
+        constructor(
+            public readonly name: string,
+            public readonly position: number,
+            public readonly type: Il2Cpp.Type
+        ) {
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Parameter",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Parameter',
+                enumerable: true,
             });
         }
 

@@ -318,7 +318,7 @@ Il2Cpp.perform(() => {
             const runtimeTypeHandle = Il2Cpp.corlib.class("System.RuntimeTypeHandle").alloc().unbox();
             runtimeTypeHandle.methodWithSignature(".ctor", Il2Cpp.Type.fromValue(runtimeType)).invoke(runtimeType);
             const reconstructedRuntimeType = Il2Cpp.corlib.class("System.RuntimeType").method("GetTypeFromHandle").invoke(runtimeTypeHandle);
-            return runtimeType.method('Equals').invoke(reconstructedRuntimeType);
+            return runtimeType.method("Equals").invoke(reconstructedRuntimeType);
         });
         assert("System.RuntimeTypeHandle", () => Il2Cpp.corlib.class("System.RuntimeTypeHandle").alloc().toString());
     });
@@ -437,8 +437,8 @@ function eq(a, b) {
     return a instanceof NativePointer || a instanceof NativeStruct
         ? a.equals(b)
         : a instanceof Array || b instanceof Array
-        ? JSON.stringify(a) == JSON.stringify(b)
-        : a == b;
+          ? JSON.stringify(a) == JSON.stringify(b)
+          : a == b;
 }
 
 function assert(expected, getActual) {

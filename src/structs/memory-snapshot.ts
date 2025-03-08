@@ -13,7 +13,9 @@ namespace Il2Cpp {
         /** Gets any initialized class. */
         @lazy
         get classes(): Il2Cpp.Class[] {
-            return readNativeIterator(_ => Il2Cpp.exports.memorySnapshotGetClasses(this, _)).map(_ => new Il2Cpp.Class(_));
+            return readNativeIterator(_ => Il2Cpp.exports.memorySnapshotGetClasses(this, _)).map(
+                _ => new Il2Cpp.Class(_)
+            );
         }
 
         /** Gets the objects tracked by this memory snapshot. */
@@ -30,7 +32,9 @@ namespace Il2Cpp {
     }
 
     /** */
-    export function memorySnapshot<T>(block: (memorySnapshot: Omit<Il2Cpp.MemorySnapshot, "free">) => T): T {
+    export function memorySnapshot<T>(
+        block: (memorySnapshot: Omit<Il2Cpp.MemorySnapshot, 'free'>) => T
+    ): T {
         const memorySnapshot = Il2Cpp.MemorySnapshot.capture();
         const result = block(memorySnapshot);
         memorySnapshot.free();

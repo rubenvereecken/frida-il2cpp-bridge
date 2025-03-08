@@ -8,10 +8,13 @@ namespace Android {
     }, lazy);
 
     function getProperty(name: string): string | undefined {
-        const handle = Module.findExportByName("libc.so", "__system_property_get");
+        const handle = Module.findExportByName('libc.so', '__system_property_get');
 
         if (handle) {
-            const __system_property_get = new NativeFunction(handle, "void", ["pointer", "pointer"]);
+            const __system_property_get = new NativeFunction(handle, 'void', [
+                'pointer',
+                'pointer',
+            ]);
 
             const value = Memory.alloc(92).writePointer(NULL);
             __system_property_get(Memory.allocUtf8String(name), value);

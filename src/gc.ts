@@ -64,15 +64,28 @@ namespace Il2Cpp {
 
             const callback = (objects: NativePointer, size: number) => {
                 for (let i = 0; i < size; i++) {
-                    matches.push(new Il2Cpp.Object(objects.add(i * Process.pointerSize).readPointer()));
+                    matches.push(
+                        new Il2Cpp.Object(objects.add(i * Process.pointerSize).readPointer())
+                    );
                 }
             };
 
-            const chooseCallback = new NativeCallback(callback, "void", ["pointer", "int", "pointer"]);
+            const chooseCallback = new NativeCallback(callback, 'void', [
+                'pointer',
+                'int',
+                'pointer',
+            ]);
 
             if (Il2Cpp.unityVersionIsBelow202120) {
-                const onWorld = new NativeCallback(() => {}, "void", []);
-                const state = Il2Cpp.exports.livenessCalculationBegin(klass, 0, chooseCallback, NULL, onWorld, onWorld);
+                const onWorld = new NativeCallback(() => {}, 'void', []);
+                const state = Il2Cpp.exports.livenessCalculationBegin(
+                    klass,
+                    0,
+                    chooseCallback,
+                    NULL,
+                    onWorld,
+                    onWorld
+                );
 
                 Il2Cpp.exports.livenessCalculationFromStatics(state);
                 Il2Cpp.exports.livenessCalculationEnd(state);
@@ -86,11 +99,21 @@ namespace Il2Cpp {
                     }
                 };
 
-                const reallocCallback = new NativeCallback(realloc, "pointer", ["pointer", "size_t", "pointer"]);
+                const reallocCallback = new NativeCallback(realloc, 'pointer', [
+                    'pointer',
+                    'size_t',
+                    'pointer',
+                ]);
 
                 this.stopWorld();
 
-                const state = Il2Cpp.exports.livenessAllocateStruct(klass, 0, chooseCallback, NULL, reallocCallback);
+                const state = Il2Cpp.exports.livenessAllocateStruct(
+                    klass,
+                    0,
+                    chooseCallback,
+                    NULL,
+                    reallocCallback
+                );
                 Il2Cpp.exports.livenessCalculationFromStatics(state);
                 Il2Cpp.exports.livenessFinalize(state);
 
@@ -136,6 +159,6 @@ namespace Il2Cpp {
          */
         stopWorld(): void {
             return Il2Cpp.exports.gcStopWorld();
-        }
+        },
     };
 }

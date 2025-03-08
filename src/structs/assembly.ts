@@ -5,13 +5,13 @@ namespace Il2Cpp {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Assembly",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Assembly',
+                enumerable: true,
             });
         }
 
@@ -40,16 +40,16 @@ namespace Il2Cpp {
                     // (despite being excluded from System.Reflection.Assembly::GetTypes).
                     return new Il2Cpp.Image(
                         this.object
-                            .method<Il2Cpp.Object>("GetType", 1)
-                            .invoke(Il2Cpp.string("<Module>"))
-                            .method<Il2Cpp.Object>("get_Module")
+                            .method<Il2Cpp.Object>('GetType', 1)
+                            .invoke(Il2Cpp.string('<Module>'))
+                            .method<Il2Cpp.Object>('get_Module')
                             .invoke()
-                            .field<NativePointer>("_impl").value
+                            .field<NativePointer>('_impl').value
                     );
                 };
             }
 
-            getter(Il2Cpp.Assembly.prototype, "image", get, lazy);
+            getter(Il2Cpp.Assembly.prototype, 'image', get, lazy);
 
             return this.image;
         }
@@ -57,14 +57,16 @@ namespace Il2Cpp {
         /** Gets the name of this assembly. */
         @lazy
         get name(): string {
-            return this.image.name.replace(".dll", "");
+            return this.image.name.replace('.dll', '');
         }
 
         /** Gets the encompassing object of the current assembly. */
         @lazy
         get object(): Il2Cpp.Object {
-            for (const _ of Il2Cpp.domain.object.method<Il2Cpp.Array<Il2Cpp.Object>>("GetAssemblies", 1).invoke(false)) {
-                if (_.field<NativePointer>("_mono_assembly").value.equals(this)) {
+            for (const _ of Il2Cpp.domain.object
+                .method<Il2Cpp.Array<Il2Cpp.Object>>('GetAssemblies', 1)
+                .invoke(false)) {
+                if (_.field<NativePointer>('_mono_assembly').value.equals(this)) {
                     return _;
                 }
             }

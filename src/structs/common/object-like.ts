@@ -9,11 +9,17 @@ namespace Il2Cpp {
         }
 
         /** Gets the method with the given name. */
-        method<T extends Il2Cpp.Method.ReturnType>(name: string, parameterCount: number = -1): Il2Cpp.BoundMethod<T> {
+        method<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            parameterCount: number = -1
+        ): Il2Cpp.BoundMethod<T> {
             return this.type.class.method<T>(name, parameterCount).bind(this);
         }
 
-        methodWithSignature<T extends Il2Cpp.Method.ReturnType>(name: string, ...paramTypes: Il2Cpp.Type[]): Il2Cpp.BoundMethod<T> {
+        methodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramTypes: Il2Cpp.Type[]
+        ): Il2Cpp.BoundMethod<T> {
             return this.type.class.methodWithSignature<T>(name, ...paramTypes).bind(this);
         }
 
@@ -23,11 +29,17 @@ namespace Il2Cpp {
         }
 
         /** Gets the field with the given name. */
-        tryMethod<T extends Il2Cpp.Method.ReturnType>(name: string, parameterCount: number = -1): Il2Cpp.BoundMethod<T> | undefined {
+        tryMethod<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            parameterCount: number = -1
+        ): Il2Cpp.BoundMethod<T> | undefined {
             return this.type.class.tryMethod<T>(name, parameterCount)?.bind(this);
         }
 
-        tryMethodWithSignature<T extends Il2Cpp.Method.ReturnType>(name: string, ...paramTypes: Il2Cpp.Type[]): Il2Cpp.BoundMethod<T> | undefined {
+        tryMethodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramTypes: Il2Cpp.Type[]
+        ): Il2Cpp.BoundMethod<T> | undefined {
             return this.type.class.methodWithSignature<T>(name, ...paramTypes).bind(this);
         }
 

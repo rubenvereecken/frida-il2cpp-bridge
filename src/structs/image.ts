@@ -5,13 +5,13 @@ namespace Il2Cpp {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, "__toString", {
+            globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true
+                enumerable: true,
             });
-            globalThis.Object.defineProperty(this, "_il2cpp", {
-                get: () => "Il2Cpp.Image",
-                enumerable: true
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => 'Il2Cpp.Image',
+                enumerable: true,
             });
         }
 
@@ -39,15 +39,23 @@ namespace Il2Cpp {
         @lazy
         get classes(): Il2Cpp.Class[] {
             if (Il2Cpp.unityVersionIsBelow201830) {
-                const types = this.assembly.object.method<Il2Cpp.Array<Il2Cpp.Object>>("GetTypes").invoke(false);
+                const types = this.assembly.object
+                    .method<Il2Cpp.Array<Il2Cpp.Object>>('GetTypes')
+                    .invoke(false);
                 // In Unity 5.3.8f1, getting System.Reflection.Emit.OpCodes type name
                 // without iterating all the classes first somehow blows things up at
                 // app startup, hence the `Array.from`.
-                const classes = globalThis.Array.from(types, _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_)));
-                classes.unshift(this.class("<Module>"));
+                const classes = globalThis.Array.from(
+                    types,
+                    _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
+                );
+                classes.unshift(this.class('<Module>'));
                 return classes;
             } else {
-                return globalThis.Array.from(globalThis.Array(this.classCount), (_, i) => new Il2Cpp.Class(Il2Cpp.exports.imageGetClass(this, i)));
+                return globalThis.Array.from(
+                    globalThis.Array(this.classCount),
+                    (_, i) => new Il2Cpp.Class(Il2Cpp.exports.imageGetClass(this, i))
+                );
             }
         }
 
@@ -59,16 +67,22 @@ namespace Il2Cpp {
 
         /** Gets the class with the specified name defined in this image. */
         class(name: string): Il2Cpp.Class {
-            return this.tryClass(name) ?? raise(`couldn't find class ${name} in assembly ${this.name}`);
+            return (
+                this.tryClass(name) ?? raise(`couldn't find class ${name} in assembly ${this.name}`)
+            );
         }
 
         /** Gets the class with the specified name defined in this image. */
         tryClass(name: string): Il2Cpp.Class | null {
-            const dotIndex = name.lastIndexOf(".");
-            const classNamespace = Memory.allocUtf8String(dotIndex == -1 ? "" : name.slice(0, dotIndex));
+            const dotIndex = name.lastIndexOf('.');
+            const classNamespace = Memory.allocUtf8String(
+                dotIndex == -1 ? '' : name.slice(0, dotIndex)
+            );
             const className = Memory.allocUtf8String(name.slice(dotIndex + 1));
 
-            return new Il2Cpp.Class(Il2Cpp.exports.classFromName(this, classNamespace, className)).asNullable();
+            return new Il2Cpp.Class(
+                Il2Cpp.exports.classFromName(this, classNamespace, className)
+            ).asNullable();
         }
     }
 

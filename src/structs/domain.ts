@@ -7,8 +7,13 @@ namespace Il2Cpp {
             let handles = readNativeList(_ => Il2Cpp.exports.domainGetAssemblies(this, _));
 
             if (handles.length == 0) {
-                const assemblyObjects = this.object.method<Il2Cpp.Array<Il2Cpp.Object>>("GetAssemblies").overload().invoke();
-                handles = globalThis.Array.from(assemblyObjects).map(_ => _.field<NativePointer>("_mono_assembly").value);
+                const assemblyObjects = this.object
+                    .method<Il2Cpp.Array<Il2Cpp.Object>>('GetAssemblies')
+                    .overload()
+                    .invoke();
+                handles = globalThis.Array.from(assemblyObjects).map(
+                    _ => _.field<NativePointer>('_mono_assembly').value
+                );
             }
 
             return handles.map(_ => new Il2Cpp.Assembly(_));
@@ -17,7 +22,10 @@ namespace Il2Cpp {
         /** Gets the encompassing object of the application domain. */
         @lazy
         get object(): Il2Cpp.Object {
-            return Il2Cpp.corlib.class("System.AppDomain").method<Il2Cpp.Object>("get_CurrentDomain").invoke();
+            return Il2Cpp.corlib
+                .class('System.AppDomain')
+                .method<Il2Cpp.Object>('get_CurrentDomain')
+                .invoke();
         }
 
         /** Opens and loads the assembly with the given name. */
@@ -32,7 +40,9 @@ namespace Il2Cpp {
 
         /** Opens and loads the assembly with the given name. */
         tryAssembly(name: string): Il2Cpp.Assembly | null {
-            return new Il2Cpp.Assembly(Il2Cpp.exports.domainGetAssemblyFromName(this, Memory.allocUtf8String(name))).asNullable();
+            return new Il2Cpp.Assembly(
+                Il2Cpp.exports.domainGetAssemblyFromName(this, Memory.allocUtf8String(name))
+            ).asNullable();
         }
     }
 

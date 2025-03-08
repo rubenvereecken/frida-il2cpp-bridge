@@ -15,7 +15,9 @@ namespace Il2Cpp {
      * const comparables = objects.filter(Il2Cpp.is(IComparable));
      * ```
      */
-    export function is<T extends Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.Type>(klass: Il2Cpp.Class): (element: T) => boolean {
+    export function is<T extends Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.Type>(
+        klass: Il2Cpp.Class
+    ): (element: T) => boolean {
         return (element: T): boolean => {
             if (element instanceof Il2Cpp.Class) {
                 return klass.isAssignableFrom(element);
@@ -41,7 +43,9 @@ namespace Il2Cpp {
      * const strings = objects.filter(Il2Cpp.isExactly(String));
      * ```
      */
-    export function isExactly<T extends Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.Type>(klass: Il2Cpp.Class): (element: T) => boolean {
+    export function isExactly<T extends Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.Type>(
+        klass: Il2Cpp.Class
+    ): (element: T) => boolean {
         return (element: T): boolean => {
             if (element instanceof Il2Cpp.Class) {
                 return element.equals(klass);
