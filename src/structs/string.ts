@@ -29,18 +29,17 @@ namespace Il2Cpp {
 
         /** @unsafe Sets the content of this string - it may write out of bounds! */
         set content(value: string | null) {
+            Il2Cpp.exports.stringGetChars(this).writeUtf16String(value ?? '');
+            this.handle.add(Il2Cpp.String.lengthOffset).writeS32(value?.length ?? 0);
+        }
+
+        @lazy
+        static get lengthOffset(): number {
+            const probe = 'vfsfitvnm';
             // prettier-ignore
-            const offset = Il2Cpp.string("vfsfitvnm").handle.offsetOf(_ => _.readInt() == 9) 
+            const offset = Il2Cpp.string(probe).handle.offsetOf(_ => _.readInt() == probe.length)
                 ?? raise("couldn't find the length offset in the native string struct");
-
-            globalThis.Object.defineProperty(Il2Cpp.String.prototype, 'content', {
-                set(this: Il2Cpp.String, value: string | null) {
-                    Il2Cpp.exports.stringGetChars(this).writeUtf16String(value ?? '');
-                    this.handle.add(offset).writeS32(value?.length ?? 0);
-                },
-            });
-
-            this.content = value;
+            return offset;
         }
 
         /** Gets the length of this string. */
