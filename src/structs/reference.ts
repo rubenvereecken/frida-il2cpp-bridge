@@ -86,13 +86,13 @@ namespace Il2Cpp {
             case 'object':
                 if (value instanceof Il2Cpp.ValueType || value instanceof Il2Cpp.Pointer) {
                     return new Il2Cpp.Reference<T>(value.handle, value.type);
-                } else if (value instanceof Il2Cpp.Object) {
-                    return new Il2Cpp.Reference<T>(handle.writePointer(value), value.class.type);
                 } else if (value instanceof Il2Cpp.String || value instanceof Il2Cpp.Array) {
                     return new Il2Cpp.Reference<T>(
                         handle.writePointer(value),
                         value.object.class.type
                     );
+                } else if (value instanceof Il2Cpp.Object) {
+                    return new Il2Cpp.Reference<T>(handle.writePointer(value), value.class.type);
                 } else if (value instanceof NativePointer) {
                     switch (type?.typeEnum) {
                         case Il2Cpp.Type.enum.unsignedNativePointer:

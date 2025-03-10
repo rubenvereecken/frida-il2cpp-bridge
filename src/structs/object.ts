@@ -1,15 +1,13 @@
 namespace Il2Cpp {
     export class Object extends Il2Cpp.ObjectLike {
+        _il2cpp = 'Il2Cpp.Object';
+
         constructor(native: NativePointerValue) {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering
             globalThis.Object.defineProperty(this, '__toString', {
                 get: () => this.toString(),
-                enumerable: true,
-            });
-            globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => 'Il2Cpp.Object',
                 enumerable: true,
             });
         }

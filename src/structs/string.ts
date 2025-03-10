@@ -1,18 +1,6 @@
 namespace Il2Cpp {
-    export class String extends NativeStruct {
-        constructor(handle: NativePointerValue) {
-            super(handle);
-
-            // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, '__toString', {
-                get: () => this.toString(),
-                enumerable: true,
-            });
-            globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => 'Il2Cpp.String',
-                enumerable: true,
-            });
-        }
+    export class String extends Il2Cpp.Object {
+        _il2cpp = 'Il2Cpp.String';
 
         valueToString(): string {
             return this.isNull() ? 'null' : `${this.content}`;
@@ -49,6 +37,7 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the current string. */
         get object(): Il2Cpp.Object {
+            // TODO remove – just backward compatibility
             return new Il2Cpp.Object(this);
         }
     }
