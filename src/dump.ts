@@ -106,8 +106,9 @@ namespace Il2Cpp {
     function directoryExists(path: string): boolean {
         return Il2Cpp.corlib
             .class('System.IO.Directory')
-            .method<boolean>('Exists')
-            .invoke(Il2Cpp.string(path));
+            .method<Il2Cpp.BooleanT>('Exists')
+            .invoke(Il2Cpp.string(path))
+            .read();
     }
 
     function createDirectoryRecursively(path: string) {

@@ -3,7 +3,7 @@ namespace Il2Cpp {
         /** Gets the native id of the current thread. */
         get id(): number {
             let get = function (this: Il2Cpp.Thread) {
-                return this.internal.field<UInt64>('thread_id').value.toNumber();
+                return this.internal.field<Il2Cpp.UInt64T>('thread_id').value.read().toNumber();
             };
 
             // https://github.com/mono/linux-packaging-mono/blob/d586f84dfea30217f34b076a616a098518aa72cd/mono/utils/mono-threads.h#L642
@@ -41,7 +41,7 @@ namespace Il2Cpp {
         /** Gets the managed id of the current thread. */
         @lazy
         get managedId(): number {
-            return this.object.method<number>('get_ManagedThreadId').invoke();
+            return this.object.method<Il2Cpp.Int32T>('get_ManagedThreadId').invoke().read();
         }
 
         /** Gets the encompassing object of the current thread. */
@@ -53,7 +53,7 @@ namespace Il2Cpp {
         /** @internal */
         @lazy
         private get staticData(): NativePointer {
-            return this.internal.field<NativePointer>('static_data').value;
+            return this.internal.field<Il2Cpp.IntPtrT>('static_data').value.read();
         }
 
         /** @internal */
@@ -99,6 +99,8 @@ namespace Il2Cpp {
                     () => {
                         const result = block();
                         setImmediate(() => resolve(result));
+                        // TODO sort void typing
+                        return undefined as any as Il2Cpp.VoidT;
                     }
                 );
 

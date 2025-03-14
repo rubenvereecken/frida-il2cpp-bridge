@@ -481,16 +481,6 @@ namespace Il2Cpp {
 
             return name;
         }
-
-        @lazy
-        get typescriptName() {
-            // From outer to inner, including this one
-            const classes: Il2Cpp.Class[] = [this, ...this.declaringClasses].reverse();
-            // Just get the final bit of each name
-            const names = classes.map(kls => kls.name.split('.').pop()!);
-            const finalName = names.join('$');
-            return finalName;
-        }
     }
 
     // Helper classes, helpfully typed

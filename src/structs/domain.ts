@@ -11,8 +11,8 @@ namespace Il2Cpp {
                     .method<Il2Cpp.Array<Il2Cpp.Object>>('GetAssemblies')
                     .overload()
                     .invoke();
-                handles = globalThis.Array.from(assemblyObjects).map(
-                    _ => _.field<NativePointer>('_mono_assembly').value
+                handles = globalThis.Array.from(assemblyObjects).map(_ =>
+                    _.field<Il2Cpp.IntPtrT>('_mono_assembly').value.read()
                 );
             }
 

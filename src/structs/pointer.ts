@@ -1,20 +1,27 @@
 namespace Il2Cpp {
-    export class Pointer<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
+    // TODO check what broke now that Pointer extends ObjectLike – what needs overriding?
+    export class Pointer<
+        T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped,
+        S extends string = string,
+    > extends ObjectLike<S> {
+        protected constructorName = 'Il2Cpp.Pointer';
+
         constructor(
             handle: NativePointer,
-            readonly type: Il2Cpp.Type
+            readonly type: Il2Cpp.Type<S>
         ) {
             super(handle);
+        }
 
-            // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, '__toString', {
-                get: () => this.toString(),
-                enumerable: true,
-            });
-            globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => 'Il2Cpp.Pointer',
-                enumerable: true,
-            });
+        // TODO check if this actually works??
+        @lazy
+        get object() {
+            return new Il2Cpp.Object<S>(this);
+        }
+
+        @lazy
+        get class() {
+            return this.object.class;
         }
 
         valueToString(): string {

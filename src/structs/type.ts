@@ -225,11 +225,6 @@ namespace Il2Cpp {
             return false;
         }
 
-        @lazy
-        get typescriptName(): string {
-            return this.class.typescriptName;
-        }
-
         isLongLike(
             this: Il2Cpp.Type
         ): this is Il2Cpp.Type<'System.Int64'> | Il2Cpp.Type<'System.UInt64'> {

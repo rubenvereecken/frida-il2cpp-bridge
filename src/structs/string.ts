@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class String extends Il2Cpp.Object {
+    export class String extends Il2Cpp.Object<'System.String'> {
         protected constructorName = 'Il2Cpp.String';
 
         valueToString(): string {

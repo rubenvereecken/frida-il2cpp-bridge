@@ -422,31 +422,32 @@ namespace Il2Cpp {
         }
 
         // /** @internal */
-        // wrap(block: ImplementationCallback<T>): NativeCallback<any, any> {
-        //     const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
-        //     return new NativeCallback(
-        //         (...args: NativeCallbackArgumentValue[]): NativeCallbackReturnValue => {
-        //             const thisObject = this.isStatic
-        //                 ? this.class
-        //                 : this.class.isValueType
-        //                   ? new Il2Cpp.ValueType(
-        //                         (args[0] as NativePointer).add(
-        //                             Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
-        //                         ),
-        //                         this.class.type
-        //                     )
-        //                   : new Il2Cpp.Object(args[0] as NativePointer);
+        wrap(block: ImplementationCallback<T>): NativeCallback<any, any> {
+            const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
+            return new NativeCallback(
+                (...args: NativeCallbackArgumentValue[]): NativeCallbackReturnValue => {
+                    const thisObject = this.isStatic
+                        ? this.class
+                        : this.class.isValueType
+                          ? new Il2Cpp.ValueType(
+                                (args[0] as NativePointer).add(
+                                    Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
+                                ),
+                                this.class.type
+                            )
+                          : new Il2Cpp.Object(args[0] as NativePointer);
 
-        //             const parameters = this.parameters.map((_, i) =>
-        //                 fromFridaValue(args[i + startIndex], _.type)
-        //             );
-        //             const result = block.call(thisObject, ...parameters);
-        //             return toFridaValue(result);
-        //         },
-        //         this.returnType.fridaAlias,
-        //         this.fridaSignature
-        //     );
-        // }
+                    const parameters = this.parameters.map((_, i) =>
+                        fromFridaValue(args[i + startIndex], _.type)
+                    );
+                    const result = block.call(thisObject, ...parameters);
+                    // TODO sort typing here
+                    return toFridaValue(result) as any;
+                },
+                this.returnType.fridaAlias,
+                this.fridaSignature
+            );
+        }
 
         // /** @internal */
         // wrapOnEnter(
