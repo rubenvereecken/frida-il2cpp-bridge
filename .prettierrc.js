@@ -1,12 +1,12 @@
 const config = {
     trailingComma: 'es5',
     tabWidth: 4,
-    semi: false,
+    semi: true,
     singleQuote: true,
-    printWidth: 120,
+    printWidth: 100,
     arrowParens: 'avoid',
     bracketSpacing: true,
     endOfLine: 'lf',
-}
+};
 
-export default config
+export default config;
