@@ -65,22 +65,28 @@ namespace Il2Cpp {
             return Il2Cpp.exports.imageGetName(this).readUtf8String()!;
         }
 
-        /** Gets the class with the specified name defined in this image. */
-        class(name: string): Il2Cpp.Class {
+        /**
+         * Gets the class with the specified name defined in this image.
+         * By default, assumes the name the class was found by is also the type name.
+         * This is wrong for:
+         * - inner classes
+         * - generic classes (I think)
+         */
+        class<T extends string>(name: T): Il2Cpp.Class<T> {
             return (
                 this.tryClass(name) ?? raise(`couldn't find class ${name} in assembly ${this.name}`)
             );
         }
 
         /** Gets the class with the specified name defined in this image. */
-        tryClass(name: string): Il2Cpp.Class | null {
+        tryClass<T extends string>(name: T): Il2Cpp.Class<T> | null {
             const dotIndex = name.lastIndexOf('.');
             const classNamespace = Memory.allocUtf8String(
                 dotIndex == -1 ? '' : name.slice(0, dotIndex)
             );
             const className = Memory.allocUtf8String(name.slice(dotIndex + 1));
 
-            return new Il2Cpp.Class(
+            return new Il2Cpp.Class<T>(
                 Il2Cpp.exports.classFromName(this, classNamespace, className)
             ).asNullable();
         }

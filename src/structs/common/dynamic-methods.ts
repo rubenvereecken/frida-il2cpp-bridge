@@ -1,7 +1,7 @@
 namespace Il2Cpp {
     export type DynamicMethods = {
         [K in Exclude<string, ['constructor' | '#invokeMethod']>]: (
-            ...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Type)[]
+            ...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Value)[]
         ) => unknown;
     };
 
@@ -27,16 +27,13 @@ namespace Il2Cpp {
 
         #invokeMethod<T extends Il2Cpp.Method.ReturnType>(
             name: string,
-            ...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Type)[]
+            ...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Value)[]
         ): T {
-            const paramTypes = parameters.map(p =>
-                Il2Cpp.Parameter.isTypeValue(p) ? p.type : Il2Cpp.Type.fromValue(p)
-            );
             const paramValues = parameters.map(p =>
                 Il2Cpp.Parameter.isTypeValue(p) ? p.value : p
             );
 
-            return this.target.methodWithSignature<T>(name, ...paramTypes).invoke(...paramValues);
+            return this.target.methodForValues<T>(name, ...paramValues).invoke(...paramValues);
         }
 
         static from(

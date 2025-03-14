@@ -1,20 +1,18 @@
 namespace Il2Cpp {
     type ImplementationCallback<T extends Il2Cpp.Method.ReturnType> = (
         this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
-        ...parameters: Il2Cpp.Parameter.Type[]
+        ...parameters: Il2Cpp.Parameter.Value[]
     ) => T;
     type OnEnterCallback = (
         this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
-        ...parameters: Il2Cpp.Parameter.Type[]
+        ...parameters: Il2Cpp.Parameter.Value[]
     ) => void;
     type OnLeaveCallback<T extends Il2Cpp.Method.ReturnType> = (
         this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
         retval: T
     ) => T | void;
 
-    export class Method<
-        T extends Il2Cpp.Method.ReturnType = Il2Cpp.Method.ReturnType,
-    > extends NativeStruct {
+    export class Method<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
         constructor(native: NativePointerValue) {
             super(native);
 
@@ -71,6 +69,8 @@ namespace Il2Cpp {
             if (this.isInflated) {
                 types.push('pointer');
             }
+
+            inform(types);
 
             return types;
         }
@@ -202,11 +202,11 @@ namespace Il2Cpp {
                 .initialize()
                 .field<Il2Cpp.Object>('FilterTypeName').value;
             const FilterTypeNameMethodPointer =
-                FilterTypeName.field<NativePointer>('method_ptr').value;
-            const FilterTypeNameMethod = FilterTypeName.field<NativePointer>('method').value;
+                FilterTypeName.field<Il2Cpp.IntPtrT>('method_ptr').value;
+            const FilterTypeNameMethod = FilterTypeName.field<Il2Cpp.IntPtrT>('method').value;
 
             // prettier-ignore
-            const offset = FilterTypeNameMethod.offsetOf(_ => _.readPointer().equals(FilterTypeNameMethodPointer))
+            const offset = FilterTypeNameMethod.read().offsetOf(_ => _.readPointer().equals(FilterTypeNameMethodPointer))
                 ?? raise("couldn't find the virtual address offset in the native method struct");
 
             // prettier-ignore
@@ -225,44 +225,44 @@ namespace Il2Cpp {
             return this.virtualAddress;
         }
 
-        /** Replaces the body of this method. */
-        set implementation(block: ImplementationCallback<T>) {
-            try {
-                Interceptor.replace(this.virtualAddress, this.wrap(block));
-            } catch (e: any) {
-                switch (e.message) {
-                    case 'access violation accessing 0x0':
-                        raise(
-                            `couldn't set implementation for method ${this.name} as it has a NULL virtual address`
-                        );
-                    case /unable to intercept function at \w+; please file a bug/.exec(e.message)
-                        ?.input:
-                        warn(
-                            `couldn't set implementation for method ${this.name} as it may be a thunk`
-                        );
-                        break;
-                    case 'already replaced this function':
-                        warn(
-                            `couldn't set implementation for method ${this.name} as it has already been replaced by a thunk`
-                        );
-                        break;
-                    default:
-                        throw e;
-                }
-            }
-        }
+        // /** Replaces the body of this method. */
+        // set implementation(block: ImplementationCallback<T>) {
+        //     try {
+        //         Interceptor.replace(this.virtualAddress, this.wrap(block));
+        //     } catch (e: any) {
+        //         switch (e.message) {
+        //             case 'access violation accessing 0x0':
+        //                 raise(
+        //                     `couldn't set implementation for method ${this.name} as it has a NULL virtual address`
+        //                 );
+        //             case /unable to intercept function at \w+; please file a bug/.exec(e.message)
+        //                 ?.input:
+        //                 warn(
+        //                     `couldn't set implementation for method ${this.name} as it may be a thunk`
+        //                 );
+        //                 break;
+        //             case 'already replaced this function':
+        //                 warn(
+        //                     `couldn't set implementation for method ${this.name} as it has already been replaced by a thunk`
+        //                 );
+        //                 break;
+        //             default:
+        //                 throw e;
+        //         }
+        //     }
+        // }
 
-        set onEnter(block: OnEnterCallback) {
-            Interceptor.attach(this.virtualAddress, {
-                onEnter: this.wrapOnEnter(block),
-            });
-        }
+        // set onEnter(block: OnEnterCallback) {
+        //     Interceptor.attach(this.virtualAddress, {
+        //         onEnter: this.wrapOnEnter(block),
+        //     });
+        // }
 
-        set onLeave(block: OnLeaveCallback<T>) {
-            Interceptor.attach(this.virtualAddress, {
-                onLeave: this.wrapOnLeave(block),
-            });
-        }
+        // set onLeave(block: OnLeaveCallback<T>) {
+        //     Interceptor.attach(this.virtualAddress, {
+        //         onLeave: this.wrapOnLeave(block),
+        //     });
+        // }
 
         /** Creates a generic instance of the current generic method. */
         inflate<R extends Il2Cpp.Method.ReturnType = T>(
@@ -284,11 +284,13 @@ namespace Il2Cpp {
             const inflatedMethodObject = this.object
                 .method<Il2Cpp.Object>('MakeGenericMethod', 1)
                 .invoke(typeArray);
-            return new Il2Cpp.Method(inflatedMethodObject.field<NativePointer>('mhandle').value);
+            return new Il2Cpp.Method(
+                inflatedMethodObject.field<Il2Cpp.IntPtrT>('mhandle').value.read()
+            );
         }
 
         /** Invokes this method. */
-        invoke(...parameters: Il2Cpp.Parameter.Type[]): T {
+        invoke(...parameters: Il2Cpp.Parameter.Value[]): T {
             if (!this.isStatic) {
                 raise(
                     `cannot invoke non-static method ${this.name} as it must be invoked throught a Il2Cpp.Object, not a Il2Cpp.Class`
@@ -297,8 +299,10 @@ namespace Il2Cpp {
             return this.invokeRaw(NULL, ...parameters);
         }
 
-        invokeRaw(instance: NativePointerValue, ...parameters: Il2Cpp.Parameter.Type[]): T {
-            const allocatedParameters = parameters.map(toFridaValue);
+        invokeRaw(instance: NativePointerValue, ...parameters: Il2Cpp.Parameter.Value[]): T {
+            const allocatedParameters = parameters.map((p, i) =>
+                toFridaValue(p, this.parameters[i].type)
+            );
 
             if (!this.isStatic || Il2Cpp.unityVersionIsBelow201830) {
                 allocatedParameters.unshift(instance);
@@ -417,81 +421,81 @@ namespace Il2Cpp {
             return bound;
         }
 
-        /** @internal */
-        wrap(block: ImplementationCallback<T>): NativeCallback<any, any> {
-            const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
-            return new NativeCallback(
-                (...args: NativeCallbackArgumentValue[]): NativeCallbackReturnValue => {
-                    const thisObject = this.isStatic
-                        ? this.class
-                        : this.class.isValueType
-                          ? new Il2Cpp.ValueType(
-                                (args[0] as NativePointer).add(
-                                    Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
-                                ),
-                                this.class.type
-                            )
-                          : new Il2Cpp.Object(args[0] as NativePointer);
+        // /** @internal */
+        // wrap(block: ImplementationCallback<T>): NativeCallback<any, any> {
+        //     const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
+        //     return new NativeCallback(
+        //         (...args: NativeCallbackArgumentValue[]): NativeCallbackReturnValue => {
+        //             const thisObject = this.isStatic
+        //                 ? this.class
+        //                 : this.class.isValueType
+        //                   ? new Il2Cpp.ValueType(
+        //                         (args[0] as NativePointer).add(
+        //                             Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
+        //                         ),
+        //                         this.class.type
+        //                     )
+        //                   : new Il2Cpp.Object(args[0] as NativePointer);
 
-                    const parameters = this.parameters.map((_, i) =>
-                        fromFridaValue(args[i + startIndex], _.type)
-                    );
-                    const result = block.call(thisObject, ...parameters);
-                    return toFridaValue(result);
-                },
-                this.returnType.fridaAlias,
-                this.fridaSignature
-            );
-        }
+        //             const parameters = this.parameters.map((_, i) =>
+        //                 fromFridaValue(args[i + startIndex], _.type)
+        //             );
+        //             const result = block.call(thisObject, ...parameters);
+        //             return toFridaValue(result);
+        //         },
+        //         this.returnType.fridaAlias,
+        //         this.fridaSignature
+        //     );
+        // }
 
-        /** @internal */
-        wrapOnEnter(
-            block: OnEnterCallback
-        ): (this: InvocationContext, args: InvocationArguments) => void {
-            const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
-            return (args: InvocationArguments) => {
-                const thisObject = this.isStatic
-                    ? this.class
-                    : this.class.isValueType
-                      ? new Il2Cpp.ValueType(
-                            (args[0] as NativePointer).add(
-                                Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
-                            ),
-                            this.class.type
-                        )
-                      : new Il2Cpp.Object(args[0] as NativePointer);
-                // As opposed to `Interceptor.replace`, `Interceptor.attach` doesn't
-                // interpret pointers, so use `read` instead of `fromFridaValue`
-                const parameters = this.parameters.map((_, i) =>
-                    read(args[i + startIndex], _.type, { derefPointer: false })
-                );
-                block.call(thisObject, ...parameters);
-            };
-        }
+        // /** @internal */
+        // wrapOnEnter(
+        //     block: OnEnterCallback
+        // ): (this: InvocationContext, args: InvocationArguments) => void {
+        //     const startIndex = +!this.isStatic | +Il2Cpp.unityVersionIsBelow201830;
+        //     return (args: InvocationArguments) => {
+        //         const thisObject = this.isStatic
+        //             ? this.class
+        //             : this.class.isValueType
+        //               ? new Il2Cpp.ValueType(
+        //                     (args[0] as NativePointer).add(
+        //                         Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
+        //                     ),
+        //                     this.class.type
+        //                 )
+        //               : new Il2Cpp.Object(args[0] as NativePointer);
+        //         // As opposed to `Interceptor.replace`, `Interceptor.attach` doesn't
+        //         // interpret pointers, so use `read` instead of `fromFridaValue`
+        //         const parameters = this.parameters.map((_, i) =>
+        //             readWrapped(args[i + startIndex], _.type, { derefPointer: false })
+        //         );
+        //         block.call(thisObject, ...parameters);
+        //     };
+        // }
 
-        /** @internal */
-        wrapOnLeave(
-            block: OnLeaveCallback<T>
-        ): (this: InvocationContext, retval: InvocationReturnValue) => void {
-            return (retval: InvocationReturnValue) => {
-                // TODO grab `this` pointer during `onEnter`
-                const thisObject = this.class;
+        // /** @internal */
+        // wrapOnLeave(
+        //     block: OnLeaveCallback<T>
+        // ): (this: InvocationContext, retval: InvocationReturnValue) => void {
+        //     return (retval: InvocationReturnValue) => {
+        //         // TODO grab `this` pointer during `onEnter`
+        //         const thisObject = this.class;
 
-                // `retval` is always a pointer, even if a primitive type
-                const returnValue =
-                    this.returnType.typeEnum != Il2Cpp.Type.enum.void
-                        ? (read(retval, this.returnType) as T)
-                        : (undefined as T);
-                const newReturnValue = block.call(thisObject, returnValue);
+        //         // `retval` is always a pointer, even if a primitive type
+        //         const returnValue =
+        //             this.returnType.typeEnum != Il2Cpp.Type.enum.void
+        //                 ? (readWrapped(retval, this.returnType) as T)
+        //                 : (undefined as T);
+        //         const newReturnValue = block.call(thisObject, returnValue);
 
-                // If callback returned nothing, don't replace, leave the old return value
-                if (newReturnValue === undefined) return;
+        //         // If callback returned nothing, don't replace, leave the old return value
+        //         if (newReturnValue === undefined) return;
 
-                const handle = Memory.alloc(this.returnType.class.valueTypeSize);
-                write(handle, newReturnValue, this.returnType);
-                retval.replace(handle);
-            };
-        }
+        //         const handle = Memory.alloc(this.returnType.class.valueTypeSize);
+        //         write(handle, newReturnValue, this.returnType);
+        //         retval.replace(handle);
+        //     };
+        // }
     }
 
     export class BoundMethod<
@@ -510,7 +514,7 @@ namespace Il2Cpp {
         }
 
         /** Invokes this method. */
-        invoke(...parameters: Il2Cpp.Parameter.Type[]): T {
+        invoke(...parameters: Il2Cpp.Parameter.Value[]): T {
             // In Unity 5.3.5f1 and >= 2021.2.0f1, value types
             // methods may assume their `this` parameter is a
             // pointer to raw data (that is how value types are
@@ -564,14 +568,16 @@ namespace Il2Cpp {
         // if it's not where it is supposed to be, it means struct methods
         // assume they are receiving value types (that is a pointer to raw data)
         // hence, we must "skip" the object header when invoking such methods.
-        const offset = struct.field<NativePointer>('value').value.equals(ptr(0xdeadbeef))
+        const offset = struct.field<Il2Cpp.IntPtrT>('value').value.read().equals(ptr(0xdeadbeef))
             ? 0
             : Il2Cpp.Object.headerSize;
         return (maybeObjectHeaderSize = () => offset)();
     };
 
     export namespace Method {
-        export type ReturnType = void | Il2Cpp.Field.Type;
+        // For backward and future compatibility
+        // Different from Il2Cpp.Parameter.Value: excludes JS primitives, strings, and Il2Cpp.Rereference
+        export type ReturnType = Il2Cpp.Wrapped;
 
         export const enum Attributes {
             MemberAccessMask = 0x0007,

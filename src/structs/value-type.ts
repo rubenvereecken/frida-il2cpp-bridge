@@ -1,23 +1,15 @@
 namespace Il2Cpp {
-    export class ValueType extends Il2Cpp.ObjectLike {
+    export class ValueType<T extends string = string> extends Il2Cpp.ObjectLike<T> {
+        protected constructorName = 'Il2Cpp.ValueType';
+
         constructor(
             handle: NativePointerValue,
-            readonly type: Il2Cpp.Type
+            readonly type: Il2Cpp.Type<T>
         ) {
             super(handle);
-
-            // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, '__toString', {
-                get: () => this.toString(),
-                enumerable: true,
-            });
-            globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => 'Il2Cpp.ValueType',
-                enumerable: true,
-            });
         }
 
-        get class(): Il2Cpp.Class {
+        get class(): Il2Cpp.Class<T> {
             return this.type.class;
         }
 

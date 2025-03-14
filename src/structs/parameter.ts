@@ -22,14 +22,18 @@ namespace Il2Cpp {
     }
 
     export namespace Parameter {
-        export type Type = Il2Cpp.Field.Type | Il2Cpp.Reference;
+        export type Value =
+            | Il2Cpp.PrimitiveLike
+            | Il2Cpp.StringLike
+            | Il2Cpp.Wrapped
+            | Il2Cpp.Reference;
 
         export type TypeValue = {
             type: Il2Cpp.Type;
-            value: Type;
+            value: Il2Cpp.Parameter.Value;
         };
 
-        export function isTypeValue(v: TypeValue | Type): v is TypeValue {
+        export function isTypeValue(v: TypeValue | Value): v is TypeValue {
             return (v as TypeValue).type !== undefined;
         }
     }

@@ -1,16 +1,6 @@
 namespace Il2Cpp {
-    export class Object extends Il2Cpp.ObjectLike {
-        _il2cpp = 'Il2Cpp.Object';
-
-        constructor(native: NativePointerValue) {
-            super(native);
-
-            // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, '__toString', {
-                get: () => this.toString(),
-                enumerable: true,
-            });
-        }
+    export class Object<T extends string = string> extends Il2Cpp.ObjectLike<T> {
+        protected constructorName = 'Il2Cpp.Object';
 
         valueToString(): string {
             if (this.isNull()) return 'null';
@@ -29,13 +19,13 @@ namespace Il2Cpp {
 
         /** Gets the class of this object. */
         @lazy
-        get class(): Il2Cpp.Class {
-            return new Il2Cpp.Class(Il2Cpp.exports.objectGetClass(this));
+        get class(): Il2Cpp.Class<T> {
+            return new Il2Cpp.Class<T>(Il2Cpp.exports.objectGetClass(this));
         }
 
         /** Gets the type of this object. */
         @lazy
-        get type(): Il2Cpp.Type {
+        get type(): Il2Cpp.Type<T> {
             return this.class.type;
         }
 

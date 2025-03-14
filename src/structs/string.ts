@@ -1,6 +1,6 @@
 namespace Il2Cpp {
     export class String extends Il2Cpp.Object {
-        _il2cpp = 'Il2Cpp.String';
+        protected constructorName = 'Il2Cpp.String';
 
         valueToString(): string {
             return this.isNull() ? 'null' : `${this.content}`;
@@ -19,6 +19,20 @@ namespace Il2Cpp {
         set content(value: string | null) {
             Il2Cpp.exports.stringGetChars(this).writeUtf16String(value ?? '');
             this.handle.add(Il2Cpp.String.lengthOffset).writeS32(value?.length ?? 0);
+        }
+
+        /**
+         * For consistency with Primitive.read
+         */
+        read() {
+            return this.content;
+        }
+
+        /**
+         * For consistency with Primitive.write
+         */
+        write(value: string | null) {
+            this.content = value;
         }
 
         @lazy
@@ -45,5 +59,15 @@ namespace Il2Cpp {
     /** Creates a new string with the specified content. */
     export function string(content: string | null): Il2Cpp.String {
         return new Il2Cpp.String(Il2Cpp.exports.stringNew(Memory.allocUtf8String(content ?? '')));
+    }
+
+    export type StringLike = string | Il2Cpp.String;
+
+    export function isStringJsType(value: unknown): value is string {
+        return typeof value === 'string';
+    }
+
+    export function isStringLike(value: Il2Cpp.Parameter.Value): value is StringLike {
+        return typeof value === 'string' || value instanceof Il2Cpp.String;
     }
 }

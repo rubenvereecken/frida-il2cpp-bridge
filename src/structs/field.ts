@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class Field<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
+    export class Field<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
         constructor(native: NativePointerValue) {
             super(native);
 
@@ -107,11 +107,11 @@ namespace Il2Cpp {
             const handle = Memory.alloc(Process.pointerSize);
             Il2Cpp.exports.fieldGetStaticValue(this.handle, handle);
 
-            return read(handle, this.type) as T;
+            return readWrapped(handle, this.type) as T;
         }
 
         /** Sets the value of this field. Thread static or literal values cannot be altered yet. */
-        set value(value: T) {
+        set value(value: Il2Cpp.Parameter.Value) {
             if (!this.isStatic) {
                 raise(
                     `cannot access instance field ${this.class.type.name}::${this.name} from a class, use an object instead`
@@ -170,9 +170,7 @@ namespace Il2Cpp {
         }
     }
 
-    export class BoundField<
-        T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type,
-    > extends Il2Cpp.Field<T> {
+    export class BoundField<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends Il2Cpp.Field<T> {
         /** @internal */
         constructor(
             handle: NativePointerValue,
@@ -194,28 +192,16 @@ namespace Il2Cpp {
 
         /** Gets the value of this field. */
         get value(): T {
-            return read(this.valueHandle, this.type) as T;
+            return readWrapped(this.valueHandle, this.type) as T;
         }
 
         /** Sets the value of this field. Thread static or literal values cannot be altered yet. */
-        set value(value: T) {
+        set value(value: Il2Cpp.Parameter.Value) {
             write(this.valueHandle, value, this.type);
         }
     }
 
     export namespace Field {
-        export type Type =
-            | boolean
-            | number
-            | Int64
-            | UInt64
-            | NativePointer
-            | Il2Cpp.Pointer
-            | Il2Cpp.ValueType
-            | Il2Cpp.Object
-            | Il2Cpp.String
-            | Il2Cpp.Array;
-
         export const enum Attributes {
             FieldAccessMask = 0x0007,
             PrivateScope = 0x0000,

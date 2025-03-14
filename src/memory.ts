@@ -1,4 +1,23 @@
 namespace Il2Cpp {
+    export type Wrapped =
+        | Il2Cpp.Primitive
+        | Il2Cpp.String
+        | Il2Cpp.Pointer
+        | Il2Cpp.ValueType
+        | Il2Cpp.Object
+        | Il2Cpp.Array;
+
+    export function isWrappedType(type: Il2Cpp.Parameter.Value): type is Wrapped {
+        return (
+            type instanceof Il2Cpp.Primitive ||
+            type instanceof Il2Cpp.String ||
+            type instanceof Il2Cpp.Pointer ||
+            type instanceof Il2Cpp.ValueType ||
+            type instanceof Il2Cpp.Object ||
+            type instanceof Il2Cpp.Array
+        );
+    }
+
     /**
      * Allocates the given amount of bytes - it's equivalent to C's `malloc`. \
      * The allocated memory should be freed manually.
@@ -23,14 +42,55 @@ namespace Il2Cpp {
         return Il2Cpp.exports.free(pointer);
     }
 
-    /**
-     * @param options.derefPointer If a pointer, dereference before reading? Usually `true`, but `false` for parameters for example.
-     */
-    export function read(
+    export function readJs(
         pointer: NativePointer,
-        type: Il2Cpp.Type,
+        type: Il2Cpp.Type<'System.Void'>,
+        options?: { derefPointer?: boolean }
+    ): void;
+    export function readJs(
+        pointer: NativePointer,
+        type: Il2Cpp.Type<'System.Boolean'>,
+        options?: { derefPointer?: boolean }
+    ): boolean;
+    export function readJs(
+        pointer: NativePointer,
+        type:
+            | Il2Cpp.Type<'System.SByte'>
+            | Il2Cpp.Type<'System.Byte'>
+            | Il2Cpp.Type<'System.Char'>
+            | Il2Cpp.Type<'System.Int16'>
+            | Il2Cpp.Type<'System.UInt16'>
+            | Il2Cpp.Type<'System.Int32'>
+            | Il2Cpp.Type<'System.UInt32'>
+            | Il2Cpp.Type<'System.Single'>
+            | Il2Cpp.Type<'System.Double'>,
+        options?: { derefPointer?: boolean }
+    ): number;
+    export function readJs(
+        pointer: NativePointer,
+        type: Il2Cpp.Type<'System.Int64'>,
+        options?: { derefPointer?: boolean }
+    ): Int64;
+    export function readJs(
+        pointer: NativePointer,
+        type: Il2Cpp.Type<'System.UInt64'>,
+        options?: { derefPointer?: boolean }
+    ): UInt64;
+    export function readJs(
+        pointer: NativePointer,
+        type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>,
+        options?: { derefPointer?: boolean }
+    ): NativePointer;
+    export function readJs(
+        pointer: NativePointer,
+        type: Il2Cpp.TypeOfPrimitive,
+        options?: { derefPointer?: boolean }
+    ): Il2Cpp.Primitive.JSType;
+    export function readJs(
+        pointer: NativePointer,
+        type: Il2Cpp.TypeOfPrimitive,
         options: { derefPointer?: boolean } = {}
-    ): Il2Cpp.Field.Type {
+    ): Il2Cpp.Primitive.JSType {
         options = { derefPointer: true, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
 
@@ -61,7 +121,44 @@ namespace Il2Cpp {
                 return pointer.readDouble();
             case Il2Cpp.Type.enum.nativePointer:
             case Il2Cpp.Type.enum.unsignedNativePointer:
+                // TODO not sure if these need dereferencing – in fact, I don't think they do
                 return dereferenced;
+        }
+
+        raise(
+            `couldn't read the value from ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+        );
+    }
+
+    /**
+     * @param options.derefPointer If a pointer, dereference before reading? Usually `true`, but `false` for parameters for example.
+     */
+    export function readWrapped(
+        pointer: NativePointer,
+        type: Il2Cpp.Type,
+        options: { derefPointer?: boolean } = {}
+    ): Il2Cpp.Wrapped {
+        options = { derefPointer: true, ...options };
+        const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
+
+        switch (type.typeEnum) {
+            case Il2Cpp.Type.enum.boolean:
+            case Il2Cpp.Type.enum.byte:
+            case Il2Cpp.Type.enum.unsignedByte:
+            case Il2Cpp.Type.enum.short:
+            case Il2Cpp.Type.enum.unsignedShort:
+            case Il2Cpp.Type.enum.int:
+            case Il2Cpp.Type.enum.unsignedInt:
+            case Il2Cpp.Type.enum.char:
+            case Il2Cpp.Type.enum.long:
+            case Il2Cpp.Type.enum.unsignedLong:
+            case Il2Cpp.Type.enum.float:
+            case Il2Cpp.Type.enum.double:
+            case Il2Cpp.Type.enum.nativePointer:
+            case Il2Cpp.Type.enum.unsignedNativePointer:
+                return new Il2Cpp.Primitive(dereferenced, type);
+            case Il2Cpp.Type.enum.string:
+                return new Il2Cpp.String(dereferenced);
             case Il2Cpp.Type.enum.pointer:
                 return new Il2Cpp.Pointer(dereferenced, type.class.baseType!);
             case Il2Cpp.Type.enum.valueType:
@@ -74,8 +171,6 @@ namespace Il2Cpp {
                 return type.class.isValueType
                     ? new Il2Cpp.ValueType(pointer, type)
                     : new Il2Cpp.Object(dereferenced);
-            case Il2Cpp.Type.enum.string:
-                return new Il2Cpp.String(dereferenced);
             case Il2Cpp.Type.enum.array:
             case Il2Cpp.Type.enum.multidimensionalArray:
                 return new Il2Cpp.Array(dereferenced);
@@ -86,36 +181,49 @@ namespace Il2Cpp {
         );
     }
 
-    export function write(pointer: NativePointer, value: any, type: Il2Cpp.Type): NativePointer {
+    function writePrimitive(
+        pointer: NativePointer,
+        value: Il2Cpp.PrimitiveLike,
+        type: Il2Cpp.Type
+    ): NativePointer {
+        if (Il2Cpp.isPrimitiveJSType(value)) {
+            if (type.isBoolean()) return pointer.writeS8(+coercePrimitive(value, type));
+            if (type.isSByte()) return pointer.writeS8(coercePrimitive(value, type));
+            if (type.isByte()) return pointer.writeU8(coercePrimitive(value, type));
+            if (type.isChar()) return pointer.writeU16(coercePrimitive(value, type));
+            if (type.isInt16()) return pointer.writeS16(coercePrimitive(value, type));
+            if (type.isUInt16()) return pointer.writeU16(coercePrimitive(value, type));
+            if (type.isInt32()) return pointer.writeS32(coercePrimitive(value, type));
+            if (type.isUInt32()) return pointer.writeU32(coercePrimitive(value, type));
+            if (type.isInt64()) return pointer.writeS64(coercePrimitive(value, type));
+            if (type.isUInt64()) return pointer.writeU64(coercePrimitive(value, type));
+            if (type.isSingle()) return pointer.writeFloat(coercePrimitive(value, type));
+            if (type.isDouble()) return pointer.writeDouble(coercePrimitive(value, type));
+            if (type.isIntPtr()) return pointer.writePointer(coercePrimitive(value, type));
+            if (type.isUIntPtr()) return pointer.writePointer(coercePrimitive(value, type));
+            raise(
+                "couldn't write primitive value ${value} to ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue"
+            );
+        } else {
+            // It's already a ValueType, so just copy over the correct number of bytes
+            Memory.copy(pointer, value.handle, type.class.valueTypeSize ?? type.class.instanceSize);
+            return pointer;
+        }
+    }
+
+    export function write(
+        pointer: NativePointer,
+        value: Il2Cpp.Parameter.Value,
+        type: Il2Cpp.Type
+    ): NativePointer {
+        if (Il2Cpp.isPrimitiveLike(value)) return writePrimitive(pointer, value, type);
+        if (Il2Cpp.isStringLike(value)) {
+            if (Il2Cpp.isStringJsType(value)) value = Il2Cpp.string(value);
+            return pointer.writePointer(value);
+        }
+
         switch (type.typeEnum) {
-            case Il2Cpp.Type.enum.boolean:
-                return pointer.writeS8(+value);
-            case Il2Cpp.Type.enum.byte:
-                return pointer.writeS8(value);
-            case Il2Cpp.Type.enum.unsignedByte:
-                return pointer.writeU8(value);
-            case Il2Cpp.Type.enum.short:
-                return pointer.writeS16(value);
-            case Il2Cpp.Type.enum.unsignedShort:
-                return pointer.writeU16(value);
-            case Il2Cpp.Type.enum.int:
-                return pointer.writeS32(value);
-            case Il2Cpp.Type.enum.unsignedInt:
-                return pointer.writeU32(value);
-            case Il2Cpp.Type.enum.char:
-                return pointer.writeU16(value);
-            case Il2Cpp.Type.enum.long:
-                return pointer.writeS64(value);
-            case Il2Cpp.Type.enum.unsignedLong:
-                return pointer.writeU64(value);
-            case Il2Cpp.Type.enum.float:
-                return pointer.writeFloat(value);
-            case Il2Cpp.Type.enum.double:
-                return pointer.writeDouble(value);
-            case Il2Cpp.Type.enum.nativePointer:
-            case Il2Cpp.Type.enum.unsignedNativePointer:
             case Il2Cpp.Type.enum.pointer:
-            case Il2Cpp.Type.enum.string:
             case Il2Cpp.Type.enum.array:
             case Il2Cpp.Type.enum.multidimensionalArray:
                 return pointer.writePointer(value);
@@ -138,7 +246,7 @@ namespace Il2Cpp {
     export function fromFridaValue(
         value: NativeCallbackArgumentValue,
         type: Il2Cpp.Type
-    ): Il2Cpp.Parameter.Type;
+    ): Il2Cpp.Parameter.Value;
 
     /** @internal */
     export function fromFridaValue(
@@ -150,73 +258,174 @@ namespace Il2Cpp {
     export function fromFridaValue(
         value: NativeCallbackArgumentValue | NativeFunctionReturnValue,
         type: Il2Cpp.Type
-    ): Il2Cpp.Parameter.Type | Il2Cpp.Method.ReturnType {
-        if (globalThis.Array.isArray(value)) {
-            const handle = Memory.alloc(type.class.valueTypeSize);
-            const fields = type.class.fields.filter(_ => !_.isStatic);
+    ): Il2Cpp.Parameter.Value | Il2Cpp.Method.ReturnType {
+        // Note: it's now impossible for arrays to be returned by Frida
+        // TODO might be interesting to have this reading logic elsewhere?
+        // if (globalThis.Array.isArray(value)) {
+        //     const handle = Memory.alloc(type.class.valueTypeSize);
+        //     const fields = type.class.fields.filter(_ => !_.isStatic);
 
-            for (let i = 0; i < fields.length; i++) {
-                const convertedValue = fromFridaValue(value[i], fields[i].type);
-                write(
-                    handle.add(fields[i].offset).sub(Il2Cpp.Object.headerSize),
-                    convertedValue,
-                    fields[i].type
-                );
-            }
+        //     for (let i = 0; i < fields.length; i++) {
+        //         const convertedValue = fromFridaValue(value[i], fields[i].type);
+        //         write(
+        //             handle.add(fields[i].offset).sub(Il2Cpp.Object.headerSize),
+        //             convertedValue,
+        //             fields[i].type
+        //         );
+        //     }
 
-            return new Il2Cpp.ValueType(handle, type);
-        } else if (value instanceof NativePointer) {
-            if (type.isByReference) {
-                return new Il2Cpp.Reference(value, type);
-            }
+        //     return new Il2Cpp.ValueType(handle, type);
+        // }
 
-            switch (type.typeEnum) {
-                case Il2Cpp.Type.enum.pointer:
-                    return new Il2Cpp.Pointer(value, type.class.baseType!);
-                case Il2Cpp.Type.enum.string:
-                    return new Il2Cpp.String(value);
-                case Il2Cpp.Type.enum.class:
-                case Il2Cpp.Type.enum.genericInstance:
-                case Il2Cpp.Type.enum.object:
-                    return new Il2Cpp.Object(value);
-                case Il2Cpp.Type.enum.array:
-                case Il2Cpp.Type.enum.multidimensionalArray:
-                    return new Il2Cpp.Array(value);
-                default:
-                    return value;
-            }
-        } else if (type.typeEnum == Il2Cpp.Type.enum.boolean) {
-            return !!(value as number);
-        } else if (type.typeEnum == Il2Cpp.Type.enum.valueType && type.class.isEnum) {
-            return fromFridaValue([value], type);
-        } else {
-            return value;
+        if (!(value instanceof NativePointer)) {
+            raise('I thought it was pointers all the way down??');
         }
+
+        if (type.isByReference) {
+            return new Il2Cpp.Reference(value, type);
+        }
+
+        if (type.isPrimitive()) return new Il2Cpp.Primitive(value, type);
+
+        switch (type.typeEnum) {
+            case Il2Cpp.Type.enum.pointer:
+                return new Il2Cpp.Pointer(value, type.class.baseType!);
+            case Il2Cpp.Type.enum.string:
+                return new Il2Cpp.String(value);
+            case Il2Cpp.Type.enum.valueType:
+                // TODO test this
+                return new Il2Cpp.ValueType(value, type);
+            case Il2Cpp.Type.enum.class:
+            case Il2Cpp.Type.enum.genericInstance:
+            case Il2Cpp.Type.enum.object:
+                return new Il2Cpp.Object(value);
+            case Il2Cpp.Type.enum.array:
+            case Il2Cpp.Type.enum.multidimensionalArray:
+                return new Il2Cpp.Array(value);
+            default:
+                raise(
+                    `couldn't convert value ${value} to an Il2Cpp type using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+                );
+        }
+        // TODO test enums
+        // else if (type.typeEnum == Il2Cpp.Type.enum.boolean) {
+        //     return !!(value as number);
+        // } else if (type.typeEnum == Il2Cpp.Type.enum.valueType && type.class.isEnum) {
+        //     return fromFridaValue([value], type);
+        // } else {
+        //     return value;
+        // }
+    }
+
+    export function guessType(value: Il2Cpp.Parameter.Value): Il2Cpp.Type {
+        const t = (kls: string) => Il2Cpp.corlib.class(kls).type;
+
+        if (typeof value === 'boolean') return Il2Cpp.System.Boolean.type;
+        if (typeof value === 'number')
+            if (Number.isInteger(value)) return Il2Cpp.System.Int32.type;
+            else return Il2Cpp.System.Double.type;
+        if (value instanceof Int64) return t('System.Int64');
+        if (value instanceof UInt64) return t('System.UInt64');
+        if (value instanceof NativePointer) return t('System.IntPtr');
+        if (typeof value === 'string') return Il2Cpp.System.String.type;
+        if (value instanceof Il2Cpp.String) return Il2Cpp.System.String.type;
+        if (value instanceof Il2Cpp.Object) return value.class.type;
+        if (value instanceof Il2Cpp.Array) return value.object.class.type;
+
+        return value.type;
+    }
+
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
+        type: Il2Cpp.Type<'System.Boolean'>
+    ): boolean;
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
+        type:
+            | Il2Cpp.Type<'System.SByte'>
+            | Il2Cpp.Type<'System.Byte'>
+            | Il2Cpp.Type<'System.Char'>
+            | Il2Cpp.Type<'System.Int16'>
+            | Il2Cpp.Type<'System.UInt16'>
+            | Il2Cpp.Type<'System.Int32'>
+            | Il2Cpp.Type<'System.UInt32'>
+            | Il2Cpp.Type<'System.Single'>
+            | Il2Cpp.Type<'System.Double'>
+    ): number;
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
+        type: Il2Cpp.Type<'System.Int64'> | Il2Cpp.Type<'System.UInt64'>
+    ): number | Int64 | UInt64;
+    export function coercePrimitive(
+        value: NativePointer,
+        type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>
+    ): NativePointer;
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
+        type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>
+    ): never;
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
+        type: Il2Cpp.Type
+    ): Il2Cpp.Primitive.JSType {
+        // Be sure to convert booleans manually (TODO necessary??)
+        if (type.name == 'System.Boolean') return !!value;
+
+        // Longs and pointers
+        if (type.class.valueTypeSize == 8) {
+            if (value instanceof NativePointer || value instanceof Int64 || value instanceof UInt64)
+                return value;
+            return +value;
+        }
+
+        // Assume it fits into 4 bytes or less
+        if (type.class.valueTypeSize > 4) {
+            raise(`cannot coerce ${value} to ${type.name} (${type.class.valueTypeSize} bytes)`);
+        }
+
+        if (value instanceof NativePointer) raise(`cannot coerce ${value} to ${type.name}`);
+        if (value instanceof Int64 || value instanceof UInt64) return value.toNumber();
+        return +value;
     }
 
     /** @internal */
-    export function toFridaValue(value: Il2Cpp.Method.ReturnType): NativeFunctionReturnValue;
-
-    /** @internal */
-    export function toFridaValue(value: Il2Cpp.Parameter.Type): NativeFunctionArgumentValue;
-
-    /** @internal */
     export function toFridaValue(
-        value: Il2Cpp.Parameter.Type | Il2Cpp.Method.ReturnType
+        value: Il2Cpp.Parameter.Value,
+        type?: Il2Cpp.Type
     ): NativeFunctionArgumentValue | NativeFunctionReturnValue {
-        if (typeof value == 'boolean') {
-            return +value;
-        } else if (value instanceof Il2Cpp.ValueType) {
-            if (value.type.class.isEnum) {
-                return value.field<number | Int64 | UInt64>('value__').value;
-            } else {
-                const _ = value.type.class.fields
-                    .filter(_ => !_.isStatic)
-                    .map(_ => toFridaValue(_.bind(value).value));
-                return _.length == 0 ? [0] : _;
-            }
-        } else {
+        type = Il2Cpp.guessType(value);
+
+        // For now, just wrap all JS primitives in a wee pointer
+        // TODO this is a memory leak! Best let Frida handle this,
+        // but then I have to change the method signature on the fly – now it's pointers all the way
+        if (Il2Cpp.isPrimitiveJSType(value)) {
+            const pointer = Memory.alloc(type.class.valueTypeSize);
+            Il2Cpp.write(pointer, value, type);
+            return pointer;
+        }
+
+        // If regular JS string, wrap it first
+        // TODO this is a memory leak!
+        if (typeof value === 'string') {
+            return Il2Cpp.string(value);
+        }
+
+        if (value instanceof Il2Cpp.ValueType && value.type.class.isEnum) {
+            // return value.field<number | Int64 | UInt64>('value__').value;
+            // TODO does this work? We used to unwrap the enum value first
             return value;
         }
+
+        if (value instanceof Il2Cpp.ValueType) {
+            // const _ = value.type.class.fields
+            //     .filter(_ => !_.isStatic)
+            //     .map(_ => toFridaValue(_.bind(value).value));
+            // return _.length == 0 ? [0] : _;
+            // TODO does this work?
+            return value;
+        }
+
+        // At this point, it's wrapped in an ObjectLike, so just return the pointer
+        return value;
     }
 }

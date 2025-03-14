@@ -24,11 +24,11 @@ namespace Il2Cpp {
             return this.target instanceof Il2Cpp.ObjectLike ? this.target.class : this.target;
         }
 
-        #getValue<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type>(name: string): T {
+        #getValue<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped>(name: string): T {
             return this.target.field<T>(name).value;
         }
 
-        #setValue<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type>(name: string, value: T): void {
+        #setValue<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped>(name: string, value: T): void {
             this.target.field<T>(name).value = value;
         }
 

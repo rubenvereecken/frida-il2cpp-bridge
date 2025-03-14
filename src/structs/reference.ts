@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class Reference<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
+    export class Reference<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
         constructor(
             handle: NativePointerValue,
             readonly type: Il2Cpp.Type
@@ -19,7 +19,7 @@ namespace Il2Cpp {
 
         /** Gets the element referenced by the current reference. */
         get value(): T {
-            return read(this.handle, this.type) as T;
+            return readWrapped(this.handle, this.type) as T;
         }
 
         /** Sets the element referenced by the current reference. */
@@ -37,17 +37,18 @@ namespace Il2Cpp {
         }
     }
 
-    export function reference<T extends number | NativePointer>(
-        value: T,
-        type: Il2Cpp.Type
-    ): Il2Cpp.Reference<T>;
+    // TODO reintroduce
+    // export function reference<T extends number | NativePointer>(
+    //     value: T,
+    //     type: Il2Cpp.Type
+    // ): Il2Cpp.Reference<T>;
 
-    export function reference<T extends Exclude<Il2Cpp.Field.Type, number | NativePointer>>(
+    export function reference<T extends Exclude<Il2Cpp.Wrapped, number | NativePointer>>(
         value: T
     ): Il2Cpp.Reference<T>;
 
     /** Creates a reference to the specified value. */
-    export function reference<T extends Il2Cpp.Field.Type>(
+    export function reference<T extends Il2Cpp.Wrapped>(
         value: T,
         type?: Il2Cpp.Type
     ): Il2Cpp.Reference<T> {

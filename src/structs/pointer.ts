@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class Pointer<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type> extends NativeStruct {
+    export class Pointer<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
         constructor(
             handle: NativePointer,
             readonly type: Il2Cpp.Type
@@ -27,7 +27,10 @@ namespace Il2Cpp {
 
         /** Gets the element at the given index. */
         get(index: number): T {
-            return read(this.handle.add(index * this.type.class.arrayElementSize), this.type) as T;
+            return readWrapped(
+                this.handle.add(index * this.type.class.arrayElementSize),
+                this.type
+            ) as T;
         }
 
         /** Reads the given amount of elements starting at the given offset. */

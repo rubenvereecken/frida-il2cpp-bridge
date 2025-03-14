@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class Array<T extends Il2Cpp.Field.Type = Il2Cpp.Field.Type>
+    export class Array<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped>
         extends NativeStruct
         implements Iterable<T>
     {
@@ -74,6 +74,16 @@ namespace Il2Cpp {
             return new Il2Cpp.Object(this);
         }
 
+        @lazy
+        get class(): Il2Cpp.Class {
+            return this.object.class;
+        }
+
+        @lazy
+        get type(): Il2Cpp.Type {
+            return this.class.type;
+        }
+
         /** Gets the element at the specified index of the current array. */
         get(index: number): T {
             if (index < 0 || index >= this.length) {
@@ -101,19 +111,19 @@ namespace Il2Cpp {
     }
 
     /** Creates a new empty array of the given length. */
-    export function array<T extends Il2Cpp.Field.Type>(
+    export function array<T extends Il2Cpp.Wrapped>(
         klass: Il2Cpp.Class,
         length: number
     ): Il2Cpp.Array<T>;
 
     /** Creates a new array with the given elements. */
-    export function array<T extends Il2Cpp.Field.Type>(
+    export function array<T extends Il2Cpp.Wrapped>(
         klass: Il2Cpp.Class,
         elements: T[]
     ): Il2Cpp.Array<T>;
 
     /** @internal */
-    export function array<T extends Il2Cpp.Field.Type>(
+    export function array<T extends Il2Cpp.Wrapped>(
         klass: Il2Cpp.Class,
         lengthOrElements: number | T[]
     ): Il2Cpp.Array<T> {

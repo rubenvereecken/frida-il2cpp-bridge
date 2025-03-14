@@ -1,6 +1,6 @@
 namespace Il2Cpp {
     @recycle
-    export class Class extends NativeStruct {
+    export class Class<T extends string = string> extends NativeStruct {
         constructor(native: NativePointerValue) {
             super(native);
 
@@ -24,7 +24,7 @@ namespace Il2Cpp {
             const SystemString = Il2Cpp.corlib.class('System.String');
 
             // prettier-ignore
-            const offset = SystemString.handle.offsetOf(_ => _.readInt() == SystemString.instanceSize - 2) 
+            const offset = SystemString.handle.offsetOf(_ => _.readInt() == Il2Cpp.System.String.instanceSize - 2) 
                 ?? raise("couldn't find the actual instance size offset in the native class struct");
 
             // prettier-ignore
@@ -59,13 +59,31 @@ namespace Il2Cpp {
             return new Il2Cpp.Class(Il2Cpp.exports.classGetDeclaringType(this)).asNullable();
         }
 
+        /** Declaring classes hierarchy, from inner to outer most */
+        @lazy
+        get declaringClasses(): Il2Cpp.Class[] {
+            const classes: Il2Cpp.Class[] = [this];
+            while (classes[classes.length - 1].declaringClass) {
+                classes.push(classes[classes.length - 1].declaringClass!);
+            }
+            classes.shift();
+            return classes;
+        }
+
         /** Gets the encompassed type of this array, reference, pointer or enum type. */
         @lazy
         get baseType(): Il2Cpp.Type | null {
             return new Il2Cpp.Type(Il2Cpp.exports.classGetBaseType(this)).asNullable();
         }
 
-        /** Gets the class of the object encompassed or referred to by the current array, pointer or reference class. */
+        /**
+         * Gets the class of the object encompassed or referred to by the current array, pointer or reference class.
+         *
+         * Examples:
+         *   `System.Int32[]` -> `System.Int32`
+         *   `System.Byte&` -> `System.Byte`
+         *   `System.String` -> `System.String`
+         */
         @lazy
         get elementClass(): Il2Cpp.Class | null {
             return new Il2Cpp.Class(Il2Cpp.exports.classGetElementClass(this)).asNullable();
@@ -252,8 +270,8 @@ namespace Il2Cpp {
 
         /** Gets the type of the current class. */
         @lazy
-        get type(): Il2Cpp.Type {
-            return new Il2Cpp.Type(Il2Cpp.exports.classGetType(this));
+        get type(): Il2Cpp.Type<T> {
+            return new Il2Cpp.Type<T>(Il2Cpp.exports.classGetType(this));
         }
 
         /** Allocates a new object of the current class. */
@@ -262,7 +280,7 @@ namespace Il2Cpp {
         }
 
         /** Gets the field identified by the given name. */
-        field<T extends Il2Cpp.Field.Type>(name: string): Il2Cpp.Field<T> {
+        field<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.Field<T> {
             return (
                 this.tryField<T>(name) ??
                 raise(`couldn't find field ${name} in class ${this.type.name}`)
@@ -317,14 +335,26 @@ namespace Il2Cpp {
             );
         }
 
-        methodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+        methodForSignature<T extends Il2Cpp.Method.ReturnType>(
             name: string,
             ...paramTypes: Il2Cpp.Type[]
         ): Il2Cpp.Method<T> {
             return (
-                this.tryMethodWithSignature<T>(name, ...paramTypes) ??
+                this.tryMethodForSignature<T>(name, ...paramTypes) ??
                 raise(
                     `couldn't find method ${name} in class ${this.type.name} for parameter types [${paramTypes.map(_ => _.name).join(', ')}]`
+                )
+            );
+        }
+
+        methodForValues<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramValues: Il2Cpp.Parameter.Value[]
+        ): Il2Cpp.Method<T> {
+            return (
+                this.tryMethodForValues<T>(name, ...paramValues) ??
+                raise(
+                    `couldn't find method ${name} in class ${this.type.name} for parameter values [${paramValues.join(', ')}]`
                 )
             );
         }
@@ -358,7 +388,7 @@ namespace Il2Cpp {
          * Finds the best fit constructor given the parameter types.
          * Doesn't cover constructors with default parameters – all parameters must be provided.
          */
-        new(...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Type)[]): Il2Cpp.Object {
+        new(...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Value)[]): Il2Cpp.Object {
             if (parameters.length == 0) return this.defaultNew();
 
             const object = this.alloc();
@@ -368,7 +398,7 @@ namespace Il2Cpp {
         }
 
         /** Gets the field with the given name. */
-        tryField<T extends Il2Cpp.Field.Type>(name: string): Il2Cpp.Field<T> | null {
+        tryField<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.Field<T> | null {
             return new Il2Cpp.Field<T>(
                 Il2Cpp.exports.classGetFieldFromName(this, Memory.allocUtf8String(name))
             ).asNullable();
@@ -388,15 +418,29 @@ namespace Il2Cpp {
             ).asNullable();
         }
 
-        tryMethodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+        tryMethodForSignature<T extends Il2Cpp.Method.ReturnType>(
             name: string,
             ...paramTypes: Il2Cpp.Type[]
         ): Il2Cpp.Method<T> | undefined {
             return this.methods.find(
                 m =>
                     m.name == name &&
+                    // TODO look into default parameters, lengths might differ?
                     m.parameters.length == paramTypes.length &&
-                    m.parameters.every((p, i) => p.type.class.isAssignableFrom(paramTypes[i].class))
+                    m.parameters.every((p, i) => p.type.isAssignableFromType(paramTypes[i]))
+            ) as Il2Cpp.Method<T> | undefined;
+        }
+
+        tryMethodForValues<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramValues: Il2Cpp.Parameter.Value[]
+        ): Il2Cpp.Method<T> | undefined {
+            return this.methods.find(
+                m =>
+                    m.name == name &&
+                    // TODO look into default parameters, lengths might differ?
+                    m.parameters.length == paramValues.length &&
+                    m.parameters.every((p, i) => p.type.isAssignableFromValue(paramValues[i]))
             ) as Il2Cpp.Method<T> | undefined;
         }
 
@@ -422,6 +466,129 @@ namespace Il2Cpp {
                 'pointer',
             ]);
             return Il2Cpp.exports.classForEach(callback, NULL);
+        }
+
+        /**
+         * TODO assess need fot this function, maybe remove
+         * Il2cpp lookup is a bit inconsistent. Sometimes it uses type name, sometimes class name.
+         * - Generics must be formatted class-style: "System.ReadOnlySpan`1"
+         */
+        formatForLookup() {
+            let name = `${this.namespace}.${this.name}`;
+
+            if (this.generics.length > 0) name += '`' + this.generics.length;
+            // TODO format arrays and pointers if needed
+
+            return name;
+        }
+
+        @lazy
+        get typescriptName() {
+            // From outer to inner, including this one
+            const classes: Il2Cpp.Class[] = [this, ...this.declaringClasses].reverse();
+            // Just get the final bit of each name
+            const names = classes.map(kls => kls.name.split('.').pop()!);
+            const finalName = names.join('$');
+            return finalName;
+        }
+    }
+
+    // Helper classes, helpfully typed
+    // export type PrimitiveClassName =
+    //     | 'System.Void'
+    //     | 'System.Boolean'
+    //     | 'System.SByte'
+    //     | 'System.Byte'
+    //     | 'System.Char'
+    //     | 'System.Int16'
+    //     | 'System.UInt16'
+    //     | 'System.Int32'
+    //     | 'System.UInt32'
+    //     | 'System.Int64'
+    //     | 'System.UInt64'
+    //     | 'System.Single'
+    //     | 'System.Double'
+    //     | 'System.IntPtr'
+    //     | 'System.UIntPtr';
+    export class System {
+        @lazy
+        static get Void() {
+            return Il2Cpp.corlib.class('System.Boolean');
+        }
+
+        @lazy
+        static get Boolean() {
+            return Il2Cpp.corlib.class('System.Boolean');
+        }
+
+        @lazy
+        static get SByte() {
+            return Il2Cpp.corlib.class('System.SByte');
+        }
+
+        @lazy
+        static get Byte() {
+            return Il2Cpp.corlib.class('System.Byte');
+        }
+
+        @lazy
+        static get Char() {
+            return Il2Cpp.corlib.class('System.Char');
+        }
+
+        @lazy
+        static get Int16() {
+            return Il2Cpp.corlib.class('System.Int16');
+        }
+
+        @lazy
+        static get UInt16() {
+            return Il2Cpp.corlib.class('System.UInt16');
+        }
+
+        @lazy
+        static get Int32() {
+            return Il2Cpp.corlib.class('System.Int32');
+        }
+
+        @lazy
+        static get UInt32() {
+            return Il2Cpp.corlib.class('System.UInt32');
+        }
+
+        @lazy
+        static get Int64() {
+            return Il2Cpp.corlib.class('System.Int64');
+        }
+
+        @lazy
+        static get UInt64() {
+            return Il2Cpp.corlib.class('System.UInt64');
+        }
+
+        @lazy
+        static get Single() {
+            return Il2Cpp.corlib.class('System.Single');
+        }
+
+        @lazy
+        static get Double() {
+            return Il2Cpp.corlib.class('System.Double');
+        }
+
+        @lazy
+        static get IntPtr() {
+            return Il2Cpp.corlib.class('System.IntPtr');
+        }
+
+        @lazy
+        static get UIntPtr() {
+            return Il2Cpp.corlib.class('System.UIntPtr');
+        }
+
+        @lazy
+        static get String() {
+            return Il2Cpp.corlib.class('System.String');
         }
     }
 }

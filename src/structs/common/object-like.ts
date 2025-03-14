@@ -1,10 +1,26 @@
 namespace Il2Cpp {
-    export abstract class ObjectLike extends NativeStruct {
-        abstract get class(): Il2Cpp.Class;
-        abstract get type(): Il2Cpp.Type;
+    export abstract class ObjectLike<T extends string = string> extends NativeStruct {
+        constructor(native: NativePointerValue) {
+            super(native);
+
+            // Shows up on Frida REPL. Useful for debugging and reverse engineering
+            globalThis.Object.defineProperty(this, '__toString', {
+                get: () => this.toString(),
+                enumerable: true,
+            });
+
+            globalThis.Object.defineProperty(this, '_il2cpp', {
+                get: () => `${this.constructorName}<${this.type.name}>`,
+                enumerable: true,
+            });
+        }
+
+        protected abstract constructorName: string;
+        abstract get class(): Il2Cpp.Class<T>;
+        abstract get type(): Il2Cpp.Type<T>;
 
         /** Gets the field with the given name. */
-        field<T extends Il2Cpp.Field.Type>(name: string): Il2Cpp.BoundField<T> {
+        field<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.BoundField<T> {
             return this.type.class.field<T>(name).bind(this);
         }
 
@@ -20,11 +36,18 @@ namespace Il2Cpp {
             name: string,
             ...paramTypes: Il2Cpp.Type[]
         ): Il2Cpp.BoundMethod<T> {
-            return this.type.class.methodWithSignature<T>(name, ...paramTypes).bind(this);
+            return this.type.class.methodForSignature<T>(name, ...paramTypes).bind(this);
+        }
+
+        methodForValues<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramValues: Il2Cpp.Parameter.Value[]
+        ): Il2Cpp.BoundMethod<T> {
+            return this.type.class.methodForValues<T>(name, ...paramValues).bind(this);
         }
 
         /** Gets the field with the given name. */
-        tryField<T extends Il2Cpp.Field.Type>(name: string): Il2Cpp.BoundField<T> | undefined {
+        tryField<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.BoundField<T> | undefined {
             return this.type.class.tryField<T>(name)?.bind(this);
         }
 
@@ -36,11 +59,18 @@ namespace Il2Cpp {
             return this.type.class.tryMethod<T>(name, parameterCount)?.bind(this);
         }
 
-        tryMethodWithSignature<T extends Il2Cpp.Method.ReturnType>(
+        tryMethodForSignature<T extends Il2Cpp.Method.ReturnType>(
             name: string,
             ...paramTypes: Il2Cpp.Type[]
         ): Il2Cpp.BoundMethod<T> | undefined {
-            return this.type.class.methodWithSignature<T>(name, ...paramTypes).bind(this);
+            return this.type.class.methodForSignature<T>(name, ...paramTypes).bind(this);
+        }
+
+        tryMethodForValues<T extends Il2Cpp.Method.ReturnType>(
+            name: string,
+            ...paramValues: Il2Cpp.Parameter.Value[]
+        ): Il2Cpp.BoundMethod<T> | undefined {
+            return this.type.class.methodForValues<T>(name, ...paramValues).bind(this);
         }
 
         @lazy
