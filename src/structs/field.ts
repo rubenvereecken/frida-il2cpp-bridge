@@ -104,8 +104,9 @@ namespace Il2Cpp {
                 );
             }
 
-            // TODO only allocate what's needed in case of non-pointer types
-            const handle = Memory.alloc(Process.pointerSize);
+            // In case of value types, allocate how much is needed to fit all fields
+            // Otherwise, valueTypeSize == Process.pointerSize
+            const handle = Memory.alloc(this.type.class.valueTypeSize);
             Il2Cpp.exports.fieldGetStaticValue(this.handle, handle);
 
             return readWrapped(handle, this.type) as T;

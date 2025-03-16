@@ -36,5 +36,26 @@ namespace Il2Cpp {
         export function isTypeValue(v: TypeValue | Value): v is TypeValue {
             return (v as TypeValue).type !== undefined;
         }
+
+        /*
+         * Flags for Params (22.1.12)
+         */
+        // #define PARAM_ATTRIBUTE_IN                 0x0001
+        // #define PARAM_ATTRIBUTE_OUT                0x0002
+        // #define PARAM_ATTRIBUTE_OPTIONAL           0x0010
+        // #define PARAM_ATTRIBUTE_RESERVED_MASK      0xf000
+        // #define PARAM_ATTRIBUTE_HAS_DEFAULT        0x1000
+        // #define PARAM_ATTRIBUTE_HAS_FIELD_MARSHAL  0x2000
+        // #define PARAM_ATTRIBUTE_UNUSED             0xcfe0
+
+        // Flags for Generic Parameters (II.23.1.7)
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NON_VARIANT                           0x00
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_COVARIANT                             0x01
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_CONTRAVARIANT                         0x02
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_VARIANCE_MASK                         0x03
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_REFERENCE_TYPE_CONSTRAINT             0x04
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_NOT_NULLABLE_VALUE_TYPE_CONSTRAINT    0x08
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_DEFAULT_CONSTRUCTOR_CONSTRAINT        0x10
+        // #define IL2CPP_GENERIC_PARAMETER_ATTRIBUTE_SPECIAL_CONSTRAINT_MASK               0x1C
     }
 }

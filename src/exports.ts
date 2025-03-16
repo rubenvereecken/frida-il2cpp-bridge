@@ -95,6 +95,10 @@ namespace Il2Cpp {
             return r('il2cpp_class_get_flags', 'int', ['pointer']);
         },
 
+        get classGetImplementationFlags() {
+            return r('il2cpp_class_get_flags', 'int', ['pointer']);
+        },
+
         get classGetImage() {
             return r('il2cpp_class_get_image', 'pointer', ['pointer']);
         },
