@@ -31,23 +31,27 @@ namespace Il2Cpp {
             return Il2Cpp.corlib.class('System.Array').instanceSize;
         }
 
-        /** @internal Gets a pointer to the first element of the current array. */
-        get elements(): Il2Cpp.Pointer<T> {
+        @lazy
+        static get elementsOffset(): number {
             // We previosly obtained an array whose content is known by calling
             // 'System.String::Split(NULL)' on a known string. However, that
             // method invocation somehow blows things up in Unity 2018.3.0f1.
-            const array = Il2Cpp.string('v').object.method<Il2Cpp.Array>('ToCharArray', 0).invoke();
+            const array = Il2Cpp.string('v').method<Il2Cpp.Array>('ToCharArray', 0).invoke();
 
-            // prettier-ignore
-            const offset = array.handle.offsetOf(_ => _.readS16() == 118) ??
+            const offset =
+                array.handle.offsetOf(p => p.readS16() == 118) ??
                 raise("couldn't find the elements offset in the native array struct");
 
-            // prettier-ignore
-            getter(Il2Cpp.Array.prototype, "elements", function (this: Il2Cpp.Array) {
-                return new Il2Cpp.Pointer(this.handle.add(offset), this.elementType);
-            }, lazy);
+            return offset;
+        }
 
-            return this.elements;
+        /** @internal Gets a pointer to the first element of the current array. */
+        @lazy
+        get elements(): Il2Cpp.Pointer<T> {
+            return new Il2Cpp.Pointer(
+                this.handle.add(Il2Cpp.Array.elementsOffset),
+                this.elementType
+            );
         }
 
         /** Gets the size of the object encompassed by the current array. */

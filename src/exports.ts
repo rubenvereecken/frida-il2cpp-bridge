@@ -380,6 +380,10 @@ namespace Il2Cpp {
             return r('il2cpp_method_get_class', 'pointer', ['pointer']);
         },
 
+        get methodGetDeclaringClass() {
+            return r('il2cpp_method_get_declaring_type', 'pointer', ['pointer']);
+        },
+
         get methodGetFlags() {
             return r('il2cpp_method_get_flags', 'uint32', ['pointer', 'pointer']);
         },

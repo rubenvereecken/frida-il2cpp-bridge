@@ -49,12 +49,6 @@ namespace Il2Cpp {
         get length(): number {
             return Il2Cpp.exports.stringGetLength(this);
         }
-
-        /** Gets the encompassing object of the current string. */
-        get object(): Il2Cpp.Object {
-            // TODO remove – just backward compatibility
-            return new Il2Cpp.Object(this);
-        }
     }
 
     /** Creates a new string with the specified content. */

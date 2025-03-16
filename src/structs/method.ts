@@ -23,7 +23,9 @@ namespace Il2Cpp {
             });
             globalThis.Object.defineProperty(this, '_il2cpp', {
                 get: () =>
-                    this instanceof Il2Cpp.BoundMethod ? 'Il2Cpp.BoundMethod' : 'Il2Cpp.Method',
+                    this instanceof Il2Cpp.BoundMethod
+                        ? `Il2Cpp.BoundMethod<${this.returnType.name}>`
+                        : `Il2Cpp.Method<${this.returnType.name}>`,
                 enumerable: true,
             });
         }
@@ -38,9 +40,24 @@ namespace Il2Cpp {
             return new Il2Cpp.Class(Il2Cpp.exports.methodGetClass(this));
         }
 
+        @lazy
+        get declaringClass(): Il2Cpp.Class {
+            return new Il2Cpp.Class(Il2Cpp.exports.methodGetDeclaringClass(this));
+        }
+
+        @lazy
+        get flags() {
+            return {
+                isStatic: !!(this.flagsRaw & Method.Attributes.Static),
+                isFinal: !!(this.flagsRaw & Method.Attributes.Final),
+                isVirtual: !!(this.flagsRaw & Method.Attributes.Virtual),
+                isAbstract: !!(this.flagsRaw & Method.Attributes.Abstract),
+            };
+        }
+
         /** Gets the flags of the current method. */
         @lazy
-        get flags(): number {
+        get flagsRaw(): number {
             return Il2Cpp.exports.methodGetFlags(this, NULL);
         }
 
@@ -69,8 +86,6 @@ namespace Il2Cpp {
             if (this.isInflated) {
                 types.push('pointer');
             }
-
-            inform(types);
 
             return types;
         }
@@ -113,6 +128,7 @@ namespace Il2Cpp {
         /** Determines whether this method is static. */
         @lazy
         get isStatic(): boolean {
+            // Note: can also check using Static flag
             return !Il2Cpp.exports.methodIsInstance(this);
         }
 
@@ -124,10 +140,11 @@ namespace Il2Cpp {
             );
         }
 
+        // TODO move this to Writer classes
         /** Gets the access modifier of this method. */
         @lazy
-        get modifier(): string | undefined {
-            switch (this.flags & Il2Cpp.Method.Attributes.MemberAccessMask) {
+        get accessModifierStr(): string | undefined {
+            switch (this.flagsRaw & Il2Cpp.Method.Attributes.MemberAccessMask) {
                 case Il2Cpp.Method.Attributes.Private:
                     return 'private';
                 case Il2Cpp.Method.Attributes.FamilyAndAssembly:
@@ -195,34 +212,35 @@ namespace Il2Cpp {
             return new Il2Cpp.Type(Il2Cpp.exports.methodGetReturnType(this));
         }
 
-        /** Gets the virtual address (VA) of this method. */
-        get virtualAddress(): NativePointer {
+        @lazy
+        static get virtualAddressOffset(): number {
             const FilterTypeName = Il2Cpp.corlib
                 .class('System.Reflection.Module')
                 .initialize()
                 .field<Il2Cpp.Object>('FilterTypeName').value;
             const FilterTypeNameMethodPointer =
-                FilterTypeName.field<Il2Cpp.IntPtrT>('method_ptr').value;
-            const FilterTypeNameMethod = FilterTypeName.field<Il2Cpp.IntPtrT>('method').value;
+                FilterTypeName.field<Il2Cpp.IntPtrT>('method_ptr').value.read();
+            const FilterTypeNameMethod =
+                FilterTypeName.field<Il2Cpp.IntPtrT>('method').value.read();
 
             // prettier-ignore
-            const offset = FilterTypeNameMethod.read().offsetOf(_ => _.readPointer().equals(FilterTypeNameMethodPointer))
+            const offset = FilterTypeNameMethod.offsetOf(_ => _.readPointer().equals(FilterTypeNameMethodPointer))
                 ?? raise("couldn't find the virtual address offset in the native method struct");
 
-            // prettier-ignore
-            getter(Il2Cpp.Method.prototype, "virtualAddress", function (this: Il2Cpp.Method) {
-                return this.handle.add(offset).readPointer();
-            }, lazy);
+            return offset;
+        }
 
+        /** Gets the virtual address (VA) of this method. */
+        get virtualAddress(): NativePointer {
             // In Unity 2017.4.40f1 (don't know about others),
             // `Il2Cpp.Class::initialize` somehow triggers a nasty bug during
             // early instrumentation, so that we aren't able to obtain the
             // offset to get the virtual address of a method when the script
             // is reloaded. A workaround consists in manually re-invoking the
             // static constructor.
-            Il2Cpp.corlib.class('System.Reflection.Module').method('.cctor').invoke();
-
-            return this.virtualAddress;
+            // TODO necessary still? Note: shouldn't run it here – that's an infinite loop
+            // Il2Cpp.corlib.class('System.Reflection.Module').method('.cctor').invoke();
+            return this.handle.add(Il2Cpp.Method.virtualAddressOffset).readPointer();
         }
 
         // /** Replaces the body of this method. */
@@ -514,8 +532,7 @@ namespace Il2Cpp {
             return `${super.toString()} (bound @ ${this.instance.handle})`;
         }
 
-        /** Invokes this method. */
-        invoke(...parameters: Il2Cpp.Parameter.Value[]): T {
+        get instanceHandle() {
             // In Unity 5.3.5f1 and >= 2021.2.0f1, value types
             // methods may assume their `this` parameter is a
             // pointer to raw data (that is how value types are
@@ -525,20 +542,23 @@ namespace Il2Cpp {
             // is in the object header, so we can safely "skip"
             // the object header by adding the object header
             // size to the object (a boxed value type) handle.
-            const handle =
-                this.instance instanceof Il2Cpp.ValueType
-                    ? this.class.isValueType
-                        ? this.instance.handle.add(
-                              maybeObjectHeaderSize() - Il2Cpp.Object.headerSize
-                          )
-                        : raise(
-                              `cannot invoke method ${this.class.type.name}::${this.name} against a value type, you must box it first`
-                          )
-                    : this.class.isValueType
-                      ? this.instance.handle.add(maybeObjectHeaderSize())
-                      : this.instance.handle;
+            if (this.instance instanceof Il2Cpp.ValueType && this.class.isValueType) {
+                return this.instance.handle.add(maybeObjectHeaderSize() - Il2Cpp.Object.headerSize);
+            } else if (this.instance instanceof Il2Cpp.ValueType && !this.class.isValueType) {
+                // TODO look into this – pretty sure unboxed methods are a thing
+                raise(
+                    `cannot invoke method ${this.class.type.name}::${this.name} against a value type, you must box it first`
+                );
+            } else if (this.class.isValueType) {
+                return this.instance.handle.add(maybeObjectHeaderSize());
+            } else {
+                return this.instance.handle;
+            }
+        }
 
-            return this.invokeRaw(handle, ...parameters);
+        /** Invokes this method. */
+        invoke(...parameters: Il2Cpp.Parameter.Value[]): T {
+            return this.invokeRaw(this.instanceHandle, ...parameters);
         }
 
         /** Creates a generic instance of the current generic method. */
