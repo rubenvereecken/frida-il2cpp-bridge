@@ -83,5 +83,20 @@ namespace Il2Cpp {
         get f(): Il2Cpp.DynamicFields {
             return Il2Cpp.DynamicFieldsLookup.from(this, false);
         }
+
+        read(): any {
+            const fields = this.class.fields.filter(f => !f.isStatic);
+            const result: Il2Cpp.JSObject = {};
+
+            // TODO I think some child classes have access to fields that aren't showing – so check the whole tree for those
+            fields.forEach(field => {
+                inform(field.name);
+                field = field.bind(this);
+                // TODO make sure this exists
+                result[field.name] = (field.value as any).read();
+            });
+
+            return result;
+        }
     }
 }

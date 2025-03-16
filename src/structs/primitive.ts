@@ -47,7 +47,47 @@ namespace Il2Cpp {
         read(this: Primitive<'System.UIntPtr'>): NativePointer;
         read(this: WrappedPrimitive): Il2Cpp.Primitive.JSType;
         read(this: WrappedPrimitive): Il2Cpp.Primitive.JSType {
-            return Il2Cpp.readJs(this.handle, this.type);
+            const pointer = this.handle;
+            switch (this.type.typeEnum) {
+                case 0:
+                    raise(
+                        `Failed to read type enum from ${this.type.name} (except if you really wanted 0, ie "IL2CPP_TYPE_END")`
+                    );
+                case Il2Cpp.Type.enum.void:
+                    return undefined;
+                case Il2Cpp.Type.enum.boolean:
+                    return !!pointer.readS8();
+                case Il2Cpp.Type.enum.byte:
+                    return pointer.readS8();
+                case Il2Cpp.Type.enum.unsignedByte:
+                    return pointer.readU8();
+                case Il2Cpp.Type.enum.short:
+                    return pointer.readS16();
+                case Il2Cpp.Type.enum.unsignedShort:
+                    return pointer.readU16();
+                case Il2Cpp.Type.enum.int:
+                    return pointer.readS32();
+                case Il2Cpp.Type.enum.unsignedInt:
+                    return pointer.readU32();
+                case Il2Cpp.Type.enum.char:
+                    return pointer.readU16();
+                case Il2Cpp.Type.enum.long:
+                    return pointer.readS64();
+                case Il2Cpp.Type.enum.unsignedLong:
+                    return pointer.readU64();
+                case Il2Cpp.Type.enum.float:
+                    return pointer.readFloat();
+                case Il2Cpp.Type.enum.double:
+                    return pointer.readDouble();
+                case Il2Cpp.Type.enum.nativePointer:
+                case Il2Cpp.Type.enum.unsignedNativePointer:
+                    // TODO do we ever not need to do this?
+                    // Note: pointers need to be dereferenced for
+                    // - Fields
+                    // Theory: `IntPtr` value is defined as `System.Void*`, so il2cpp incorrectly
+                    // added the extra step of storing the actual value referenced by an unnecessary pointer
+                    return pointer.readPointer();
+            }
         }
 
         write(this: Primitive<'System.Boolean'>, value: boolean): void;

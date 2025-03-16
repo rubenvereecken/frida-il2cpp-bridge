@@ -603,7 +603,6 @@ namespace Il2Cpp {
         /*
          * Method Attributes (22.1.9)
          */
-
         // #define METHOD_IMPL_ATTRIBUTE_CODE_TYPE_MASK       0x0003
         // #define METHOD_IMPL_ATTRIBUTE_IL                   0x0000
         // #define METHOD_IMPL_ATTRIBUTE_NATIVE               0x0001

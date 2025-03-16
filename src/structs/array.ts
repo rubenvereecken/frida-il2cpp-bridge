@@ -1,28 +1,19 @@
 namespace Il2Cpp {
-    export class Array<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped>
-        extends NativeStruct
-        implements Iterable<T>
+    // TODO Array now extends Object but it still doesn't support method calling
+    export class Array<R extends Il2Cpp.Wrapped = Il2Cpp.Wrapped, T extends string = string>
+        extends Il2Cpp.Object<T>
+        implements Iterable<R>
     {
-        constructor(native: NativePointerValue) {
-            super(native);
-
-            // Shows up on Frida REPL. Useful for debugging and reverse engineering
-            globalThis.Object.defineProperty(this, '__toString', {
-                get: () => this.toString(),
-                enumerable: true,
-            });
-            globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => 'Il2Cpp.Array',
-                enumerable: true,
-            });
+        get constructorName() {
+            return 'Il2Cpp.Array';
         }
 
         valueToString(): string {
-            return this.isNull() ? 'null' : `[${this.elements.read(this.length, 0)}]`;
+            return this.isNull() ? 'null' : `[${this.read()}]`;
         }
 
         toString(): string {
-            return `${this.valueToString()} (${this.elementType.name}[])`;
+            return this.valueToString();
         }
 
         /** Gets the Il2CppArray struct size, possibly equal to `Process.pointerSize * 4`. */
@@ -47,7 +38,7 @@ namespace Il2Cpp {
 
         /** @internal Gets a pointer to the first element of the current array. */
         @lazy
-        get elements(): Il2Cpp.Pointer<T> {
+        get elements(): Il2Cpp.Pointer<R> {
             return new Il2Cpp.Pointer(
                 this.handle.add(Il2Cpp.Array.elementsOffset),
                 this.elementType
@@ -63,7 +54,7 @@ namespace Il2Cpp {
         /** Gets the type of the object encompassed by the current array. */
         @lazy
         get elementType(): Il2Cpp.Type {
-            return this.object.class.type.class.baseType!;
+            return this.class.type.class.baseType!;
         }
 
         /** Gets the total number of elements in all the dimensions of the current array. */
@@ -72,44 +63,55 @@ namespace Il2Cpp {
             return Il2Cpp.exports.arrayGetLength(this);
         }
 
-        /** Gets the encompassing object of the current array. */
-        @lazy
-        get object(): Il2Cpp.Object {
-            return new Il2Cpp.Object(this);
-        }
-
-        @lazy
-        get class(): Il2Cpp.Class {
-            return this.object.class;
-        }
-
-        @lazy
-        get type(): Il2Cpp.Type {
-            return this.class.type;
-        }
-
         /** Gets the element at the specified index of the current array. */
-        get(index: number): T {
+        get(index: number): R {
             if (index < 0 || index >= this.length) {
                 raise(`cannot get element at index ${index} as the array length is ${this.length}`);
             }
 
-            return this.elements.get(index);
+            return readWrapped(
+                this.elements.handle.add(index * this.elementType.class.arrayElementSize),
+                this.elementType
+            ) as R;
         }
 
         /** Sets the element at the specified index of the current array. */
-        set(index: number, value: T) {
+        set(index: number, value: R) {
             if (index < 0 || index >= this.length) {
                 raise(`cannot set element at index ${index} as the array length is ${this.length}`);
             }
 
-            this.elements.set(index, value);
+            write(
+                this.elements.handle.add(index * this.elementType.class.arrayElementSize),
+                value,
+                this.elementType
+            );
+        }
+
+        /** Writes the given elements starting at the given index. */
+        write(values: R[], offset: number = 0): void {
+            for (let i = 0; i < values.length; i++) {
+                this.set(i + offset, values[i]);
+            }
+        }
+
+        // TODO should this live elsewhere? Like Array instead of Pointer
+        /** Reads the given amount of elements starting at the given offset. */
+        read(offset: number = 0, length: number | undefined = undefined): R[] {
+            length = this.length;
+            const values = new globalThis.Array<R>(length);
+
+            for (let i = 0; i < length; i++) {
+                values[i] = this.get(i + offset);
+            }
+
+            return values;
         }
 
         /** Iterable. */
-        *[Symbol.iterator](): IterableIterator<T> {
+        *[Symbol.iterator](): IterableIterator<R> {
             for (let i = 0; i < this.length; i++) {
-                yield this.elements.get(i);
+                yield this.get(i);
             }
         }
     }
@@ -136,7 +138,7 @@ namespace Il2Cpp {
         const array = new Il2Cpp.Array<T>(Il2Cpp.exports.arrayNew(klass, length));
 
         if (globalThis.Array.isArray(lengthOrElements)) {
-            array.elements.write(lengthOrElements);
+            array.write(lengthOrElements);
         }
 
         return array;

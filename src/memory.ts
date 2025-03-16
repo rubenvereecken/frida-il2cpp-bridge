@@ -18,6 +18,11 @@ namespace Il2Cpp {
         );
     }
 
+    export type JSObject = {
+        // TODO type this using RecursiveValuesOf (see Frida's NativeFunctionReturnValue)
+        [key: string]: any;
+    };
+
     /**
      * Allocates the given amount of bytes - it's equivalent to C's `malloc`. \
      * The allocated memory should be freed manually.
@@ -40,100 +45,6 @@ namespace Il2Cpp {
      */
     export function free(pointer: NativePointerValue): void {
         return Il2Cpp.exports.free(pointer);
-    }
-
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.Type<'System.Void'>,
-        options?: { derefPointer?: boolean }
-    ): void;
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.Type<'System.Boolean'>,
-        options?: { derefPointer?: boolean }
-    ): boolean;
-    export function readJs(
-        pointer: NativePointer,
-        type:
-            | Il2Cpp.Type<'System.SByte'>
-            | Il2Cpp.Type<'System.Byte'>
-            | Il2Cpp.Type<'System.Char'>
-            | Il2Cpp.Type<'System.Int16'>
-            | Il2Cpp.Type<'System.UInt16'>
-            | Il2Cpp.Type<'System.Int32'>
-            | Il2Cpp.Type<'System.UInt32'>
-            | Il2Cpp.Type<'System.Single'>
-            | Il2Cpp.Type<'System.Double'>,
-        options?: { derefPointer?: boolean }
-    ): number;
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.Type<'System.Int64'>,
-        options?: { derefPointer?: boolean }
-    ): Int64;
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.Type<'System.UInt64'>,
-        options?: { derefPointer?: boolean }
-    ): UInt64;
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>,
-        options?: { derefPointer?: boolean }
-    ): NativePointer;
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.WrappedPrimitiveCSType,
-        options?: { derefPointer?: boolean }
-    ): Il2Cpp.Primitive.JSType;
-    export function readJs(
-        pointer: NativePointer,
-        type: Il2Cpp.WrappedPrimitiveCSType,
-        options: { derefPointer?: boolean } = {}
-    ): Il2Cpp.Primitive.JSType | void {
-        options = { derefPointer: true, ...options };
-        const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
-
-        switch (type.typeEnum) {
-            case 0:
-                raise(
-                    `Failed to read type enum from ${type.name} (except if you really wanted 0, ie "IL2CPP_TYPE_END")`
-                );
-            case Il2Cpp.Type.enum.void:
-                return undefined;
-            case Il2Cpp.Type.enum.boolean:
-                return !!pointer.readS8();
-            case Il2Cpp.Type.enum.byte:
-                return pointer.readS8();
-            case Il2Cpp.Type.enum.unsignedByte:
-                return pointer.readU8();
-            case Il2Cpp.Type.enum.short:
-                return pointer.readS16();
-            case Il2Cpp.Type.enum.unsignedShort:
-                return pointer.readU16();
-            case Il2Cpp.Type.enum.int:
-                return pointer.readS32();
-            case Il2Cpp.Type.enum.unsignedInt:
-                return pointer.readU32();
-            case Il2Cpp.Type.enum.char:
-                return pointer.readU16();
-            case Il2Cpp.Type.enum.long:
-                return pointer.readS64();
-            case Il2Cpp.Type.enum.unsignedLong:
-                return pointer.readU64();
-            case Il2Cpp.Type.enum.float:
-                return pointer.readFloat();
-            case Il2Cpp.Type.enum.double:
-                return pointer.readDouble();
-            case Il2Cpp.Type.enum.nativePointer:
-            case Il2Cpp.Type.enum.unsignedNativePointer:
-                // TODO not sure if these need dereferencing – in fact, I don't think they do
-                return dereferenced;
-        }
-
-        raise(
-            `couldn't read the value from ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
-        );
     }
 
     /**
@@ -171,7 +82,7 @@ namespace Il2Cpp {
         }
 
         raise(
-            `couldn't read the value from ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+            `couldn't read the value from ${pointer} using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
         );
     }
 
@@ -196,7 +107,7 @@ namespace Il2Cpp {
             if (type.isIntPtr()) return pointer.writePointer(coercePrimitive(value, type));
             if (type.isUIntPtr()) return pointer.writePointer(coercePrimitive(value, type));
             raise(
-                "couldn't write primitive value ${value} to ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue"
+                `couldn't write primitive value ${value} to ${pointer} using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
             );
         } else {
             // It's already a ValueType, so just copy over the correct number of bytes
@@ -324,8 +235,8 @@ namespace Il2Cpp {
         if (value instanceof NativePointer) return Il2Cpp.System.IntPtr.type;
         if (typeof value === 'string') return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.String) return Il2Cpp.System.String.type;
+        if (value instanceof Il2Cpp.Array) return value.class.type;
         if (value instanceof Il2Cpp.Object) return value.class.type;
-        if (value instanceof Il2Cpp.Array) return value.object.class.type;
 
         return value.type;
     }

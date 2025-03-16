@@ -12,8 +12,8 @@ namespace Il2Cpp {
         }
 
         /** Gets the content of this string. */
-        get content(): string | null {
-            return Il2Cpp.exports.stringGetChars(this).readUtf16String(this.length);
+        get content(): string {
+            return Il2Cpp.exports.stringGetChars(this).readUtf16String(this.length)!;
         }
 
         /** @unsafe Sets the content of this string - it may write out of bounds! */
@@ -25,7 +25,7 @@ namespace Il2Cpp {
         /**
          * For consistency with Primitive.read
          */
-        read() {
+        read(): string {
             return this.content;
         }
 
