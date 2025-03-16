@@ -12,7 +12,7 @@ namespace Il2Cpp {
                 enumerable: true,
             });
             globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => 'Il2Cpp.Reference',
+                get: () => `Il2Cpp.Reference<${this.type.name}>`,
                 enumerable: true,
             });
         }

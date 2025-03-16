@@ -83,18 +83,24 @@ namespace Il2Cpp {
     ): NativePointer;
     export function readJs(
         pointer: NativePointer,
-        type: Il2Cpp.TypeOfPrimitive,
+        type: Il2Cpp.WrappedPrimitiveCSType,
         options?: { derefPointer?: boolean }
     ): Il2Cpp.Primitive.JSType;
     export function readJs(
         pointer: NativePointer,
-        type: Il2Cpp.TypeOfPrimitive,
+        type: Il2Cpp.WrappedPrimitiveCSType,
         options: { derefPointer?: boolean } = {}
-    ): Il2Cpp.Primitive.JSType {
+    ): Il2Cpp.Primitive.JSType | void {
         options = { derefPointer: true, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
 
         switch (type.typeEnum) {
+            case 0:
+                raise(
+                    `Failed to read type enum from ${type.name} (except if you really wanted 0, ie "IL2CPP_TYPE_END")`
+                );
+            case Il2Cpp.Type.enum.void:
+                return undefined;
             case Il2Cpp.Type.enum.boolean:
                 return !!pointer.readS8();
             case Il2Cpp.Type.enum.byte:
@@ -139,24 +145,12 @@ namespace Il2Cpp {
         options: { derefPointer?: boolean } = {}
     ): Il2Cpp.Wrapped {
         options = { derefPointer: true, ...options };
+        // TODO reassess dereferenced, when is this necessary?
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
 
+        if (type.isPrimitive()) return new Il2Cpp.Primitive(pointer, type);
+
         switch (type.typeEnum) {
-            case Il2Cpp.Type.enum.boolean:
-            case Il2Cpp.Type.enum.byte:
-            case Il2Cpp.Type.enum.unsignedByte:
-            case Il2Cpp.Type.enum.short:
-            case Il2Cpp.Type.enum.unsignedShort:
-            case Il2Cpp.Type.enum.int:
-            case Il2Cpp.Type.enum.unsignedInt:
-            case Il2Cpp.Type.enum.char:
-            case Il2Cpp.Type.enum.long:
-            case Il2Cpp.Type.enum.unsignedLong:
-            case Il2Cpp.Type.enum.float:
-            case Il2Cpp.Type.enum.double:
-            case Il2Cpp.Type.enum.nativePointer:
-            case Il2Cpp.Type.enum.unsignedNativePointer:
-                return new Il2Cpp.Primitive(dereferenced, type);
             case Il2Cpp.Type.enum.string:
                 return new Il2Cpp.String(dereferenced);
             case Il2Cpp.Type.enum.pointer:
@@ -320,13 +314,14 @@ namespace Il2Cpp {
     export function guessType(value: Il2Cpp.Parameter.Value): Il2Cpp.Type {
         const t = (kls: string) => Il2Cpp.corlib.class(kls).type;
 
+        if (value === undefined) return Il2Cpp.System.Void.type;
         if (typeof value === 'boolean') return Il2Cpp.System.Boolean.type;
         if (typeof value === 'number')
             if (Number.isInteger(value)) return Il2Cpp.System.Int32.type;
             else return Il2Cpp.System.Double.type;
-        if (value instanceof Int64) return t('System.Int64');
-        if (value instanceof UInt64) return t('System.UInt64');
-        if (value instanceof NativePointer) return t('System.IntPtr');
+        if (value instanceof Int64) return Il2Cpp.System.Int64.type;
+        if (value instanceof UInt64) return Il2Cpp.System.UInt64.type;
+        if (value instanceof NativePointer) return Il2Cpp.System.IntPtr.type;
         if (typeof value === 'string') return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.String) return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.Object) return value.class.type;
@@ -368,6 +363,8 @@ namespace Il2Cpp {
         value: Il2Cpp.Primitive.JSType,
         type: Il2Cpp.Type
     ): Il2Cpp.Primitive.JSType {
+        if (value === undefined) return value;
+
         // Be sure to convert booleans manually (TODO necessary??)
         if (type.name == 'System.Boolean') return !!value;
 

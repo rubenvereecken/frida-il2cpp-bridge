@@ -1,6 +1,8 @@
 namespace Il2Cpp {
     export class Object<T extends string = string> extends Il2Cpp.ObjectLike<T> {
-        protected constructorName = 'Il2Cpp.Object';
+        get constructorName() {
+            return 'Il2Cpp.Object';
+        }
 
         valueToString(): string {
             if (this.isNull()) return 'null';
@@ -8,7 +10,7 @@ namespace Il2Cpp {
         }
 
         toString(): string {
-            return `${this.valueToString()} (${this.type.name})`;
+            return this.valueToString();
         }
 
         /** Gets the Il2CppObject struct size, possibly equal to `Process.pointerSize * 2`. */

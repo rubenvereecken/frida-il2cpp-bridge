@@ -15,9 +15,10 @@ namespace Il2Cpp {
             });
         }
 
-        protected abstract constructorName: string;
         abstract get class(): Il2Cpp.Class<T>;
         abstract get type(): Il2Cpp.Type<T>;
+
+        abstract get constructorName(): string;
 
         /** Gets the field with the given name. */
         field<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.BoundField<T> {

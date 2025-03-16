@@ -4,7 +4,9 @@ namespace Il2Cpp {
         T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped,
         S extends string = string,
     > extends ObjectLike<S> {
-        protected constructorName = 'Il2Cpp.Pointer';
+        get constructorName() {
+            return 'Il2Cpp.Pointer';
+        }
 
         constructor(
             handle: NativePointer,

@@ -104,7 +104,8 @@ namespace Il2Cpp {
                 );
             }
 
-            const handle = Memory.alloc(Process.pointerSize);
+            // TODO test this – used to always allocate a whole pointer
+            const handle = Memory.alloc(this.type.class.instanceSize);
             Il2Cpp.exports.fieldGetStaticValue(this.handle, handle);
 
             return readWrapped(handle, this.type) as T;

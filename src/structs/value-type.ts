@@ -1,12 +1,14 @@
 namespace Il2Cpp {
     export class ValueType<T extends string = string> extends Il2Cpp.ObjectLike<T> {
-        protected constructorName = 'Il2Cpp.ValueType';
-
         constructor(
             handle: NativePointerValue,
             readonly type: Il2Cpp.Type<T>
         ) {
             super(handle);
+        }
+
+        get constructorName() {
+            return 'Il2Cpp.ValueType';
         }
 
         get class(): Il2Cpp.Class<T> {
@@ -28,7 +30,7 @@ namespace Il2Cpp {
         }
 
         toString(): string {
-            return `${this.valueToString()} (${this.type.name})`;
+            return this.valueToString();
         }
     }
 }

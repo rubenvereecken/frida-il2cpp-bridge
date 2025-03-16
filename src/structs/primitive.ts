@@ -18,11 +18,19 @@ namespace Il2Cpp {
 
     export class Primitive<
         T extends PrimitiveClassName = PrimitiveClassName,
-    > extends Il2Cpp.ValueType {
-        protected constructorName = 'Il2Cpp.Primitive';
+    > extends Il2Cpp.ValueType<T> {
         declare readonly type: Il2Cpp.Type<T>;
 
-        read(this: Primitive<'System.Void'>): void;
+        get constructorName() {
+            return 'Il2Cpp.Primitive';
+        }
+
+        valueToString(this: WrappedPrimitive): string {
+            const value = this.read();
+            return '' + value;
+        }
+
+        read(this: Primitive<'System.Void'>): undefined;
         read(this: Primitive<'System.Boolean'>): boolean;
         read(this: Primitive<'System.Byte'>): number;
         read(this: Primitive<'System.SByte'>): number;
@@ -37,8 +45,9 @@ namespace Il2Cpp {
         read(this: Primitive<'System.Double'>): number;
         read(this: Primitive<'System.IntPtr'>): NativePointer;
         read(this: Primitive<'System.UIntPtr'>): NativePointer;
-        read(this: Primitive<PrimitiveClassName>): Il2Cpp.Primitive.JSType {
-            return Il2Cpp.readJs(this.handle, this.type as any as Il2Cpp.TypeOfPrimitive);
+        read(this: WrappedPrimitive): Il2Cpp.Primitive.JSType;
+        read(this: WrappedPrimitive): Il2Cpp.Primitive.JSType {
+            return Il2Cpp.readJs(this.handle, this.type);
         }
 
         write(this: Primitive<'System.Boolean'>, value: boolean): void;
@@ -81,10 +90,27 @@ namespace Il2Cpp {
     export type UIntPtrT = Primitive<'System.UIntPtr'>;
 
     export namespace Primitive {
-        export type JSType = boolean | number | Int64 | UInt64 | NativePointer;
+        export type JSType = undefined | boolean | number | Int64 | UInt64 | NativePointer;
     }
 
-    export type PrimitiveLike = Primitive | Primitive.JSType;
+    export type WrappedPrimitive =
+        | VoidT
+        | BooleanT
+        | SByteT
+        | ByteT
+        | CharT
+        | Int16T
+        | UInt16T
+        | Int32T
+        | UInt32T
+        | Int64T
+        | UInt64T
+        | SingleT
+        | DoubleT
+        | IntPtrT
+        | UIntPtrT;
+
+    export type PrimitiveLike = WrappedPrimitive | Primitive.JSType;
 
     // TODO find a better home for all these foundational type checker methods – perhaps memory.ts?
     export function isPrimitiveJSType(

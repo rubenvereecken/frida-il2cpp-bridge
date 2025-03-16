@@ -131,7 +131,7 @@ namespace Il2Cpp {
 
         /** Determines whether this type is primitive. */
         // TODO add @lazy for methods
-        isPrimitive(): this is Il2Cpp.Type<PrimitiveClassName> {
+        isPrimitive(): this is Il2Cpp.WrappedPrimitiveCSType {
             switch (this.typeEnum) {
                 case Il2Cpp.Type.enum.void:
                 case Il2Cpp.Type.enum.boolean:
@@ -295,7 +295,9 @@ namespace Il2Cpp {
         }
     }
 
-    export type TypeOfPrimitive = {
-        [K in Il2Cpp.PrimitiveClassName]: Type<K>;
-    }[Il2Cpp.PrimitiveClassName];
+    // export type TypeOfPrimitive = {
+    //     [K in Il2Cpp.PrimitiveClassName]: Type<K>;
+    // }[Il2Cpp.PrimitiveClassName];
+
+    export type WrappedPrimitiveCSType = WrappedPrimitive['type'];
 }

@@ -1,7 +1,8 @@
 namespace Il2Cpp {
     export class String extends Il2Cpp.Object<'System.String'> {
-        protected constructorName = 'Il2Cpp.String';
-
+        get constructorName() {
+            return 'Il2Cpp.String';
+        }
         valueToString(): string {
             return this.isNull() ? 'null' : `${this.content}`;
         }
