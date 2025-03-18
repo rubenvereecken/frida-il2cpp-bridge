@@ -18,7 +18,7 @@ namespace Il2Cpp {
         // TODO check if this actually works??
         @lazy
         get object() {
-            return new Il2Cpp.Object<S>(this);
+            return new Il2Cpp.ReferenceType<S>(this);
         }
 
         @lazy

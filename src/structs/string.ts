@@ -1,10 +1,11 @@
 namespace Il2Cpp {
-    export class String extends Il2Cpp.Object<'System.String'> {
+    export class String extends Il2Cpp.ReferenceType<'System.String'> {
         get constructorName() {
             return 'Il2Cpp.String';
         }
+
         valueToString(): string {
-            return this.isNull() ? 'null' : `${this.content}`;
+            return this.read();
         }
 
         toString(): string {

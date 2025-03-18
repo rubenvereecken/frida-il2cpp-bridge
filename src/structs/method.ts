@@ -1,14 +1,14 @@
 namespace Il2Cpp {
     type ImplementationCallback<T extends Il2Cpp.Method.ReturnType> = (
-        this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
+        this: Il2Cpp.Class | Il2Cpp.ReferenceType | Il2Cpp.ValueType,
         ...parameters: Il2Cpp.Parameter.Value[]
     ) => T;
     type OnEnterCallback = (
-        this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
+        this: Il2Cpp.Class | Il2Cpp.ReferenceType | Il2Cpp.ValueType,
         ...parameters: Il2Cpp.Parameter.Value[]
     ) => void;
     type OnLeaveCallback<T extends Il2Cpp.Method.ReturnType> = (
-        this: Il2Cpp.Class | Il2Cpp.Object | Il2Cpp.ValueType,
+        this: Il2Cpp.Class | Il2Cpp.ReferenceType | Il2Cpp.ValueType,
         retval: T
     ) => T | void;
 
@@ -98,7 +98,7 @@ namespace Il2Cpp {
             }
 
             const types = this.object
-                .method<Il2Cpp.Array<Il2Cpp.Object>>('GetGenericArguments')
+                .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetGenericArguments')
                 .invoke();
             return globalThis.Array.from(types).map(
                 _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
@@ -178,8 +178,8 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the current method. */
         @lazy
-        get object(): Il2Cpp.Object {
-            return new Il2Cpp.Object(Il2Cpp.exports.methodGetObject(this, NULL));
+        get object(): Il2Cpp.ReferenceType {
+            return new Il2Cpp.ReferenceType(Il2Cpp.exports.methodGetObject(this, NULL));
         }
 
         /** Gets the amount of parameters of this method. */
@@ -217,7 +217,7 @@ namespace Il2Cpp {
             const FilterTypeName = Il2Cpp.corlib
                 .class('System.Reflection.Module')
                 .initialize()
-                .field<Il2Cpp.Object>('FilterTypeName').value;
+                .field<Il2Cpp.ReferenceType>('FilterTypeName').value;
             const FilterTypeNameMethodPointer =
                 FilterTypeName.field<Il2Cpp.IntPtrT>('method_ptr').value.read();
             const FilterTypeNameMethod =
@@ -300,7 +300,7 @@ namespace Il2Cpp {
             const typeArray = Il2Cpp.array(Il2Cpp.corlib.class('System.Type'), types);
 
             const inflatedMethodObject = this.object
-                .method<Il2Cpp.Object>('MakeGenericMethod', 1)
+                .method<Il2Cpp.ReferenceType>('MakeGenericMethod', 1)
                 .invoke(typeArray);
             return new Il2Cpp.Method(
                 inflatedMethodObject.field<Il2Cpp.IntPtrT>('mhandle').value.read()
@@ -449,11 +449,11 @@ namespace Il2Cpp {
                         : this.class.isValueType
                           ? new Il2Cpp.ValueType(
                                 (args[0] as NativePointer).add(
-                                    Il2Cpp.Object.headerSize - maybeObjectHeaderSize()
+                                    Il2Cpp.ReferenceType.headerSize - maybeObjectHeaderSize()
                                 ),
                                 this.class.type
                             )
-                          : new Il2Cpp.Object(args[0] as NativePointer);
+                          : new Il2Cpp.ReferenceType(args[0] as NativePointer);
 
                     const parameters = this.parameters.map((_, i) =>
                         fromFridaValue(args[i + startIndex], _.type)
@@ -543,7 +543,9 @@ namespace Il2Cpp {
             // the object header by adding the object header
             // size to the object (a boxed value type) handle.
             if (this.instance instanceof Il2Cpp.ValueType && this.class.isValueType) {
-                return this.instance.handle.add(maybeObjectHeaderSize() - Il2Cpp.Object.headerSize);
+                return this.instance.handle.add(
+                    maybeObjectHeaderSize() - Il2Cpp.ReferenceType.headerSize
+                );
             } else if (this.instance instanceof Il2Cpp.ValueType && !this.class.isValueType) {
                 // TODO look into this – pretty sure unboxed methods are a thing
                 raise(
@@ -591,7 +593,7 @@ namespace Il2Cpp {
         // hence, we must "skip" the object header when invoking such methods.
         const offset = struct.field<Il2Cpp.IntPtrT>('value').value.read().equals(ptr(0xdeadbeef))
             ? 0
-            : Il2Cpp.Object.headerSize;
+            : Il2Cpp.ReferenceType.headerSize;
         return (maybeObjectHeaderSize = () => offset)();
     };
 

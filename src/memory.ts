@@ -4,9 +4,9 @@ namespace Il2Cpp {
         | Il2Cpp.String
         | Il2Cpp.Pointer
         | Il2Cpp.ValueType
-        | Il2Cpp.Object
+        | Il2Cpp.ReferenceType
         | Il2Cpp.Array
-        | Il2Cpp.NullObject;
+        | Il2Cpp.NullReference;
 
     export function isWrappedType(type: Il2Cpp.Parameter.Value): type is Wrapped {
         return (
@@ -14,7 +14,7 @@ namespace Il2Cpp {
             type instanceof Il2Cpp.String ||
             type instanceof Il2Cpp.Pointer ||
             type instanceof Il2Cpp.ValueType ||
-            type instanceof Il2Cpp.Object ||
+            type instanceof Il2Cpp.ReferenceType ||
             type instanceof Il2Cpp.Array
         );
     }
@@ -66,7 +66,7 @@ namespace Il2Cpp {
         if (type.isPrimitive()) return new Il2Cpp.Primitive(pointer, type);
 
         // Only reference types can be null
-        if (dereferenced.isNull() && !type.class.isValueType) return new Il2Cpp.NullObject(type);
+        if (dereferenced.isNull() && !type.class.isValueType) return new Il2Cpp.NullReference(type);
 
         // Value types can't be null
         if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
@@ -82,11 +82,11 @@ namespace Il2Cpp {
                     return new Il2Cpp.ValueType(dereferenced, type);
                 case Il2Cpp.Type.enum.object:
                 case Il2Cpp.Type.enum.class:
-                    return new Il2Cpp.Object(dereferenced);
+                    return new Il2Cpp.ReferenceType(dereferenced);
                 case Il2Cpp.Type.enum.genericInstance:
                     return type.class.isValueType
                         ? new Il2Cpp.ValueType(dereferenced, type)
-                        : new Il2Cpp.Object(dereferenced);
+                        : new Il2Cpp.ReferenceType(dereferenced);
                 case Il2Cpp.Type.enum.array:
                 case Il2Cpp.Type.enum.multidimensionalArray:
                     return new Il2Cpp.Array(dereferenced);
@@ -198,7 +198,7 @@ namespace Il2Cpp {
         }
 
         if (type.isByReference) {
-            return new Il2Cpp.Reference(value, type);
+            return new Il2Cpp.ByReference(value, type);
         }
 
         if (type.isPrimitive()) return new Il2Cpp.Primitive(value, type);
@@ -214,7 +214,7 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.class:
             case Il2Cpp.Type.enum.genericInstance:
             case Il2Cpp.Type.enum.object:
-                return new Il2Cpp.Object(value);
+                return new Il2Cpp.ReferenceType(value);
             case Il2Cpp.Type.enum.array:
             case Il2Cpp.Type.enum.multidimensionalArray:
                 return new Il2Cpp.Array(value);
@@ -247,7 +247,7 @@ namespace Il2Cpp {
         if (typeof value === 'string') return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.String) return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.Array) return value.class.type;
-        if (value instanceof Il2Cpp.Object) return value.class.type;
+        if (value instanceof Il2Cpp.ReferenceType) return value.class.type;
 
         return value.type;
     }

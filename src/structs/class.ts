@@ -127,7 +127,7 @@ namespace Il2Cpp {
             }
 
             const types = this.type.object
-                .method<Il2Cpp.Array<Il2Cpp.Object>>('GetGenericArguments')
+                .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetGenericArguments')
                 .invoke();
             return globalThis.Array.from(types).map(
                 _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
@@ -285,8 +285,8 @@ namespace Il2Cpp {
         }
 
         /** Allocates a new object of the current class. */
-        alloc(): Il2Cpp.Object {
-            return new Il2Cpp.Object(Il2Cpp.exports.objectNew(this));
+        alloc(): Il2Cpp.ReferenceType {
+            return new Il2Cpp.ReferenceType(Il2Cpp.exports.objectNew(this));
         }
 
         /** Gets the field identified by the given name. */
@@ -313,7 +313,7 @@ namespace Il2Cpp {
             const typeArray = Il2Cpp.array(Il2Cpp.corlib.class('System.Type'), types);
 
             const inflatedType = this.type.object
-                .method<Il2Cpp.Object>('MakeGenericType', 1)
+                .method<Il2Cpp.ReferenceType>('MakeGenericType', 1)
                 .invoke(typeArray);
             return new Il2Cpp.Class(Il2Cpp.exports.classFromObject(inflatedType));
         }
@@ -378,7 +378,7 @@ namespace Il2Cpp {
         }
 
         /** Allocates a new object of the current class and calls its default constructor. */
-        defaultNew(): Il2Cpp.Object {
+        defaultNew(): Il2Cpp.ReferenceType {
             const object = this.alloc();
 
             const exceptionArray = Memory.alloc(Process.pointerSize);
@@ -388,7 +388,7 @@ namespace Il2Cpp {
             const exception = exceptionArray.readPointer();
 
             if (!exception.isNull()) {
-                raise(new Il2Cpp.Object(exception).toString());
+                raise(new Il2Cpp.ReferenceType(exception).toString());
             }
 
             return object;
@@ -398,7 +398,9 @@ namespace Il2Cpp {
          * Finds the best fit constructor given the parameter types.
          * Doesn't cover constructors with default parameters – all parameters must be provided.
          */
-        new(...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Value)[]): Il2Cpp.Object {
+        new(
+            ...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Value)[]
+        ): Il2Cpp.ReferenceType {
             if (parameters.length == 0) return this.defaultNew();
 
             const object = this.alloc();

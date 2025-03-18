@@ -4,8 +4,10 @@ namespace Il2Cpp {
         constructor(readonly handle: number) {}
 
         /** Gets the object associated to this handle. */
-        get target(): Il2Cpp.Object | null {
-            return new Il2Cpp.Object(Il2Cpp.exports.gcHandleGetTarget(this.handle)).asNullable();
+        get target(): Il2Cpp.ReferenceType | null {
+            return new Il2Cpp.ReferenceType(
+                Il2Cpp.exports.gcHandleGetTarget(this.handle)
+            ).asNullable();
         }
 
         /** Frees this handle. */

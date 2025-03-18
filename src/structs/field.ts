@@ -129,7 +129,7 @@ namespace Il2Cpp {
             const handle =
                 // pointer-like values should be passed as-is, but boxed
                 // value types (primitives included) must be unboxed first
-                value instanceof Il2Cpp.Object && this.type.class.isValueType
+                value instanceof Il2Cpp.ReferenceType && this.type.class.isValueType
                     ? value.unbox()
                     : value instanceof NativeStruct
                       ? value.handle
@@ -188,7 +188,9 @@ namespace Il2Cpp {
         get valueHandle(): NativePointer {
             return this.instance.handle.add(
                 this.offset -
-                    (this.instance instanceof Il2Cpp.ValueType ? Il2Cpp.Object.headerSize : 0)
+                    (this.instance instanceof Il2Cpp.ValueType
+                        ? Il2Cpp.ReferenceType.headerSize
+                        : 0)
             );
         }
 

@@ -19,8 +19,6 @@ namespace Il2Cpp {
     export class Primitive<
         T extends PrimitiveClassName = PrimitiveClassName,
     > extends Il2Cpp.ValueType<T> {
-        declare readonly type: Il2Cpp.Type<T>;
-
         get constructorName() {
             return 'Il2Cpp.Primitive';
         }

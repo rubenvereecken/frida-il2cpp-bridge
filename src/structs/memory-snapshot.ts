@@ -20,9 +20,9 @@ namespace Il2Cpp {
 
         /** Gets the objects tracked by this memory snapshot. */
         @lazy
-        get objects(): Il2Cpp.Object[] {
+        get objects(): Il2Cpp.ReferenceType[] {
             // prettier-ignore
-            return readNativeList(_ => Il2Cpp.exports.memorySnapshotGetObjects(this, _)).filter(_ => !_.isNull()).map(_ => new Il2Cpp.Object(_));
+            return readNativeList(_ => Il2Cpp.exports.memorySnapshotGetObjects(this, _)).filter(_ => !_.isNull()).map(_ => new Il2Cpp.ReferenceType(_));
         }
 
         /** Frees this memory snapshot. */

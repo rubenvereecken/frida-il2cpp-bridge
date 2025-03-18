@@ -168,8 +168,8 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the current type. */
         @lazy
-        get object(): Il2Cpp.Object {
-            return new Il2Cpp.Object(Il2Cpp.exports.typeGetObject(this));
+        get object(): Il2Cpp.ReferenceType {
+            return new Il2Cpp.ReferenceType(Il2Cpp.exports.typeGetObject(this));
         }
 
         /** Gets the type enum of the current type. */
@@ -216,7 +216,7 @@ namespace Il2Cpp {
                 return true;
             }
 
-            if (other instanceof Il2Cpp.Reference) {
+            if (other instanceof Il2Cpp.ByReference) {
                 raise(
                     `might not have support for reference types yet: ${other.type.name} -> ${this.name}`
                 );

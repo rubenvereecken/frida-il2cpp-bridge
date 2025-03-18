@@ -1,10 +1,10 @@
 namespace Il2Cpp {
     export class ValueType<T extends string = string> extends Il2Cpp.ObjectLike<T> {
-        constructor(
-            handle: NativePointerValue,
-            readonly type: Il2Cpp.Type<T>
-        ) {
-            super(handle);
+        // Re-declare as non-nullable because ValueTypes don't have a header with type info
+        declare readonly _type: Il2Cpp.Type<T>;
+
+        constructor(handle: NativePointerValue, type: Il2Cpp.Type<T>) {
+            super(handle, type);
         }
 
         get constructorName() {
@@ -15,9 +15,13 @@ namespace Il2Cpp {
             return this.type.class;
         }
 
+        get type(): Il2Cpp.Type<T> {
+            return this._type;
+        }
+
         /** Boxes the current value type in a object. */
-        box(): Il2Cpp.Object {
-            return new Il2Cpp.Object(Il2Cpp.exports.valueTypeBox(this.class, this));
+        box(): Il2Cpp.ReferenceType {
+            return new Il2Cpp.ReferenceType(Il2Cpp.exports.valueTypeBox(this.class, this));
         }
 
         valueToString(): string {

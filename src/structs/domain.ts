@@ -8,7 +8,7 @@ namespace Il2Cpp {
 
             if (handles.length == 0) {
                 const assemblyObjects = this.object
-                    .method<Il2Cpp.Array<Il2Cpp.Object>>('GetAssemblies')
+                    .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetAssemblies')
                     .overload()
                     .invoke();
                 handles = globalThis.Array.from(assemblyObjects).map(_ =>
@@ -21,10 +21,10 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the application domain. */
         @lazy
-        get object(): Il2Cpp.Object {
+        get object(): Il2Cpp.ReferenceType {
             return Il2Cpp.corlib
                 .class('System.AppDomain')
-                .method<Il2Cpp.Object>('get_CurrentDomain')
+                .method<Il2Cpp.ReferenceType>('get_CurrentDomain')
                 .invoke();
         }
 

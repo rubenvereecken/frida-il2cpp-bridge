@@ -1,7 +1,7 @@
 namespace Il2Cpp {
-    export class Object<T extends string = string> extends Il2Cpp.ObjectLike<T> {
+    export class ReferenceType<T extends string = string> extends Il2Cpp.ObjectLike<T> {
         get constructorName() {
-            return 'Il2Cpp.Object';
+            return 'Il2Cpp.ReferenceType';
         }
 
         valueToString(): string {
@@ -21,18 +21,21 @@ namespace Il2Cpp {
         /** Gets the class of this object. */
         @lazy
         get class(): Il2Cpp.Class<T> {
+            // Can be read from the object header
             return new Il2Cpp.Class<T>(Il2Cpp.exports.objectGetClass(this));
         }
 
         /** Gets the type of this object. */
         @lazy
         get type(): Il2Cpp.Type<T> {
+            // TODO: by default fall back on this._type if available
+            // Benefit: save a ton of il2cpp calls for figuring out type when it's already known
             return this.class.type;
         }
 
         /** Returns a monitor for this object. */
-        get monitor(): Il2Cpp.Object.Monitor {
-            return new Il2Cpp.Object.Monitor(this);
+        get monitor(): Il2Cpp.ReferenceType.Monitor {
+            return new Il2Cpp.ReferenceType.Monitor(this);
         }
 
         /** Gets the size of the current object. */
@@ -70,7 +73,7 @@ namespace Il2Cpp {
         }
     }
 
-    export namespace Object {
+    export namespace ReferenceType {
         export class Monitor {
             /** @internal */
             constructor(/** @internal */ readonly handle: NativePointerValue) {}

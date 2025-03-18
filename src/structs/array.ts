@@ -1,7 +1,7 @@
 namespace Il2Cpp {
     // TODO Array now extends Object but it still doesn't support method calling
     export class Array<R extends Il2Cpp.Wrapped = Il2Cpp.Wrapped, T extends string = string>
-        extends Il2Cpp.Object<T>
+        extends Il2Cpp.ReferenceType<T>
         implements Iterable<R>
     {
         get constructorName() {

@@ -1,6 +1,9 @@
 namespace Il2Cpp {
     export abstract class ObjectLike<T extends string = string> extends NativeStruct {
-        constructor(native: NativePointerValue) {
+        constructor(
+            native: NativePointerValue,
+            readonly _type: Il2Cpp.Type<T> | undefined = undefined
+        ) {
             super(native);
 
             // Shows up on Frida REPL. Useful for debugging and reverse engineering

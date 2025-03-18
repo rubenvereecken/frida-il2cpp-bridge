@@ -26,7 +26,7 @@ namespace Il2Cpp {
             | Il2Cpp.PrimitiveLike
             | Il2Cpp.StringLike
             | Il2Cpp.Wrapped
-            | Il2Cpp.Reference;
+            | Il2Cpp.ByReference;
 
         export type TypeValue = {
             type: Il2Cpp.Type;

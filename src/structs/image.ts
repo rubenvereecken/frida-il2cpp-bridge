@@ -40,7 +40,7 @@ namespace Il2Cpp {
         get classes(): Il2Cpp.Class[] {
             if (Il2Cpp.unityVersionIsBelow201830) {
                 const types = this.assembly.object
-                    .method<Il2Cpp.Array<Il2Cpp.Object>>('GetTypes')
+                    .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetTypes')
                     .invoke(false);
                 // In Unity 5.3.8f1, getting System.Reflection.Emit.OpCodes type name
                 // without iterating all the classes first somehow blows things up at

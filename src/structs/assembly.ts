@@ -40,9 +40,9 @@ namespace Il2Cpp {
                     // (despite being excluded from System.Reflection.Assembly::GetTypes).
                     return new Il2Cpp.Image(
                         this.object
-                            .method<Il2Cpp.Object>('GetType', 1)
+                            .method<Il2Cpp.ReferenceType>('GetType', 1)
                             .invoke(Il2Cpp.string('<Module>'))
-                            .method<Il2Cpp.Object>('get_Module')
+                            .method<Il2Cpp.ReferenceType>('get_Module')
                             .invoke()
                             .field<Il2Cpp.IntPtrT>('_impl')
                             .value.read()
@@ -63,9 +63,9 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the current assembly. */
         @lazy
-        get object(): Il2Cpp.Object {
+        get object(): Il2Cpp.ReferenceType {
             for (const _ of Il2Cpp.domain.object
-                .method<Il2Cpp.Array<Il2Cpp.Object>>('GetAssemblies', 1)
+                .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetAssemblies', 1)
                 .invoke(false)) {
                 if (_.field<Il2Cpp.IntPtrT>('_mono_assembly').value.read().equals(this)) {
                     return _;

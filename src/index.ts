@@ -30,9 +30,13 @@
 /// <reference path="./structs/field.ts">/>
 /// <reference path="./structs/class.ts">/>
 /// <reference path="./structs/type.ts">/>
-/// <reference path="./structs/object.ts">/>
-/// <reference path="./structs/value-type.ts">/>
+/// <reference path="./structs/reference-type.ts">/>
+/// <reference path="./structs/string.ts">/>
 /// <reference path="./structs/array.ts">/>
+/// <reference path="./structs/value-type.ts">/>
+/// <reference path="./structs/primitive.ts">/>
+/// <reference path="./structs/reference.ts">/>
+/// <reference path="./structs/pointer.ts">/>
 /// <reference path="./structs/assembly.ts">/>
 /// <reference path="./structs/delegate.ts">/>
 /// <reference path="./structs/domain.ts">/>
@@ -40,9 +44,6 @@
 /// <reference path="./structs/image.ts">/>
 /// <reference path="./structs/memory-snapshot.ts">/>
 /// <reference path="./structs/parameter.ts">/>
-/// <reference path="./structs/pointer.ts">/>
-/// <reference path="./structs/reference.ts">/>
-/// <reference path="./structs/string.ts">/>
 /// <reference path="./structs/thread.ts">/>
 
 globalThis.Il2Cpp = Il2Cpp;
