@@ -543,6 +543,10 @@ namespace Il2Cpp {
         get typeEquals() {
             return r('il2cpp_type_equals', 'bool', ['pointer', 'pointer']);
         },
+
+        get typeIsByRef() {
+            return r('il2cpp_type_is_byref', 'bool', ['pointer']);
+        },
     };
 
     decorate(exports, lazy);

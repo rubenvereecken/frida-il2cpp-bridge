@@ -9,7 +9,7 @@ namespace Il2Cpp {
         }
 
         valueToString(): string {
-            return this.isNull() ? 'null' : `[${this.read()}]`;
+            return `[${this.read()}]`;
         }
 
         toString(): string {

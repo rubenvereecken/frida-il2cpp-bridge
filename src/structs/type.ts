@@ -126,7 +126,7 @@ namespace Il2Cpp {
         /** Determines whether this type is passed by reference. */
         @lazy
         get isByReference(): boolean {
-            return this.name.endsWith('&');
+            return !!Il2Cpp.exports.typeIsByRef(this);
         }
 
         /** Determines whether this type is primitive. */

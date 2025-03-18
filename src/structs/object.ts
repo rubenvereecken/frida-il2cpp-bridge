@@ -5,7 +5,6 @@ namespace Il2Cpp {
         }
 
         valueToString(): string {
-            if (this.isNull()) return 'null';
             return this.method<Il2Cpp.String>('ToString', 0).invoke().content ?? 'null';
         }
 

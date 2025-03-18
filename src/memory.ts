@@ -5,7 +5,8 @@ namespace Il2Cpp {
         | Il2Cpp.Pointer
         | Il2Cpp.ValueType
         | Il2Cpp.Object
-        | Il2Cpp.Array;
+        | Il2Cpp.Array
+        | Il2Cpp.NullObject;
 
     export function isWrappedType(type: Il2Cpp.Parameter.Value): type is Wrapped {
         return (
@@ -55,34 +56,44 @@ namespace Il2Cpp {
         type: Il2Cpp.Type,
         options: { derefPointer?: boolean } = {}
     ): Il2Cpp.Wrapped {
-        options = { derefPointer: true, ...options };
-        // TODO reassess dereferenced, when is this necessary?
+        // reference types (classes, arrays, etc) need dereferencing,
+        // while value types (primitives and value types) never do
+        // TODO that might not be entirely true, so double check
+        options = { derefPointer: !type.class.isValueType, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
+        inform(`readWrapped: ${pointer} -> ${dereferenced} (${type.name})`);
 
         if (type.isPrimitive()) return new Il2Cpp.Primitive(pointer, type);
 
-        switch (type.typeEnum) {
-            case Il2Cpp.Type.enum.string:
-                return new Il2Cpp.String(dereferenced);
-            case Il2Cpp.Type.enum.pointer:
-                return new Il2Cpp.Pointer(dereferenced, type.class.baseType!);
-            case Il2Cpp.Type.enum.valueType:
-                // Never needs dereferencing
-                return new Il2Cpp.ValueType(pointer, type);
-            case Il2Cpp.Type.enum.object:
-            case Il2Cpp.Type.enum.class:
-                return new Il2Cpp.Object(dereferenced);
-            case Il2Cpp.Type.enum.genericInstance:
-                return type.class.isValueType
-                    ? new Il2Cpp.ValueType(pointer, type)
-                    : new Il2Cpp.Object(dereferenced);
-            case Il2Cpp.Type.enum.array:
-            case Il2Cpp.Type.enum.multidimensionalArray:
-                return new Il2Cpp.Array(dereferenced);
-        }
+        // Only reference types can be null
+        if (dereferenced.isNull() && !type.class.isValueType) return new Il2Cpp.NullObject(type);
+
+        // Value types can't be null
+        if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
+
+        if (!type.isByReference)
+            switch (type.typeEnum) {
+                case Il2Cpp.Type.enum.string:
+                    return new Il2Cpp.String(dereferenced);
+                case Il2Cpp.Type.enum.pointer:
+                    return new Il2Cpp.Pointer(dereferenced, type.class.baseType!);
+                case Il2Cpp.Type.enum.valueType:
+                    // Never needs dereferencing
+                    return new Il2Cpp.ValueType(dereferenced, type);
+                case Il2Cpp.Type.enum.object:
+                case Il2Cpp.Type.enum.class:
+                    return new Il2Cpp.Object(dereferenced);
+                case Il2Cpp.Type.enum.genericInstance:
+                    return type.class.isValueType
+                        ? new Il2Cpp.ValueType(dereferenced, type)
+                        : new Il2Cpp.Object(dereferenced);
+                case Il2Cpp.Type.enum.array:
+                case Il2Cpp.Type.enum.multidimensionalArray:
+                    return new Il2Cpp.Array(dereferenced);
+            }
 
         raise(
-            `couldn't read the value from ${pointer} using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
+            `couldn't read the value from ${pointer} (->${dereferenced}) using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
         );
     }
 

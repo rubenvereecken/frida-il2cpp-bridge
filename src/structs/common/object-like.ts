@@ -10,7 +10,9 @@ namespace Il2Cpp {
             });
 
             globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => `${this.constructorName}<${this.type.name}>`,
+                get: () => {
+                    return `${this.constructorName}<${this.type.name}>`;
+                },
                 enumerable: true,
             });
         }
@@ -85,12 +87,13 @@ namespace Il2Cpp {
         }
 
         read(): any {
+            if (this.isNull()) return null;
+
             const fields = this.class.fields.filter(f => !f.isStatic);
             const result: Il2Cpp.JSObject = {};
 
             // TODO I think some child classes have access to fields that aren't showing – so check the whole tree for those
             fields.forEach(field => {
-                inform(field.name);
                 field = field.bind(this);
                 // TODO make sure this exists
                 result[field.name] = (field.value as any).read();

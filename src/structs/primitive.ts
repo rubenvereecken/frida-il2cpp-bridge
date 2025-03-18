@@ -84,8 +84,8 @@ namespace Il2Cpp {
                     // TODO do we ever not need to do this?
                     // Note: pointers need to be dereferenced for
                     // - Fields
-                    // Theory: `IntPtr` value is defined as `System.Void*`, so il2cpp incorrectly
-                    // added the extra step of storing the actual value referenced by an unnecessary pointer
+                    // In that sense, they're just like objects. Weird, because they should be primitives
+                    // just like longs. Looks like a 'bug' or inconsistent design decision in il2cpp.
                     return pointer.readPointer();
             }
         }
