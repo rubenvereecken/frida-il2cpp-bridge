@@ -321,7 +321,7 @@ namespace Il2Cpp {
                 toFridaValue(p, this.parameters[i].type)
             );
             for (const p of allocatedParameters) {
-                inform(`p: ${p} (${typeof p})`);
+                inform(`p: ${p} (${p?.constructor?.name ?? typeof p})`);
             }
 
             if (!this.isStatic || Il2Cpp.unityVersionIsBelow201830) {

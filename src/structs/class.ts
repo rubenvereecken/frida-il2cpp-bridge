@@ -521,7 +521,7 @@ namespace Il2Cpp {
     export class System {
         @lazy
         static get Void() {
-            return Il2Cpp.corlib.class('System.Boolean');
+            return Il2Cpp.corlib.class('System.Void');
         }
 
         @lazy

@@ -300,8 +300,14 @@ namespace Il2Cpp {
 
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
+        type: Il2Cpp.Type<'System.Void'>
+    ): undefined;
+    // Any number can be coerced to a boolean (lossy)
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
         type: Il2Cpp.Type<'System.Boolean'>
     ): boolean;
+    // All 1 to 4 byte primitives fit into a regular JS `number` (double) without loss, as do doubles
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
         type:
@@ -315,21 +321,27 @@ namespace Il2Cpp {
             | Il2Cpp.Type<'System.Single'>
             | Il2Cpp.Type<'System.Double'>
     ): number;
+    // Any primitive can be upcast to a long (signed or unsigned) without loss
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
-        type: Il2Cpp.Type<'System.Int64'> | Il2Cpp.Type<'System.UInt64'>
-    ): number | globalThis.Int64 | globalThis.UInt64;
+        type: Il2Cpp.Type<'System.Int64'>
+    ): globalThis.Int64;
     export function coercePrimitive(
-        value: NativePointer,
+        value: Il2Cpp.Primitive.JSType,
+        type: Il2Cpp.Type<'System.UInt64'>
+    ): globalThis.UInt64;
+    // Any primitive can be upcast to a pointer without loss
+    export function coercePrimitive(
+        value: Il2Cpp.Primitive.JSType,
         type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>
     ): NativePointer;
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
-        type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>
-    ): never;
+        type: Il2Cpp.WrappedPrimitiveCSType
+    ): Il2Cpp.Primitive.JSType;
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
-        type: Il2Cpp.Type
+        type: Il2Cpp.WrappedPrimitiveCSType
     ): Il2Cpp.Primitive.JSType {
         if (value === undefined) return value;
 
@@ -353,12 +365,18 @@ namespace Il2Cpp {
         return +value;
     }
 
-    /** @internal */
+    /**
+     * @internal
+     * For use as a parameter to a native function.
+     * It's useful to provide `type` to get an accurate match. For example when passing an Int64 into an Int32 (number), which frida won't like.
+     */
     export function toFridaValue(
         value: Il2Cpp.Parameter.Value,
         type?: Il2Cpp.Type
     ): NativeFunctionArgumentValue | NativeFunctionReturnValue {
         if (!type) type = Il2Cpp.guessType(value);
+
+        if (type.name === 'System.Void') return undefined;
 
         // For now, just wrap all JS primitives in a wee pointer
         // TODO this is a memory leak! Best let Frida handle this,
@@ -373,10 +391,11 @@ namespace Il2Cpp {
             // return pointer;
         }
 
-        if (Il2Cpp.isWrappedPrimitive(value)) {
-            const jsValue = value.read();
-            if (typeof jsValue === 'boolean') return +jsValue;
-            return jsValue;
+        if (Il2Cpp.isWrappedPrimitive(value) && type.isPrimitive()) {
+            // For cases like Int64 -> Int32, otherwise il2cpp or frida will throw
+            const coerced = Il2Cpp.coercePrimitive(value.read(), type);
+            if (typeof coerced === 'boolean') return +coerced;
+            return coerced;
         }
 
         // If regular JS string, wrap it first
