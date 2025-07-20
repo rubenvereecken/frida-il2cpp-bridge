@@ -152,7 +152,10 @@ namespace Il2Cpp {
             // It's already wrapped: easy, just write the pointer
             if (Il2Cpp.isWrappedArray(value)) return pointer.writePointer(value);
 
-            
+            // TODO: Handle raw JS array types like StringLike[] - needs array conversion logic
+            throw new Error(
+                `Raw JS arrays not yet supported in write() - got ${typeof value}: ${value}`
+            );
         }
 
         switch (type.typeEnum) {
@@ -161,7 +164,7 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.multidimensionalArray:
                 return pointer.writePointer(value);
             case Il2Cpp.Type.enum.valueType:
-                return Memory.copy(pointer, value, type.class.valueTypeSize), pointer;
+                return (Memory.copy(pointer, value, type.class.valueTypeSize), pointer);
             case Il2Cpp.Type.enum.object:
             case Il2Cpp.Type.enum.class:
             case Il2Cpp.Type.enum.genericInstance:
@@ -266,7 +269,12 @@ namespace Il2Cpp {
         if (value instanceof Il2Cpp.Array) return value.class.type;
         if (value instanceof Il2Cpp.ReferenceType) return value.class.type;
 
-        return value.type;
+        // TODO: Handle array types properly - they don't always have a .type property
+        if (value instanceof globalThis.Array) {
+            throw new Error(`Array type guessing not implemented yet: ${value}`);
+        }
+
+        return (value as any).type;
     }
 
     export function coercePrimitive(
@@ -362,6 +370,11 @@ namespace Il2Cpp {
         }
 
         // At this point, it's wrapped in an ObjectLike, so just return the pointer
-        return value;
+        // TODO: Handle complex array types that cause Frida return type conflicts
+        if (value instanceof globalThis.Array) {
+            throw new Error(`Array return types not yet supported: ${value}`);
+        }
+
+        return value as any;
     }
 }

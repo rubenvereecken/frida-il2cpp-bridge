@@ -6,7 +6,7 @@ namespace Il2Cpp {
         /**
          * Gets the heap size in bytes.
          */
-        get heapSize(): Int64 {
+        get heapSize(): globalThis.Int64 {
             return Il2Cpp.exports.gcGetHeapSize();
         },
 
@@ -29,14 +29,14 @@ namespace Il2Cpp {
          * Gets the number of nanoseconds the garbage collector can spend in a
          * collection step.
          */
-        get maxTimeSlice(): Int64 {
+        get maxTimeSlice(): globalThis.Int64 {
             return Il2Cpp.exports.gcGetMaxTimeSlice();
         },
 
         /**
          * Gets the used heap size in bytes.
          */
-        get usedHeapSize(): Int64 {
+        get usedHeapSize(): globalThis.Int64 {
             return Il2Cpp.exports.gcGetUsedSize();
         },
 
@@ -51,7 +51,7 @@ namespace Il2Cpp {
          *  Sets the number of nanoseconds the garbage collector can spend in
          * a collection step.
          */
-        set maxTimeSlice(nanoseconds: number | Int64) {
+        set maxTimeSlice(nanoseconds: number | globalThis.Int64) {
             Il2Cpp.exports.gcSetMaxTimeSlice(nanoseconds);
         },
 
@@ -90,7 +90,7 @@ namespace Il2Cpp {
                 Il2Cpp.exports.livenessCalculationFromStatics(state);
                 Il2Cpp.exports.livenessCalculationEnd(state);
             } else {
-                const realloc = (handle: NativePointer, size: UInt64) => {
+                const realloc = (handle: NativePointer, size: globalThis.UInt64) => {
                     if (!handle.isNull() && size.compare(0) == 0) {
                         Il2Cpp.free(handle);
                         return NULL;

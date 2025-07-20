@@ -160,7 +160,8 @@ namespace Il2Cpp {
         const array = new Il2Cpp.Array<T>(Il2Cpp.exports.arrayNew(klass, length));
 
         if (globalThis.Array.isArray(lengthOrElements)) {
-            array.write(lengthOrElements);
+            // TODO: Fix type compatibility between T[] and ArrayLike<T>
+            array.write(lengthOrElements as any);
         }
 
         return array;
