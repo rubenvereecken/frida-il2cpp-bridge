@@ -24,3 +24,9 @@ function ok(message: any): void {
 function inform(message: any): void {
     (globalThis as any).console.log(`\x1b[38;5;12mil2cpp\x1b[0m: ${message}`);
 }
+
+/** @internal */
+function logtrace(message: any): void {
+    // Log stack trace
+    (globalThis as any).console.log(new Error(`\x1b[38;5;14mil2cpp\x1b[0m: ${message}`).stack);
+}

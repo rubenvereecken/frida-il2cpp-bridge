@@ -82,22 +82,51 @@ namespace Il2Cpp {
             }
 
             switch (this.typeEnum) {
+                // Note: Since Frida 17, primitives can no longer be passed as pointers
+                case Il2Cpp.Type.enum.void:
+                    return 'void';
+                case Il2Cpp.Type.enum.boolean:
+                    return 'int32';
+                // TODO is this 1 or 2 bytes??
+                case Il2Cpp.Type.enum.char:
+                    return 'char';
+                case Il2Cpp.Type.enum.byte:
+                    return 'int8';
+                case Il2Cpp.Type.enum.unsignedByte:
+                    return 'uint8';
+                case Il2Cpp.Type.enum.short:
+                    return 'int16';
+                case Il2Cpp.Type.enum.unsignedShort:
+                    return 'uint16';
+                case Il2Cpp.Type.enum.int:
+                    return 'int32';
+                case Il2Cpp.Type.enum.unsignedInt:
+                    return 'uint32';
+                case Il2Cpp.Type.enum.long:
+                    return 'int64';
+                case Il2Cpp.Type.enum.unsignedLong:
+                    return 'uint64';
+                case Il2Cpp.Type.enum.float:
+                    return 'float';
+                case Il2Cpp.Type.enum.double:
+                    return 'double';
+                // --
                 // We used to have Frida parse primitives, but now they're wrapped in an Il2Cpp.Primitive
                 // So just pass a pointer and don't read it until required
-                case Il2Cpp.Type.enum.void:
-                case Il2Cpp.Type.enum.boolean:
-                case Il2Cpp.Type.enum.char:
-                case Il2Cpp.Type.enum.byte:
-                case Il2Cpp.Type.enum.unsignedByte:
-                case Il2Cpp.Type.enum.short:
-                case Il2Cpp.Type.enum.unsignedShort:
-                case Il2Cpp.Type.enum.int:
-                case Il2Cpp.Type.enum.unsignedInt:
-                case Il2Cpp.Type.enum.long:
-                case Il2Cpp.Type.enum.unsignedLong:
-                case Il2Cpp.Type.enum.float:
-                case Il2Cpp.Type.enum.double:
-                    return 'pointer';
+                // case Il2Cpp.Type.enum.void:
+                // case Il2Cpp.Type.enum.boolean:
+                // case Il2Cpp.Type.enum.char:
+                // case Il2Cpp.Type.enum.byte:
+                // case Il2Cpp.Type.enum.unsignedByte:
+                // case Il2Cpp.Type.enum.short:
+                // case Il2Cpp.Type.enum.unsignedShort:
+                // case Il2Cpp.Type.enum.int:
+                // case Il2Cpp.Type.enum.unsignedInt:
+                // case Il2Cpp.Type.enum.long:
+                // case Il2Cpp.Type.enum.unsignedLong:
+                // case Il2Cpp.Type.enum.float:
+                // case Il2Cpp.Type.enum.double:
+                // return 'pointer';
                 case Il2Cpp.Type.enum.nativePointer:
                 case Il2Cpp.Type.enum.unsignedNativePointer:
                 case Il2Cpp.Type.enum.pointer:

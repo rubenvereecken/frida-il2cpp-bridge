@@ -72,7 +72,7 @@ namespace Il2Cpp {
         // TODO that might not be entirely true, so double check
         options = { derefPointer: !type.class.isValueType, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
-        inform(`readWrapped: ${pointer} -> ${dereferenced} (${type.name})`);
+        logtrace(`readWrapped: ${pointer} -> ${dereferenced} (${type.name})`);
 
         if (type.isPrimitive()) return new Il2Cpp.Primitive(pointer, type);
 
@@ -213,15 +213,36 @@ namespace Il2Cpp {
         //     return new Il2Cpp.ValueType(handle, type);
         // }
 
-        if (!(value instanceof NativePointer)) {
-            raise('I thought it was pointers all the way down??');
+        // Note: Since Frida 17, primitives can no longer be passed as pointers
+        // if (!(value instanceof NativePointer)) {
+        //     raise('I thought it was pointers all the way down??');
+        // }
+
+        if (type.isPrimitive()) {
+            const pointer = Memory.alloc(type.class.valueTypeSize);
+            // TODO double check use case
+            if (value === undefined) {
+                warn(`Got undefined for ${type.name}, returning unallocated pointer`);
+                return pointer;
+            }
+            if (!Il2Cpp.isPrimitiveJSType(value)) {
+                raise(
+                    `Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`
+                );
+            }
+            Il2Cpp.write(pointer, value, type);
+            return new Il2Cpp.Primitive(pointer, type);
         }
+
+        if (value === undefined) raise(`Expected a value, got undefined for ${type.name}`);
+        if (!(value instanceof NativePointer))
+            raise(
+                `Expected a pointer for type ${type.name}, got ${value?.constructor?.name} (${value})`
+            );
 
         if (type.isByReference) {
             return new Il2Cpp.ByReference(value, type);
         }
-
-        if (type.isPrimitive()) return new Il2Cpp.Primitive(value, type);
 
         switch (type.typeEnum) {
             case Il2Cpp.Type.enum.pointer:
@@ -337,15 +358,25 @@ namespace Il2Cpp {
         value: Il2Cpp.Parameter.Value,
         type?: Il2Cpp.Type
     ): NativeFunctionArgumentValue | NativeFunctionReturnValue {
-        type = Il2Cpp.guessType(value);
+        if (!type) type = Il2Cpp.guessType(value);
 
         // For now, just wrap all JS primitives in a wee pointer
         // TODO this is a memory leak! Best let Frida handle this,
         // but then I have to change the method signature on the fly – now it's pointers all the way
         if (Il2Cpp.isPrimitiveJSType(value)) {
-            const pointer = Memory.alloc(type.class.valueTypeSize);
-            Il2Cpp.write(pointer, value, type);
-            return pointer;
+            // Frida only supports booleans passed as numbers
+            if (typeof value === 'boolean') return +value;
+            return value;
+            // Note: Since Frida 17, primitives can no longer be passed as pointers
+            // const pointer = Memory.alloc(type.class.valueTypeSize);
+            // Il2Cpp.write(pointer, value, type);
+            // return pointer;
+        }
+
+        if (Il2Cpp.isWrappedPrimitive(value)) {
+            const jsValue = value.read();
+            if (typeof jsValue === 'boolean') return +jsValue;
+            return jsValue;
         }
 
         // If regular JS string, wrap it first

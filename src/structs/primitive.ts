@@ -157,23 +157,23 @@ namespace Il2Cpp {
     export type PrimitiveLike = WrappedPrimitive | Primitive.JSType;
 
     // TODO find a better home for all these foundational type checker methods – perhaps memory.ts?
-    export function isPrimitiveJSType(
-        type: Il2Cpp.Parameter.Value
-    ): type is Il2Cpp.Primitive.JSType {
+    export function isPrimitiveJSType(value: unknown): value is Il2Cpp.Primitive.JSType {
         return (
-            typeof type === 'boolean' ||
-            typeof type === 'number' ||
-            type instanceof Int64 ||
-            type instanceof UInt64 ||
-            type instanceof NativePointer
+            typeof value === 'boolean' ||
+            typeof value === 'number' ||
+            value instanceof Int64 ||
+            value instanceof UInt64 ||
+            value instanceof NativePointer
         );
     }
 
     export function isPrimitiveLike(type: Il2Cpp.Parameter.Value): type is Il2Cpp.PrimitiveLike {
-        return type instanceof Il2Cpp.Primitive || Il2Cpp.isPrimitiveJSType(type);
+        return Il2Cpp.isWrappedPrimitive(type) || Il2Cpp.isPrimitiveJSType(type);
     }
 
-    export function isWrappedPrimitive(value: Il2Cpp.Parameter.Value): value is Il2Cpp.Primitive {
+    export function isWrappedPrimitive(
+        value: Il2Cpp.Parameter.Value
+    ): value is Il2Cpp.WrappedPrimitive {
         if (!Il2Cpp.isWrappedType(value)) {
             return false;
         }

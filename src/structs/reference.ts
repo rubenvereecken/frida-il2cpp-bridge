@@ -1,4 +1,9 @@
 namespace Il2Cpp {
+    /**
+     * Not to be confused with "passing a parameter by reference", reference types are a C# concept.
+     *
+     * Opposite of `Il2Cpp.ValueType`.
+     */
     export class ByReference<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
         constructor(
             handle: NativePointerValue,
