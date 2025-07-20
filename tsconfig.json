@@ -11,6 +11,8 @@
         "sourceMap": true,
         "strict": true,
         "stripInternal": true,
+        "typeRoots": ["./node_modules/@types"],
+        "types": ["frida-gum"],
         "plugins": [{ "transform": "ts-transformer-inline-file/transformer" }]
     }
 }

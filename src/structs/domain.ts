@@ -12,7 +12,7 @@ namespace Il2Cpp {
                     .overload()
                     .invoke();
                 handles = globalThis.Array.from(assemblyObjects).map(_ =>
-                    _.field<Il2Cpp.IntPtrT>('_mono_assembly').value.read()
+                    _.field<Il2Cpp.IntPtr>('_mono_assembly').value.read()
                 );
             }
 

@@ -19,6 +19,17 @@ namespace Il2Cpp {
         );
     }
 
+    export function isWrapped(type: Il2Cpp.Parameter.Value): type is Wrapped {
+        return (
+            type instanceof Il2Cpp.Primitive ||
+            type instanceof Il2Cpp.String ||
+            type instanceof Il2Cpp.Pointer ||
+            type instanceof Il2Cpp.ValueType ||
+            type instanceof Il2Cpp.ReferenceType ||
+            type instanceof Il2Cpp.Array
+        );
+    }
+
     export type JSObject = {
         // TODO type this using RecursiveValuesOf (see Frida's NativeFunctionReturnValue)
         [key: string]: any;
@@ -28,7 +39,7 @@ namespace Il2Cpp {
      * Allocates the given amount of bytes - it's equivalent to C's `malloc`. \
      * The allocated memory should be freed manually.
      */
-    export function alloc(size: number | UInt64 = Process.pointerSize): NativePointer {
+    export function alloc(size: number | globalThis.UInt64 = Process.pointerSize): NativePointer {
         return Il2Cpp.exports.alloc(size);
     }
 
@@ -136,6 +147,12 @@ namespace Il2Cpp {
         if (Il2Cpp.isStringLike(value)) {
             if (Il2Cpp.isStringJsType(value)) value = Il2Cpp.string(value);
             return pointer.writePointer(value);
+        }
+        if (Il2Cpp.isArrayLike(value)) {
+            // It's already wrapped: easy, just write the pointer
+            if (Il2Cpp.isWrappedArray(value)) return pointer.writePointer(value);
+
+            
         }
 
         switch (type.typeEnum) {
@@ -272,7 +289,7 @@ namespace Il2Cpp {
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
         type: Il2Cpp.Type<'System.Int64'> | Il2Cpp.Type<'System.UInt64'>
-    ): number | Int64 | UInt64;
+    ): number | globalThis.Int64 | globalThis.UInt64;
     export function coercePrimitive(
         value: NativePointer,
         type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>

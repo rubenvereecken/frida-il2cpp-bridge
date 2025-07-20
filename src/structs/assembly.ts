@@ -44,7 +44,7 @@ namespace Il2Cpp {
                             .invoke(Il2Cpp.string('<Module>'))
                             .method<Il2Cpp.ReferenceType>('get_Module')
                             .invoke()
-                            .field<Il2Cpp.IntPtrT>('_impl')
+                            .field<Il2Cpp.IntPtr>('_impl')
                             .value.read()
                     );
                 };
@@ -67,7 +67,7 @@ namespace Il2Cpp {
             for (const _ of Il2Cpp.domain.object
                 .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetAssemblies', 1)
                 .invoke(false)) {
-                if (_.field<Il2Cpp.IntPtrT>('_mono_assembly').value.read().equals(this)) {
+                if (_.field<Il2Cpp.IntPtr>('_mono_assembly').value.read().equals(this)) {
                     return _;
                 }
             }

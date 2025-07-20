@@ -197,23 +197,31 @@ namespace Il2Cpp {
          * - pass Int64 to System.Int32 (64 -> 32)
          * - pass 1 to System.Boolean (64 -> 1)
          */
-        isAssignableFromValue(other: Il2Cpp.Parameter.Value) {
+        isAssignableFromValue(other: Il2Cpp.Parameter.Value): boolean {
             // Alright, we already know its type because it's got a wrapper
             if (Il2Cpp.isWrappedType(other)) {
                 return this.isAssignableFromType(other.type);
             }
 
-            // typeof other === Il2Cpp.Primitive.JSType || typeof other === string
-
-            // If it's a string, easy to wrap
-            if (typeof other === 'string') {
+            // StringLike: If it's a string, easy to wrap (we already know it's not wrapped)
+            if (Il2Cpp.isStringLike(other)) {
                 return this.isAssignableFromType(Il2Cpp.System.String.type);
             }
 
             // If the required parameter is a primitive and the provided value is a JSType, it can be cast to a number (even if lossy),
             // so as long as it's a primitive on both sides for now, all good
-            if (Il2Cpp.isPrimitiveJSType(other) && this.isPrimitive()) {
+            if (Il2Cpp.isPrimitiveLike(other) && this.isPrimitive()) {
                 return true;
+            }
+
+            // ArrayLike: Assume homogeneous arrays
+            if (this.isArray() && Il2Cpp.isArrayLike(other)) {
+                // Empty JS array is always assignable
+                if (other.length == 0) return true;
+
+                const firstElement = other[0];
+
+                return this.class.elementClass.type.isAssignableFromValue(firstElement);
             }
 
             if (other instanceof Il2Cpp.ByReference) {
@@ -293,11 +301,18 @@ namespace Il2Cpp {
         isString(this: Il2Cpp.Type): this is Il2Cpp.Type<'System.String'> {
             return this.typeEnum === Il2Cpp.Type.enum.string;
         }
+
+        isArray(this: Il2Cpp.Type): this is Il2Cpp.WrappedArrayCSType {
+            return (
+                this.typeEnum === Il2Cpp.Type.enum.array ||
+                this.typeEnum == Il2Cpp.Type.enum.multidimensionalArray
+            );
+        }
     }
 
-    // export type TypeOfPrimitive = {
-    //     [K in Il2Cpp.PrimitiveClassName]: Type<K>;
-    // }[Il2Cpp.PrimitiveClassName];
+    export type WrappedArrayCSType = Il2Cpp.Type & {
+        class: Il2Cpp.WrappedArrayCSClass;
+    };
 
     export type WrappedPrimitiveCSType = WrappedPrimitive['type'];
 

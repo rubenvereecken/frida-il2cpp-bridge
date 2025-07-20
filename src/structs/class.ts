@@ -495,6 +495,12 @@ namespace Il2Cpp {
         }
     }
 
+    export type WrappedArrayCSClass = Il2Cpp.Class & {
+        // TODO make these not crash in non-array classes (and instead return nullable)
+        arrayElementSize: number;
+        elementClass: Il2Cpp.Class;
+    };
+
     // Helper classes, helpfully typed
     // export type PrimitiveClassName =
     //     | 'System.Void'

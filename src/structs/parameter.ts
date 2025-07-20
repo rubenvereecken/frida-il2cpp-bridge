@@ -25,6 +25,7 @@ namespace Il2Cpp {
         export type Value =
             | Il2Cpp.PrimitiveLike
             | Il2Cpp.StringLike
+            | Il2Cpp.ArrayLike
             | Il2Cpp.Wrapped
             | Il2Cpp.ByReference;
 

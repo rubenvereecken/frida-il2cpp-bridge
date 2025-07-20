@@ -37,8 +37,8 @@ namespace Il2Cpp {
         read(this: Primitive<'System.UInt16'>): number;
         read(this: Primitive<'System.Int32'>): number;
         read(this: Primitive<'System.UInt32'>): number;
-        read(this: Primitive<'System.Int64'>): Int64;
-        read(this: Primitive<'System.UInt64'>): UInt64;
+        read(this: Primitive<'System.Int64'>): globalThis.Int64;
+        read(this: Primitive<'System.UInt64'>): globalThis.UInt64;
         read(this: Primitive<'System.Single'>): number;
         read(this: Primitive<'System.Double'>): number;
         read(this: Primitive<'System.IntPtr'>): NativePointer;
@@ -96,8 +96,8 @@ namespace Il2Cpp {
         write(this: Primitive<'System.Int16'>, value: number): void;
         write(this: Primitive<'System.Int32'>, value: number): void;
         write(this: Primitive<'System.UInt32'>, value: number): void;
-        write(this: Primitive<'System.Int64'>, value: Int64): void;
-        write(this: Primitive<'System.UInt64'>, value: UInt64): void;
+        write(this: Primitive<'System.Int64'>, value: globalThis.Int64): void;
+        write(this: Primitive<'System.UInt64'>, value: globalThis.UInt64): void;
         write(this: Primitive<'System.Single'>, value: number): void;
         write(this: Primitive<'System.Double'>, value: number): void;
         write(this: Primitive<'System.IntPtr'>, value: NativePointer): void;
@@ -111,42 +111,48 @@ namespace Il2Cpp {
         }
     }
 
-    export type VoidT = Primitive<'System.Void'>;
-    export type BooleanT = Primitive<'System.Boolean'>;
-    export type SByteT = Primitive<'System.SByte'>;
-    export type ByteT = Primitive<'System.Byte'>;
-    export type CharT = Primitive<'System.Char'>;
-    export type Int16T = Primitive<'System.Int16'>;
-    export type UInt16T = Primitive<'System.UInt16'>;
-    export type Int32T = Primitive<'System.Int32'>;
-    export type UInt32T = Primitive<'System.UInt32'>;
-    export type Int64T = Primitive<'System.Int64'>;
-    export type UInt64T = Primitive<'System.UInt64'>;
-    export type SingleT = Primitive<'System.Single'>;
-    export type DoubleT = Primitive<'System.Double'>;
-    export type IntPtrT = Primitive<'System.IntPtr'>;
-    export type UIntPtrT = Primitive<'System.UIntPtr'>;
+    export type Void = Primitive<'System.Void'>;
+    export type Boolean = Primitive<'System.Boolean'>;
+    export type SByte = Primitive<'System.SByte'>;
+    export type Byte = Primitive<'System.Byte'>;
+    export type Char = Primitive<'System.Char'>;
+    export type Int16 = Primitive<'System.Int16'>;
+    export type UInt16 = Primitive<'System.UInt16'>;
+    export type Int32 = Primitive<'System.Int32'>;
+    export type UInt32 = Primitive<'System.UInt32'>;
+    export type Int64 = Primitive<'System.Int64'>;
+    export type UInt64 = Primitive<'System.UInt64'>;
+    export type Single = Primitive<'System.Single'>;
+    export type Double = Primitive<'System.Double'>;
+    export type IntPtr = Primitive<'System.IntPtr'>;
+    export type UIntPtr = Primitive<'System.UIntPtr'>;
 
     export namespace Primitive {
-        export type JSType = undefined | boolean | number | Int64 | UInt64 | NativePointer;
+        export type JSType =
+            | undefined
+            | boolean
+            | number
+            | globalThis.Int64
+            | globalThis.UInt64
+            | NativePointer;
     }
 
     export type WrappedPrimitive =
-        | VoidT
-        | BooleanT
-        | SByteT
-        | ByteT
-        | CharT
-        | Int16T
-        | UInt16T
-        | Int32T
-        | UInt32T
-        | Int64T
-        | UInt64T
-        | SingleT
-        | DoubleT
-        | IntPtrT
-        | UIntPtrT;
+        | Il2Cpp.Void
+        | Il2Cpp.Boolean
+        | Il2Cpp.SByte
+        | Il2Cpp.Byte
+        | Il2Cpp.Char
+        | Il2Cpp.Int16
+        | Il2Cpp.UInt16
+        | Il2Cpp.Int32
+        | Il2Cpp.UInt32
+        | Il2Cpp.Int64
+        | Il2Cpp.UInt64
+        | Il2Cpp.Single
+        | Il2Cpp.Double
+        | Il2Cpp.IntPtr
+        | Il2Cpp.UIntPtr;
 
     export type PrimitiveLike = WrappedPrimitive | Primitive.JSType;
 
@@ -168,7 +174,7 @@ namespace Il2Cpp {
     }
 
     export function isWrappedPrimitive(value: Il2Cpp.Parameter.Value): value is Il2Cpp.Primitive {
-        if (Il2Cpp.isPrimitiveJSType(value) || Il2Cpp.isStringJsType(value)) {
+        if (!Il2Cpp.isWrappedType(value)) {
             return false;
         }
 

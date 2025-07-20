@@ -106,7 +106,7 @@ namespace Il2Cpp {
     function directoryExists(path: string): boolean {
         return Il2Cpp.corlib
             .class('System.IO.Directory')
-            .method<Il2Cpp.BooleanT>('Exists')
+            .method<Il2Cpp.Boolean>('Exists')
             .invoke(Il2Cpp.string(path))
             .read();
     }

@@ -1,3 +1,5 @@
+/// <reference types="frida-gum" />
+
 /// <reference path="./utils/android.ts">/>
 /// <reference path="./utils/console.ts">/>
 /// <reference path="./utils/decorate.ts">/>

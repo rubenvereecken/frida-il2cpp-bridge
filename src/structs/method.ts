@@ -219,9 +219,8 @@ namespace Il2Cpp {
                 .initialize()
                 .field<Il2Cpp.ReferenceType>('FilterTypeName').value;
             const FilterTypeNameMethodPointer =
-                FilterTypeName.field<Il2Cpp.IntPtrT>('method_ptr').value.read();
-            const FilterTypeNameMethod =
-                FilterTypeName.field<Il2Cpp.IntPtrT>('method').value.read();
+                FilterTypeName.field<Il2Cpp.IntPtr>('method_ptr').value.read();
+            const FilterTypeNameMethod = FilterTypeName.field<Il2Cpp.IntPtr>('method').value.read();
 
             // prettier-ignore
             const offset = FilterTypeNameMethod.offsetOf(_ => _.readPointer().equals(FilterTypeNameMethodPointer))
@@ -303,7 +302,7 @@ namespace Il2Cpp {
                 .method<Il2Cpp.ReferenceType>('MakeGenericMethod', 1)
                 .invoke(typeArray);
             return new Il2Cpp.Method(
-                inflatedMethodObject.field<Il2Cpp.IntPtrT>('mhandle').value.read()
+                inflatedMethodObject.field<Il2Cpp.IntPtr>('mhandle').value.read()
             );
         }
 
@@ -591,7 +590,7 @@ namespace Il2Cpp {
         // if it's not where it is supposed to be, it means struct methods
         // assume they are receiving value types (that is a pointer to raw data)
         // hence, we must "skip" the object header when invoking such methods.
-        const offset = struct.field<Il2Cpp.IntPtrT>('value').value.read().equals(ptr(0xdeadbeef))
+        const offset = struct.field<Il2Cpp.IntPtr>('value').value.read().equals(ptr(0xdeadbeef))
             ? 0
             : Il2Cpp.ReferenceType.headerSize;
         return (maybeObjectHeaderSize = () => offset)();

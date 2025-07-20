@@ -4,6 +4,24 @@ namespace Il2Cpp {
         extends Il2Cpp.ReferenceType<T>
         implements Iterable<R>
     {
+        constructor(handle: NativePointerValue, type: Il2Cpp.Type<T> | undefined = undefined) {
+            super(handle, type);
+
+            return new Proxy(this, {
+                get: (target, prop) => {
+                    if (typeof prop === 'string') {
+                        const index = Number(prop);
+                        if (!isNaN(index)) {
+                            return target.get(index); // Redirect array access
+                        }
+                    }
+                    return (target as any)[prop]; // Default property access
+                },
+            });
+        }
+
+        [index: number]: T;
+
         get constructorName() {
             return 'Il2Cpp.Array';
         }
@@ -89,9 +107,13 @@ namespace Il2Cpp {
         }
 
         /** Writes the given elements starting at the given index. */
-        write(values: R[], offset: number = 0): void {
+        write(values: Il2Cpp.ArrayLike<R>, offset: number = 0): void {
+            if (Il2Cpp.isWrappedArray(values)) {
+                values;
+                const v = values.get(0);
+            }
             for (let i = 0; i < values.length; i++) {
-                this.set(i + offset, values[i]);
+                // this.set(i + offset, values.get)i);
             }
         }
 
@@ -142,5 +164,37 @@ namespace Il2Cpp {
         }
 
         return array;
+    }
+
+    export namespace Array {
+        export type JSType = string[] | Il2Cpp.Primitive.JSType[];
+    }
+
+    type StringArrayLike = Il2Cpp.StringLike[] | Il2Cpp.Array<Il2Cpp.String, 'System.String'>;
+    type PrimitiveArrayLike =
+        | Il2Cpp.PrimitiveLike[]
+        | Il2Cpp.Array<Il2Cpp.Primitive, Il2Cpp.PrimitiveClassName>;
+    export type ArrayLike<R extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> = R extends Il2Cpp.String
+        ? StringArrayLike
+        : R extends Il2Cpp.Primitive
+          ? PrimitiveArrayLike
+          : R[] | Il2Cpp.Array<R>;
+
+    export function isWrappedArray(
+        value: Il2Cpp.Parameter.Value
+    ): value is Il2Cpp.Array<Il2Cpp.Wrapped> {
+        return (
+            value instanceof Il2Cpp.Array ||
+            (value instanceof Il2Cpp.ReferenceType && value.type.isArray())
+        );
+    }
+
+    // TODO struct arrays
+    export function isArrayJsType(value: Il2Cpp.Parameter.Value): value is Il2Cpp.Array.JSType {
+        return globalThis.Array.isArray(value);
+    }
+
+    export function isArrayLike(value: Il2Cpp.Parameter.Value): value is ArrayLike {
+        return isArrayJsType(value) || value instanceof Il2Cpp.Array;
     }
 }

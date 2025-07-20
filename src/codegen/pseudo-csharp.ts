@@ -24,7 +24,7 @@ ${field.isThreadStatic ? `[ThreadStatic] ` : ``}\
 ${field.isStatic ? `static ` : ``}\
 ${field.type.name} \
 ${field.name}\
-${field.isLiteral ? ` = ${field.type.class.isEnum ? read((field.value as Il2Cpp.ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
+${field.isLiteral ? ` = ${field.type.class.isEnum ? readWrapped((field.value as Il2Cpp.ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
 ${field.isThreadStatic || field.isLiteral ? `` : ` // 0x${field.offset.toString(16)}`}`;
         }
 
@@ -41,7 +41,9 @@ ${method.virtualAddress.isNull() ? `` : ` // 0x${method.relativeVirtualAddress.t
             return `${parameter.type.name} ${parameter.name}`;
         }
 
-        write(value: Il2Cpp.Image | Il2Cpp.Class | Il2Cpp.Field | Il2Cpp.Method | Il2Cpp.Parameter): string {
+        write(
+            value: Il2Cpp.Image | Il2Cpp.Class | Il2Cpp.Field | Il2Cpp.Method | Il2Cpp.Parameter
+        ): string {
             if (value instanceof Il2Cpp.Image) {
                 return this.writeImage(value);
             } else if (value instanceof Il2Cpp.Class) {
