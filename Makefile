@@ -11,8 +11,8 @@ node_modules:
 	@ npm i
 	@ touch -m node_modules
 
-test: test/index.js test/agent.js dist build/host
-	@ node "$<"
+test: test/main.py test/agent.js dist build/host
+	@ python3 test/main.py
 
 build/host: test/host.c
 	@ mkdir -p build

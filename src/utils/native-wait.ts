@@ -11,7 +11,9 @@ function forModule(...moduleNames: string[]): Promise<Module> {
         name: string,
         readString: (handle: NativePointer) => string | null = _ => _.readUtf8String()
     ): ResolvedExport | undefined {
-        const handle = Module.findExportByName(moduleName, name) ?? NULL;
+        const handle = moduleName
+            ? (Process.findModuleByName(moduleName)?.findExportByName(name) ?? NULL)
+            : NULL;
         if (!handle.isNull()) {
             return { handle, readString };
         }
@@ -118,4 +120,20 @@ function forModule(...moduleNames: string[]): Promise<Module> {
             })
         );
     });
+}
+
+/** @internal */
+namespace NativeWait {
+    /** @internal */
+    export function isExported(moduleName: string, name: string): boolean {
+        return !(Process.findModuleByName(moduleName)?.findExportByName(name)?.isNull() ?? true);
+    }
+
+    /** @internal */
+    export function get(moduleName: string, name: string): NativePointer {
+        const handle = Process.findModuleByName(moduleName)?.findExportByName(name) ?? NULL;
+        return handle.isNull()
+            ? raise(`couldn't find export ${name} in module ${moduleName}`)
+            : handle;
+    }
 }

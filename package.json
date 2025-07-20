@@ -24,7 +24,8 @@
         "dist"
     ],
     "scripts": {
-        "prepare": "make dist"
+        "prepare": "make dist",
+        "test": "make test"
     },
     "devDependencies": {
         "@types/frida-gum": "^19.0.0",

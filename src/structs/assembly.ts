@@ -20,39 +20,35 @@ namespace Il2Cpp {
         }
 
         /** Gets the image of this assembly. */
+        @lazy
         get image(): Il2Cpp.Image {
-            let get = function (this: Il2Cpp.Assembly) {
-                return new Il2Cpp.Image(Il2Cpp.exports.assemblyGetImage(this));
-            };
+            if (Il2Cpp.exports.assemblyGetImage.isNull()) {
+                // We need to get the System.Reflection.Module of the current assembly;
+                // System.Reflection.Assembly::GetModulesInternal, for some reason,
+                // throws a NullReferenceExceptionin Unity 5.3.8f1, so we must rely on
+                // System.Type::get_Module instead.
+                // Now we need to get any System.Type of this assembly.
+                // We cannot use System.Reflection.Assembly::GetTypes because it may
+                // return an empty array; hence we use System.Reflection.Assembly::GetType
+                // to retrieve <Module>, a class/type that seems to be always present
+                // (despite being excluded from System.Reflection.Assembly::GetTypes).
+                const runtimeModule =
+                    this.object
+                        .tryMethod<Il2Cpp.ReferenceType>('GetType', 1)
+                        ?.invoke(Il2Cpp.string('<Module>'))
+                        ?.asNullable()
+                        ?.tryMethod<Il2Cpp.ReferenceType>('get_Module')
+                        ?.invoke() ??
+                    this.object
+                        .tryMethod<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetModules', 1)
+                        ?.invoke(false)
+                        ?.get(0) ??
+                    raise(`couldn't find the runtime module object of assembly ${this.name}`);
 
-            try {
-                Il2Cpp.exports.assemblyGetImage;
-            } catch (_) {
-                get = function (this: Il2Cpp.Assembly) {
-                    // We need to get the System.Reflection.Module of the current assembly;
-                    // System.Reflection.Assembly::GetModulesInternal, for some reason,
-                    // throws a NullReferenceExceptionin Unity 5.3.8f1, so we must rely on
-                    // System.Type::get_Module instead.
-                    // Now we need to get any System.Type of this assembly.
-                    // We cannot use System.Reflection.Assembly::GetTypes because it may
-                    // return an empty array; hence we use System.Reflection.Assembly::GetType
-                    // to retrieve <Module>, a class/type that seems to be always present
-                    // (despite being excluded from System.Reflection.Assembly::GetTypes).
-                    return new Il2Cpp.Image(
-                        this.object
-                            .method<Il2Cpp.ReferenceType>('GetType', 1)
-                            .invoke(Il2Cpp.string('<Module>'))
-                            .method<Il2Cpp.ReferenceType>('get_Module')
-                            .invoke()
-                            .field<Il2Cpp.IntPtr>('_impl')
-                            .value.read()
-                    );
-                };
+                return new Il2Cpp.Image(runtimeModule.field<Il2Cpp.IntPtr>('_impl').value.read());
             }
 
-            getter(Il2Cpp.Assembly.prototype, 'image', get, lazy);
-
-            return this.image;
+            return new Il2Cpp.Image(Il2Cpp.exports.assemblyGetImage(this));
         }
 
         /** Gets the name of this assembly. */

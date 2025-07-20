@@ -179,6 +179,10 @@ namespace Il2Cpp {
         }
 
         isSame(other: Il2Cpp.Type): boolean {
+            if (Il2Cpp.exports.typeEquals.isNull()) {
+                return !!this.object.method<Il2Cpp.Boolean>('Equals').invoke(other.object).read();
+            }
+
             return !!Il2Cpp.exports.typeEquals(this.handle, other.handle);
         }
 
