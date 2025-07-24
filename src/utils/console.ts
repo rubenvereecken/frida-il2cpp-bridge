@@ -27,6 +27,7 @@ function inform(message: any): void {
 
 /** @internal */
 function logtrace(message: any): void {
-    // Log stack trace
-    (globalThis as any).console.log(new Error(`\x1b[38;5;14mil2cpp\x1b[0m: ${message}`).stack);
+    // Capture stack trace without showing as error
+    const stack = new Error().stack?.split('\n').slice(1).join('\n') || '';
+    (globalThis as any).console.log(`\x1b[38;5;14mil2cpp\x1b[0m: ${message}\n${stack}`);
 }

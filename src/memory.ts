@@ -72,7 +72,6 @@ namespace Il2Cpp {
         // TODO that might not be entirely true, so double check
         options = { derefPointer: !type.class.isValueType, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
-        logtrace(`readWrapped: ${pointer} -> ${dereferenced} (${type.name})`);
 
         if (type.isPrimitive()) return new Il2Cpp.Primitive(pointer, type);
 
@@ -377,6 +376,25 @@ namespace Il2Cpp {
         if (!type) type = Il2Cpp.guessType(value);
 
         if (type.name === 'System.Void') return undefined;
+
+        if (type.getIsByReference()) {
+            // ✔️ Assign T& to T& (probably rare, because who has a T& lying around?)
+            if (value instanceof Il2Cpp.ByReference) return value;
+
+            // ✔️ Assign T to T& (both value and reference types)
+            // Note: this only works for primitives right now because I write them to a memory location first
+            if (
+                type.isAssignableFromValue(value) &&
+                (value instanceof Il2Cpp.ValueType || value instanceof Il2Cpp.ReferenceType)
+            )
+                return value.handle;
+
+            // TODO: if there are any useful use cases, gracefully create a reference
+            // For example, decided not to create a reference on the fly, because there's no way to use it afterwards
+            raise(
+                `Got ${value} (type: ${value?.constructor?.name ?? typeof value}) for ${type.name}, expected ${type.getReferredType().name}`
+            );
+        }
 
         // For now, just wrap all JS primitives in a wee pointer
         // TODO this is a memory leak! Best let Frida handle this,

@@ -1,30 +1,36 @@
 namespace Il2Cpp {
     /**
-     * Not to be confused with "passing a parameter by reference", reference types are a C# concept.
+     * As in, "pass parameter by reference". Not to be confused with C#'s `ReferenceType`
      *
-     * Opposite of `Il2Cpp.ValueType`.
+     * - Prevents copies of value types.
      */
     export class ByReference<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
         constructor(
             handle: NativePointerValue,
-            readonly type: Il2Cpp.Type
+            readonly referredType: Il2Cpp.Type
         ) {
             super(handle);
 
             globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => `Il2Cpp.Reference<${this.type.name}>`,
+                get: () => `Il2Cpp.Reference<${this.referredType.name}>`,
                 enumerable: true,
             });
         }
 
         /** Gets the element referenced by the current reference. */
         get value(): T {
-            return readWrapped(this.handle, this.type) as T;
+            return readWrapped(this.handle, this.referredType) as T;
         }
 
         /** Sets the element referenced by the current reference. */
         set value(value: T) {
-            write(this.handle, value, this.type);
+            write(this.handle, value, this.referredType);
+        }
+
+        get type(): Il2Cpp.Type {
+            // TODO: how to create a by reference type?
+            raise('havent figured out how to create a by reference type yet');
+            return this.type;
         }
 
         /** */
@@ -33,7 +39,7 @@ namespace Il2Cpp {
         }
 
         toString(): string {
-            return `->${this.valueToString()} (&${this.type.name})`;
+            return `->${this.valueToString()} (&${this.referredType.name})`;
         }
     }
 

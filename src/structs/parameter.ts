@@ -29,13 +29,13 @@ namespace Il2Cpp {
             | Il2Cpp.Wrapped
             | Il2Cpp.ByReference;
 
-        export type TypeValue = {
+        export type TypedValue = {
             type: Il2Cpp.Type;
             value: Il2Cpp.Parameter.Value;
         };
 
-        export function isTypeValue(v: TypeValue | Value): v is TypeValue {
-            return (v as TypeValue).type !== undefined;
+        export function isTypeValue(v: TypedValue | Value): v is TypedValue {
+            return (v as TypedValue).type !== undefined && (v as TypedValue).value !== undefined;
         }
 
         /*

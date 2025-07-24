@@ -320,9 +320,6 @@ namespace Il2Cpp {
             const allocatedParameters = parameters.map((p, i) =>
                 toFridaValue(p, this.parameters[i].type)
             );
-            for (const p of allocatedParameters) {
-                inform(`p: ${p} (${p?.constructor?.name ?? typeof p})`);
-            }
 
             if (!this.isStatic || Il2Cpp.unityVersionIsBelow201830) {
                 allocatedParameters.unshift(instance);
@@ -334,7 +331,8 @@ namespace Il2Cpp {
 
             try {
                 const returnValue = this.nativeFunction(...allocatedParameters);
-                inform(`returnValue: ${returnValue} (${this.returnType})`);
+                // inform(`returnValue: ${returnValue} (${this.returnType})`);
+                // inform(`    -> ${fromFridaValue(returnValue, this.returnType)}`);
                 return fromFridaValue(returnValue, this.returnType) as T;
             } catch (e: any) {
                 if (e == null) {

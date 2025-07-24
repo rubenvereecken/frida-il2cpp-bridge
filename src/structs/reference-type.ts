@@ -1,4 +1,9 @@
 namespace Il2Cpp {
+    /**
+     * Not to be confused with "passing a parameter by reference", reference types are a C# concept.
+     *
+     * Opposite of `Il2Cpp.ValueType`.
+     */
     export class ReferenceType<T extends string = string> extends Il2Cpp.ObjectLike<T> {
         get constructorName() {
             return 'Il2Cpp.ReferenceType';

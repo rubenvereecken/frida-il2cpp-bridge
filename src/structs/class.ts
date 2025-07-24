@@ -399,7 +399,7 @@ namespace Il2Cpp {
          * Doesn't cover constructors with default parameters – all parameters must be provided.
          */
         new(
-            ...parameters: (Il2Cpp.Parameter.TypeValue | Il2Cpp.Parameter.Value)[]
+            ...parameters: (Il2Cpp.Parameter.TypedValue | Il2Cpp.Parameter.Value)[]
         ): Il2Cpp.ReferenceType {
             if (parameters.length == 0) return this.defaultNew();
 

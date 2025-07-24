@@ -153,9 +153,16 @@ namespace Il2Cpp {
         }
 
         /** Determines whether this type is passed by reference. */
-        @lazy
         get isByReference(): boolean {
             return !!Il2Cpp.exports.typeIsByRef(this);
+        }
+
+        getIsByReference(): this is Il2Cpp.Type & { isByReference: true } {
+            return this.isByReference;
+        }
+
+        getReferredType(this: Il2Cpp.Type & { isByReference: true }): Il2Cpp.Type {
+            return this.class.type;
         }
 
         /** Determines whether this type is primitive. */
@@ -258,9 +265,18 @@ namespace Il2Cpp {
             }
 
             if (other instanceof Il2Cpp.ByReference) {
-                raise(
-                    `might not have support for reference types yet: ${other.type.name} -> ${this.name}`
-                );
+                // ✔️ Assign T& to T&
+                // ✔️ Assign T to T&
+                if (
+                    this.getIsByReference() &&
+                    this.getReferredType().isAssignableFromType(other.referredType)
+                ) {
+                    return true;
+                }
+
+                // raise(
+                //     `might not have support for reference types yet: ${other.referredType.name} -> ${this.name}`
+                // );
             }
 
             return false;
