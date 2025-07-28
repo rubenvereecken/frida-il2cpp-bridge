@@ -177,21 +177,21 @@ namespace Il2Cpp {
         );
     }
 
-    /** @internal */
     export function fromFridaValue(
         value: NativeCallbackArgumentValue,
         type: Il2Cpp.Type
     ): Il2Cpp.Parameter.Value;
 
-    /** @internal */
     export function fromFridaValue(
         value: NativeFunctionReturnValue,
         type: Il2Cpp.Type
     ): Il2Cpp.Method.ReturnType;
 
-    /** @internal */
+    // TODO: should we unify `boolean` in some joint frida type?
+    export function fromFridaValue(value: boolean, type: Il2Cpp.Type): Il2Cpp.WrappedPrimitive;
+
     export function fromFridaValue(
-        value: NativeCallbackArgumentValue | NativeFunctionReturnValue,
+        value: NativeCallbackArgumentValue | NativeFunctionReturnValue | boolean,
         type: Il2Cpp.Type
     ): Il2Cpp.Parameter.Value | Il2Cpp.Method.ReturnType {
         // Note: it's now impossible for arrays to be returned by Frida
@@ -365,7 +365,6 @@ namespace Il2Cpp {
     }
 
     /**
-     * @internal
      * For use as a parameter to a native function.
      * It's useful to provide `type` to get an accurate match. For example when passing an Int64 into an Int32 (number), which frida won't like.
      */
