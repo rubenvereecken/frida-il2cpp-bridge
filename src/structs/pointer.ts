@@ -10,9 +10,10 @@ namespace Il2Cpp {
 
         constructor(
             handle: NativePointer,
-            readonly type: Il2Cpp.Type<S>
+            readonly referredType: Il2Cpp.Type<S>
         ) {
-            super(handle);
+            // TODO: this is wrong, really we need the pointer version of the original type
+            super(handle, referredType);
         }
 
         // TODO check if this actually works??
@@ -24,6 +25,12 @@ namespace Il2Cpp {
         @lazy
         get class() {
             return this.object.class;
+        }
+
+        @lazy
+        get type() {
+            // TODO: this is wrong, really we need the pointer version of the original type
+            return this.referredType;
         }
 
         valueToString(): string {

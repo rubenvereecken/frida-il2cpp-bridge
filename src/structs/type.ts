@@ -161,8 +161,18 @@ namespace Il2Cpp {
             return this.isByReference;
         }
 
-        getReferredType(this: Il2Cpp.Type & { isByReference: true }): Il2Cpp.Type {
+        getReferredType(
+            this: (Il2Cpp.Type & { isByReference: true }) | (Il2Cpp.Type & { isPointer: true })
+        ): Il2Cpp.Type {
             return this.class.type;
+        }
+
+        get isPointer(): boolean {
+            return !!Il2Cpp.exports.typeIsPointer(this);
+        }
+
+        getIsPointer(): this is Il2Cpp.Type & { isPointer: true } {
+            return this.isPointer;
         }
 
         /** Determines whether this type is primitive. */
