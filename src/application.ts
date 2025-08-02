@@ -49,6 +49,7 @@ namespace Il2Cpp {
          * ```
          */
         get version(): string | null {
+            // Alternatively, could use `Il2Cpp.domain.assembly("UnityEngine.CoreModule").image.class("UnityEngine.Application").m.get_version()`
             return unityEngineCall('get_version');
         },
     };
