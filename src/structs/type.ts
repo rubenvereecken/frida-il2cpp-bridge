@@ -231,6 +231,23 @@ namespace Il2Cpp {
             );
         }
 
+        /**
+         * Creates a pointer type of the current type.
+         *
+         * @example
+         * ```ts
+         * const intType = Il2Cpp.corlib.class("System.Int32").type;
+         * const intPtrType = intType.asPointerType();
+         * console.log(intPtrType.name); // "System.Int32*"
+         * ```
+         */
+        asPointerType(): Il2Cpp.Type {
+            const pointerRuntimeType = this.runtimeType
+                .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakePointerType', 0)
+                .invoke();
+            return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(pointerRuntimeType)).type;
+        }
+
         /** Gets the type enum of the current type. */
         @lazy
         get typeEnum(): number {
