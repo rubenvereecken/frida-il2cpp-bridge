@@ -101,7 +101,7 @@ namespace Il2Cpp {
                 .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetGenericArguments')
                 .invoke();
             return globalThis.Array.from(types).map(
-                _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
+                _ => new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(_))
             );
         }
 
@@ -295,7 +295,7 @@ namespace Il2Cpp {
                 );
             }
 
-            const types = classes.map(_ => _.type.object);
+            const types = classes.map(_ => _.type.runtimeType);
             const typeArray = Il2Cpp.array(Il2Cpp.corlib.class('System.Type'), types);
 
             const inflatedMethodObject = this.object

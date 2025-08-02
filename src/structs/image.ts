@@ -47,7 +47,7 @@ namespace Il2Cpp {
                 // app startup, hence the `Array.from`.
                 const classes = globalThis.Array.from(
                     types,
-                    _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
+                    _ => new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(_))
                 );
 
                 // <Module> class does not always exist

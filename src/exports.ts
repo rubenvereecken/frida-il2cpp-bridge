@@ -55,7 +55,7 @@ namespace Il2Cpp {
             return r('il2cpp_class_from_name', 'pointer', ['pointer', 'pointer', 'pointer']);
         },
 
-        get classFromObject() {
+        get classFromSystemType() {
             return r('il2cpp_class_from_system_type', 'pointer', ['pointer']);
         },
 

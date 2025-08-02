@@ -212,10 +212,23 @@ namespace Il2Cpp {
             }
         }
 
-        /** Gets the encompassing object of the current type. */
+        /**
+         * Gets the corresponding `System.RuntimeType` of the current type.
+         * Implemented in il2cpp as Il2CppReflectionType.
+         *
+         * @example
+         * ```ts
+         * const intType = Il2Cpp.corlib.class("System.Int32").type;
+         * const intRuntimeType = intType.runtimeType;
+         * const intPtrRuntimeType = intRuntimeType.m.MakePointerType()
+         * const intPtrType = (new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(intPtrRuntimeType))).type
+         * ```
+         */
         @lazy
-        get object(): Il2Cpp.ReferenceType {
-            return new Il2Cpp.ReferenceType(Il2Cpp.exports.typeGetObject(this));
+        get runtimeType() {
+            return new Il2Cpp.ReferenceType<'System.RuntimeType'>(
+                Il2Cpp.exports.typeGetObject(this)
+            );
         }
 
         /** Gets the type enum of the current type. */
@@ -226,7 +239,10 @@ namespace Il2Cpp {
 
         isSame(other: Il2Cpp.Type): boolean {
             if (Il2Cpp.exports.typeEquals.isNull()) {
-                return !!this.object.method<Il2Cpp.Boolean>('Equals').invoke(other.object).read();
+                return !!this.runtimeType
+                    .method<Il2Cpp.Boolean>('Equals')
+                    .invoke(other.runtimeType)
+                    .read();
             }
 
             return !!Il2Cpp.exports.typeEquals(this.handle, other.handle);

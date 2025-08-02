@@ -126,11 +126,11 @@ namespace Il2Cpp {
                 return [];
             }
 
-            const types = this.type.object
+            const types = this.type.runtimeType
                 .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetGenericArguments')
                 .invoke();
             return globalThis.Array.from(types).map(
-                _ => new Il2Cpp.Class(Il2Cpp.exports.classFromObject(_))
+                _ => new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(_))
             );
         }
 
@@ -309,13 +309,13 @@ namespace Il2Cpp {
                 );
             }
 
-            const types = classes.map(_ => _.type.object);
+            const types = classes.map(_ => _.type.runtimeType);
             const typeArray = Il2Cpp.array(Il2Cpp.corlib.class('System.Type'), types);
 
-            const inflatedType = this.type.object
+            const inflatedType = this.type.runtimeType
                 .method<Il2Cpp.ReferenceType>('MakeGenericType', 1)
                 .invoke(typeArray);
-            return new Il2Cpp.Class(Il2Cpp.exports.classFromObject(inflatedType));
+            return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(inflatedType));
         }
 
         /** Calls the static constructor of the current class. */
