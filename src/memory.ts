@@ -91,7 +91,7 @@ namespace Il2Cpp {
                     // Never needs dereferencing
                     return new Il2Cpp.ValueType(dereferenced, type);
                 case Il2Cpp.Type.enum.object:
-                case Il2Cpp.Type.enum.class:
+                case Il2Cpp.Type.enum.referenceType:
                     return new Il2Cpp.ReferenceType(dereferenced);
                 case Il2Cpp.Type.enum.genericInstance:
                     return type.class.isValueType
@@ -165,7 +165,7 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.valueType:
                 return (Memory.copy(pointer, value, type.class.valueTypeSize), pointer);
             case Il2Cpp.Type.enum.object:
-            case Il2Cpp.Type.enum.class:
+            case Il2Cpp.Type.enum.referenceType:
             case Il2Cpp.Type.enum.genericInstance:
                 return value instanceof Il2Cpp.ValueType
                     ? (Memory.copy(pointer, value, type.class.valueTypeSize), pointer)
@@ -251,7 +251,7 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.valueType:
                 // TODO test this
                 return new Il2Cpp.ValueType(value, type);
-            case Il2Cpp.Type.enum.class:
+            case Il2Cpp.Type.enum.referenceType:
             case Il2Cpp.Type.enum.genericInstance:
             case Il2Cpp.Type.enum.object:
                 return new Il2Cpp.ReferenceType(value);
