@@ -81,7 +81,7 @@ namespace Il2Cpp {
         // Value types can't be null
         if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
 
-        if (!type.isByRef)
+        if (!type._isByRef)
             switch (type.typeEnum) {
                 case Il2Cpp.Type.enum.string:
                     return new Il2Cpp.String(dereferenced);
@@ -239,7 +239,7 @@ namespace Il2Cpp {
                 `Expected a pointer for type ${type.name}, got ${value?.constructor?.name} (${value})`
             );
 
-        if (type.isByRef) {
+        if (type._isByRef) {
             return new Il2Cpp.ByRef(value, type);
         }
 
@@ -336,11 +336,11 @@ namespace Il2Cpp {
     ): NativePointer;
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
-        type: Il2Cpp.WrappedPrimitiveCSType
+        type: Il2Cpp.WrappedPrimitiveType
     ): Il2Cpp.Primitive.JSType;
     export function coercePrimitive(
         value: Il2Cpp.Primitive.JSType,
-        type: Il2Cpp.WrappedPrimitiveCSType
+        type: Il2Cpp.WrappedPrimitiveType
     ): Il2Cpp.Primitive.JSType {
         if (value === undefined) return value;
 
@@ -376,7 +376,7 @@ namespace Il2Cpp {
 
         if (type.name === 'System.Void') return undefined;
 
-        if (type.getIsByRef()) {
+        if (type.isByRef()) {
             // ✔️ Assign T& to T& (probably rare, because who has a T& lying around?)
             if (value instanceof Il2Cpp.ByRef) return value;
 
@@ -391,7 +391,7 @@ namespace Il2Cpp {
             // TODO: if there are any useful use cases, gracefully create a reference
             // For example, decided not to create a reference on the fly, because there's no way to use it afterwards
             raise(
-                `Got ${value} (type: ${value?.constructor?.name ?? typeof value}) for ${type.name}, expected ${type.getReferredType().name}`
+                `Got ${value} (type: ${value?.constructor?.name ?? typeof value}) for ${type.name}, expected ${type.getElementType().name}`
             );
         }
 

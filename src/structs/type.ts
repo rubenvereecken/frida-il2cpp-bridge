@@ -77,7 +77,7 @@ namespace Il2Cpp {
                     : instanceFields.map(_ => _.type.fridaAlias);
             }
 
-            if (this.isByRef) {
+            if (this._isByRef) {
                 return 'pointer';
             }
 
@@ -152,32 +152,50 @@ namespace Il2Cpp {
             }
         }
 
-        /** Determines whether this type is passed by reference. */
-        get isByRef(): boolean {
+        static fromRuntimeType<T extends string>(runtimeType: Il2Cpp.ReferenceType) {
+            return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(runtimeType))
+                .type as Il2Cpp.Type<T>;
+        }
+
+        @lazy
+        get _isByRef(): boolean {
             return !!Il2Cpp.exports.typeIsByRef(this);
         }
 
-        getIsByRef(): this is Il2Cpp.Type & { isByRef: true } {
-            return this.isByRef;
+        isByRef(): this is T extends `${string}&`
+            ? Il2Cpp.ByRefType<T>
+            : Il2Cpp.ByRefType<`${string}&`> {
+            return this._isByRef;
         }
 
-        getReferredType(
-            this: (Il2Cpp.Type & { isByRef: true }) | (Il2Cpp.Type & { isPointer: true })
-        ): Il2Cpp.Type {
-            return this.class.type;
-        }
-
-        get isPointer(): boolean {
+        @lazy
+        get _isPointer(): boolean {
             return !!Il2Cpp.exports.typeIsPointer(this);
         }
 
-        getIsPointer(): this is Il2Cpp.Type & { isPointer: true } {
-            return this.isPointer;
+        isPointer(): this is T extends `${string}*`
+            ? Il2Cpp.PointerType<T>
+            : Il2Cpp.PointerType<`${string}*`> {
+            return this._isPointer;
+        }
+
+        @lazy
+        get _isArray(): boolean {
+            return (
+                this.typeEnum === Il2Cpp.Type.enum.array ||
+                this.typeEnum == Il2Cpp.Type.enum.multidimensionalArray
+            );
+        }
+
+        isArray(): this is T extends `${string}[]`
+            ? Il2Cpp.ArrayType<T>
+            : Il2Cpp.ArrayType<`${string}[]`> {
+            return this._isArray;
         }
 
         /** Determines whether this type is primitive. */
         // TODO add @lazy for methods
-        isPrimitive(): this is Il2Cpp.WrappedPrimitiveCSType {
+        isPrimitive(): this is Il2Cpp.WrappedPrimitiveType {
             switch (this.typeEnum) {
                 case Il2Cpp.Type.enum.void:
                 case Il2Cpp.Type.enum.boolean:
@@ -236,17 +254,77 @@ namespace Il2Cpp {
          *
          * @example
          * ```ts
-         * const intType = Il2Cpp.corlib.class("System.Int32").type;
-         * const intPtrType = intType.asPointerType();
-         * console.log(intPtrType.name); // "System.Int32*"
+         * Il2Cpp.System.Int32.type.makePointerType(); // -> System.Int32*
          * ```
          */
-        asPointerType() {
+        makePointerType(): Il2Cpp.PointerType<`${T}*`> {
             const pointerRuntimeType = this.runtimeType
                 .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakePointerType', 0)
                 .invoke();
-            return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(pointerRuntimeType))
-                .type as Il2Cpp.Type<`${T}*`> & { isPointer: true };
+            return Il2Cpp.Type.fromRuntimeType<`${T}*`>(
+                pointerRuntimeType
+            ) as Il2Cpp.PointerType<`${T}*`>;
+        }
+
+        /**
+         * Creates a by-reference type of the current type.
+         *
+         * @example
+         * ```ts
+         * Il2Cpp.System.Int32.type.makeByRefType(); // -> System.Int32&
+         * ```
+         */
+        makeByRefType(): Il2Cpp.ByRefType<`${T}&`> {
+            const byRefRuntimeType = this.runtimeType
+                .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakeByRefType', 0)
+                .invoke();
+            return Il2Cpp.Type.fromRuntimeType<`${T}&`>(
+                byRefRuntimeType
+            ) as Il2Cpp.ByRefType<`${T}&`>;
+        }
+
+        /**
+         * Creates an array type of the current type.
+         *
+         * @example
+         * ```ts
+         * Il2Cpp.System.Int32.type.makeArrayType(); // -> System.Int32[]
+         * ```
+         */
+        makeArrayType(): Il2Cpp.ArrayType<`${T}[]`> {
+            const arrayRuntimeType = this.runtimeType
+                .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakeArrayType', 0)
+                .invoke();
+            return Il2Cpp.Type.fromRuntimeType<`${T}[]`>(
+                arrayRuntimeType
+            ) as Il2Cpp.ArrayType<`${T}[]`>;
+        }
+
+        /**
+         * Element type of either a by-ref, pointer, or array type.
+         *
+         * @example
+         * ```ts
+         * Il2Cpp.System.Int32.type.makePointerType().getElementType(); // -> System.Int32
+         * Il2Cpp.System.String.type.makeByRefType().getElementType(); // -> System.String
+         * Il2Cpp.System.Object.type.makeArrayType().getElementType(); // -> System.Object
+         * ```
+         */
+        getElementType<U extends `${string}*`>(
+            this: Il2Cpp.PointerType<U>
+        ): Il2Cpp.Type<Il2Cpp.StripPointerSuffix<U>>;
+        getElementType<U extends `${string}&`>(
+            this: Il2Cpp.ByRefType<U>
+        ): Il2Cpp.Type<Il2Cpp.StripByRefSuffix<U>>;
+        getElementType<U extends `${string}[]`>(
+            this: Il2Cpp.ArrayType<U>
+        ): Il2Cpp.Type<Il2Cpp.StripArraySuffix<U>>;
+        getElementType<U extends string>(this: Il2Cpp.HasElementType<U>): Il2Cpp.Type {
+            const elementRuntimeType = this.runtimeType
+                .method<Il2Cpp.ReferenceType>('GetElementType', 0)
+                .invoke();
+            // Overloads provide the precise return type; impl can be broad
+            return Il2Cpp.Type.fromRuntimeType(elementRuntimeType) as Il2Cpp.Type;
         }
 
         /** Gets the type enum of the current type. */
@@ -255,7 +333,7 @@ namespace Il2Cpp {
             return Il2Cpp.exports.typeGetTypeEnum(this);
         }
 
-        isSame(other: Il2Cpp.Type): boolean {
+        isSame<U extends string>(other: Il2Cpp.Type<U>): this is Il2Cpp.Type<U> {
             if (Il2Cpp.exports.typeEquals.isNull()) {
                 return !!this.runtimeType
                     .method<Il2Cpp.Boolean>('Equals')
@@ -312,8 +390,8 @@ namespace Il2Cpp {
                 // ✔️ Assign T& to T&
                 // ✔️ Assign T to T&
                 if (
-                    this.getIsByRef() &&
-                    this.getReferredType().isAssignableFromType(other.referredType)
+                    this.isByRef() &&
+                    this.getElementType().isAssignableFromType(other.referredType)
                 ) {
                     return true;
                 }
@@ -394,20 +472,24 @@ namespace Il2Cpp {
         isString(this: Il2Cpp.Type): this is Il2Cpp.Type<'System.String'> {
             return this.typeEnum === Il2Cpp.Type.enum.string;
         }
-
-        isArray(this: Il2Cpp.Type): this is Il2Cpp.WrappedArrayCSType {
-            return (
-                this.typeEnum === Il2Cpp.Type.enum.array ||
-                this.typeEnum == Il2Cpp.Type.enum.multidimensionalArray
-            );
-        }
     }
 
-    export type WrappedArrayCSType = Il2Cpp.Type & {
-        class: Il2Cpp.WrappedArrayCSClass;
+    export type WrappedPrimitiveType = WrappedPrimitive['type'];
+
+    export type PointerType<T extends `${string}*`> = Il2Cpp.Type<T> & { _isPointer: true };
+
+    export type ByRefType<T extends `${string}&`> = Il2Cpp.Type<T> & { _isByRef: true };
+
+    export type ArrayType<T extends `${string}[]`> = Il2Cpp.Type<T> & {
+        _isArray: true;
+        class: Il2Cpp.WrappedArrayClass<T>;
     };
 
-    export type WrappedPrimitiveCSType = WrappedPrimitive['type'];
+    /** Any type that has an element type (pointer, by-ref, or array) */
+    export type HasElementType<T extends string = string> =
+        | Il2Cpp.PointerType<Extract<T, `${string}*`>>
+        | Il2Cpp.ByRefType<Extract<T, `${string}&`>>
+        | Il2Cpp.ArrayType<Extract<T, `${string}[]`>>;
 
     // IL2CPP_TYPE_END        = 0x00,       /* End of List */
     // IL2CPP_TYPE_VOID       = 0x01,

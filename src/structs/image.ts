@@ -31,7 +31,7 @@ namespace Il2Cpp {
             if (Il2Cpp.unityVersionIsBelow201830) {
                 return this.classes.length;
             } else {
-                return Il2Cpp.exports.imageGetClassCount(this);
+                return Il2Cpp.exports.imageGetClassCount(this).toNumber();
             }
         }
 

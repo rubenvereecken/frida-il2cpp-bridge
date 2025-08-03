@@ -383,7 +383,7 @@ namespace Il2Cpp {
 
             const exceptionArray = Memory.alloc(Process.pointerSize);
 
-            Il2Cpp.exports.objectInitialize(object, exceptionArray);
+            Il2Cpp.exports.objectInitializeException(object, exceptionArray);
 
             const exception = exceptionArray.readPointer();
 
@@ -495,10 +495,10 @@ namespace Il2Cpp {
         }
     }
 
-    export type WrappedArrayCSClass = Il2Cpp.Class & {
+    export type WrappedArrayClass<T extends string = string> = Il2Cpp.Class<T> & {
         // TODO make these not crash in non-array classes (and instead return nullable)
         arrayElementSize: number;
-        elementClass: Il2Cpp.Class;
+        elementClass: Il2Cpp.Class<Il2Cpp.StripArraySuffix<T>>;
     };
 
     // Helper classes, helpfully typed

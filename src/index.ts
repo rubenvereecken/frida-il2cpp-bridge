@@ -1,5 +1,6 @@
 /// <reference types="frida-gum" />
 
+/// <reference path="./utils/type-helpers.ts">/>
 /// <reference path="./utils/android.ts">/>
 /// <reference path="./utils/console.ts">/>
 /// <reference path="./utils/decorate.ts">/>
@@ -37,7 +38,7 @@
 /// <reference path="./structs/array.ts">/>
 /// <reference path="./structs/value-type.ts">/>
 /// <reference path="./structs/primitive.ts">/>
-/// <reference path="./structs/reference.ts">/>
+/// <reference path="./structs/by-ref.ts">/>
 /// <reference path="./structs/pointer.ts">/>
 /// <reference path="./structs/assembly.ts">/>
 /// <reference path="./structs/delegate.ts">/>

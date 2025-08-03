@@ -87,7 +87,7 @@ namespace Il2Cpp {
         /** Gets the offset of this field, calculated as the difference with its owner virtual address. */
         @lazy
         get offset(): number {
-            return Il2Cpp.exports.fieldGetOffset(this);
+            return Il2Cpp.exports.fieldGetOffset(this).toNumber();
         }
 
         /** Gets the type of this field. */
