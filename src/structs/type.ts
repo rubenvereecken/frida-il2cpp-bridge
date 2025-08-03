@@ -410,7 +410,7 @@ namespace Il2Cpp {
          */
         isAssignableFromValue(other: Il2Cpp.Parameter.Value): boolean {
             // Alright, we already know its type because it's got a wrapper
-            if (Il2Cpp.isWrappedType(other)) {
+            if (Il2Cpp.isIl2Cpp(other)) {
                 return this.isAssignableFromType(other.type);
             }
 
@@ -451,15 +451,6 @@ namespace Il2Cpp {
             }
 
             return false;
-        }
-
-        isLongLike(
-            this: Il2Cpp.Type
-        ): this is Il2Cpp.Type<'System.Int64'> | Il2Cpp.Type<'System.UInt64'> {
-            return (
-                this.typeEnum === Il2Cpp.Type.enum.long ||
-                this.typeEnum === Il2Cpp.Type.enum.unsignedLong
-            );
         }
 
         isBoolean(this: Il2Cpp.Type): this is Il2Cpp.Type<'System.Boolean'> {
@@ -525,13 +516,19 @@ namespace Il2Cpp {
 
     export type WrappedPrimitiveType = WrappedPrimitive['type'];
 
-    export type PointerType<T extends `${string}*`> = Il2Cpp.Type<T> & { _isPointer: true };
+    export type PointerType<T extends `${string}*`> = Il2Cpp.Type<T> & {
+        _isPointer: true;
+        class: Il2Cpp.PointerClass<T>;
+    };
 
-    export type ByRefType<T extends `${string}&`> = Il2Cpp.Type<T> & { _isByRef: true };
+    export type ByRefType<T extends `${string}&`> = Il2Cpp.Type<T> & {
+        _isByRef: true;
+        class: Il2Cpp.ByRefClass<T>;
+    };
 
     export type ArrayType<T extends `${string}[]`> = Il2Cpp.Type<T> & {
         _isArray: true;
-        class: Il2Cpp.WrappedArrayClass<T>;
+        class: Il2Cpp.ArrayClass<T>;
     };
 
     /** Any type that has an element type (pointer, by-ref, or array) */

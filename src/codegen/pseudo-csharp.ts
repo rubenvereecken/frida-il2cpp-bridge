@@ -24,7 +24,7 @@ ${field.isThreadStatic ? `[ThreadStatic] ` : ``}\
 ${field.isStatic ? `static ` : ``}\
 ${field.type.name} \
 ${field.name}\
-${field.isLiteral ? ` = ${field.type.class.isEnum ? readWrapped((field.value as Il2Cpp.ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
+${field.isLiteral ? ` = ${field.type.class.isEnum ? readIl2Cpp((field.value as Il2Cpp.ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
 ${field.isThreadStatic || field.isLiteral ? `` : ` // 0x${field.offset.toString(16)}`}`;
         }
 

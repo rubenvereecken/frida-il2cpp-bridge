@@ -12,7 +12,7 @@ namespace Il2Cpp {
         retval: T
     ) => T | void;
 
-    export class Method<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
+    export class Method<T extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue> extends NativeStruct {
         constructor(native: NativePointerValue) {
             super(native);
 
@@ -316,9 +316,9 @@ namespace Il2Cpp {
             return this.invokeRaw(NULL, ...parameters);
         }
 
-        invokeRaw(instance: NativePointerValue, ...parameters: Il2Cpp.Parameter.Value[]): T {
+        invokeRaw(instance: NativePointerValue, ...parameters: Il2Cpp.ParameterLike[]): T {
             const allocatedParameters = parameters.map((p, i) =>
-                toFridaValue(p, this.parameters[i].type)
+                toFrida(p, this.parameters[i].type)
             );
 
             if (!this.isStatic || Il2Cpp.unityVersionIsBelow201830) {
@@ -333,7 +333,7 @@ namespace Il2Cpp {
                 const returnValue = this.nativeFunction(...allocatedParameters);
                 // inform(`returnValue: ${returnValue} (${this.returnType})`);
                 // inform(`    -> ${fromFridaValue(returnValue, this.returnType)}`);
-                return fromFridaValue(returnValue, this.returnType) as T;
+                return fridaToIl2Cpp(returnValue, this.returnType) as T;
             } catch (e: any) {
                 if (e == null) {
                     raise(
@@ -457,11 +457,11 @@ namespace Il2Cpp {
                           : new Il2Cpp.ReferenceType(args[0] as NativePointer);
 
                     const parameters = this.parameters.map((_, i) =>
-                        fromFridaValue(args[i + startIndex], _.type)
+                        fridaToIl2Cpp(args[i + startIndex], _.type)
                     );
                     const result = block.call(thisObject, ...parameters);
                     // TODO sort typing here
-                    return toFridaValue(result) as any;
+                    return toFrida(result) as any;
                 },
                 this.returnType.fridaAlias,
                 this.fridaSignature
@@ -601,7 +601,7 @@ namespace Il2Cpp {
     export namespace Method {
         // For backward and future compatibility
         // Different from Il2Cpp.Parameter.Value: excludes JS primitives, strings, and Il2Cpp.Rereference
-        export type ReturnType = Il2Cpp.Wrapped;
+        export type ReturnType = Il2Cpp.Il2CppValue;
 
         /*
          * Method Attributes (22.1.9)

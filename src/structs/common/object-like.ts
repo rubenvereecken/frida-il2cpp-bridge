@@ -26,7 +26,7 @@ namespace Il2Cpp {
         abstract get constructorName(): string;
 
         /** Gets the field with the given name. */
-        field<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.BoundField<T> {
+        field<T extends Il2Cpp.Il2CppValue>(name: string): Il2Cpp.BoundField<T> {
             return this.type.class.field<T>(name).bind(this);
         }
 
@@ -53,7 +53,7 @@ namespace Il2Cpp {
         }
 
         /** Gets the field with the given name. */
-        tryField<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.BoundField<T> | undefined {
+        tryField<T extends Il2Cpp.Il2CppValue>(name: string): Il2Cpp.BoundField<T> | undefined {
             return this.type.class.tryField<T>(name)?.bind(this);
         }
 
@@ -93,7 +93,7 @@ namespace Il2Cpp {
             if (this.isNull()) return null;
 
             const fields = this.class.fields.filter(f => !f.isStatic);
-            const result: Il2Cpp.JSObject = {};
+            const result: Il2Cpp.JsObject = {};
 
             // TODO I think some child classes have access to fields that aren't showing – so check the whole tree for those
             fields.forEach(field => {

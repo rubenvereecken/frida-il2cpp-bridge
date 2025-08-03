@@ -1,39 +1,65 @@
 namespace Il2Cpp {
-    export type Wrapped =
+    // TODO figure out where I want to put all these types – probably in types/*.ts files
+    export type Il2CppValue =
         | Il2Cpp.Primitive
         | Il2Cpp.String
+        | Il2Cpp.ByRef
         | Il2Cpp.Pointer
         | Il2Cpp.ValueType
         | Il2Cpp.ReferenceType
         | Il2Cpp.Array
         | Il2Cpp.NullReference;
 
-    export function isWrappedType(type: Il2Cpp.Parameter.Value): type is Wrapped {
-        return (
-            type instanceof Il2Cpp.Primitive ||
-            type instanceof Il2Cpp.String ||
-            type instanceof Il2Cpp.Pointer ||
-            type instanceof Il2Cpp.ValueType ||
-            type instanceof Il2Cpp.ReferenceType ||
-            type instanceof Il2Cpp.Array
-        );
-    }
-
-    export function isWrapped(type: Il2Cpp.Parameter.Value): type is Wrapped {
-        return (
-            type instanceof Il2Cpp.Primitive ||
-            type instanceof Il2Cpp.String ||
-            type instanceof Il2Cpp.Pointer ||
-            type instanceof Il2Cpp.ValueType ||
-            type instanceof Il2Cpp.ReferenceType ||
-            type instanceof Il2Cpp.Array
-        );
-    }
-
-    export type JSObject = {
+    export type JsObject = {
         // TODO type this using RecursiveValuesOf (see Frida's NativeFunctionReturnValue)
         [key: string]: any;
     };
+
+    // TODO consolidate
+    export type JsPrimitive = Il2Cpp.Primitive.JsType;
+    export type JsValue = Il2Cpp.JsPrimitive | Il2Cpp.JsObject;
+
+    export type FridaValue =
+        | NativeFunctionReturnValue
+        | NativeFunctionArgumentValue
+        | NativeCallbackArgumentValue;
+
+    // TODO: remove this line when I'm happy – when this replaces Il2Cpp.Parameter.Value
+    /**
+     * Anything that can be passed as a parameter to an Il2Cpp method.
+     */
+    export type ParameterLike =
+        // Regular Il2Cpp types
+        | Il2Cpp.Il2CppValue
+        // And things that can be coerced to Il2Cpp types
+        | Il2Cpp.PrimitiveLike
+        | Il2Cpp.StringLike
+        | Il2Cpp.ArrayLike;
+
+    export function isIl2Cpp(type: Il2Cpp.Parameter.Value): type is Il2CppValue {
+        return (
+            type instanceof Il2Cpp.Primitive ||
+            type instanceof Il2Cpp.String ||
+            type instanceof Il2Cpp.ByRef ||
+            type instanceof Il2Cpp.Pointer ||
+            type instanceof Il2Cpp.ValueType ||
+            type instanceof Il2Cpp.ReferenceType ||
+            type instanceof Il2Cpp.Array
+        );
+    }
+
+    type maps = [
+        {
+            js: boolean;
+            frida: number;
+            il2cpp: Il2Cpp.Primitive<'System.Boolean'>;
+        },
+        {
+            js: number;
+            frida: number;
+            il2cpp: Il2Cpp.Primitive<'System.Int32'>;
+        },
+    ];
 
     /**
      * Allocates the given amount of bytes - it's equivalent to C's `malloc`. \
@@ -62,11 +88,11 @@ namespace Il2Cpp {
     /**
      * @param options.derefPointer If a pointer, dereference before reading? Usually `true`, but `false` for parameters for example.
      */
-    export function readWrapped(
+    export function readIl2Cpp(
         pointer: NativePointer,
         type: Il2Cpp.Type,
         options: { derefPointer?: boolean } = {}
-    ): Il2Cpp.Wrapped {
+    ): Il2Cpp.Il2CppValue {
         // reference types (classes, arrays, etc) need dereferencing,
         // while value types (primitives and value types) never do
         // TODO that might not be entirely true, so double check
@@ -81,7 +107,7 @@ namespace Il2Cpp {
         // Value types can't be null
         if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
 
-        if (!type.isByRef())
+        if (!type._isByRef)
             switch (type.typeEnum) {
                 case Il2Cpp.Type.enum.string:
                     return new Il2Cpp.String(dereferenced);
@@ -113,20 +139,20 @@ namespace Il2Cpp {
         type: Il2Cpp.Type
     ): NativePointer {
         if (Il2Cpp.isPrimitiveJSType(value)) {
-            if (type.isBoolean()) return pointer.writeS8(+coercePrimitive(value, type));
-            if (type.isSByte()) return pointer.writeS8(coercePrimitive(value, type));
-            if (type.isByte()) return pointer.writeU8(coercePrimitive(value, type));
-            if (type.isChar()) return pointer.writeU16(coercePrimitive(value, type));
-            if (type.isInt16()) return pointer.writeS16(coercePrimitive(value, type));
-            if (type.isUInt16()) return pointer.writeU16(coercePrimitive(value, type));
-            if (type.isInt32()) return pointer.writeS32(coercePrimitive(value, type));
-            if (type.isUInt32()) return pointer.writeU32(coercePrimitive(value, type));
-            if (type.isInt64()) return pointer.writeS64(coercePrimitive(value, type));
-            if (type.isUInt64()) return pointer.writeU64(coercePrimitive(value, type));
-            if (type.isSingle()) return pointer.writeFloat(coercePrimitive(value, type));
-            if (type.isDouble()) return pointer.writeDouble(coercePrimitive(value, type));
-            if (type.isIntPtr()) return pointer.writePointer(coercePrimitive(value, type));
-            if (type.isUIntPtr()) return pointer.writePointer(coercePrimitive(value, type));
+            if (type.isBoolean()) return pointer.writeS8(+coerceJSPrimitive(value, type));
+            if (type.isSByte()) return pointer.writeS8(coerceJSPrimitive(value, type));
+            if (type.isByte()) return pointer.writeU8(coerceJSPrimitive(value, type));
+            if (type.isChar()) return pointer.writeU16(coerceJSPrimitive(value, type));
+            if (type.isInt16()) return pointer.writeS16(coerceJSPrimitive(value, type));
+            if (type.isUInt16()) return pointer.writeU16(coerceJSPrimitive(value, type));
+            if (type.isInt32()) return pointer.writeS32(coerceJSPrimitive(value, type));
+            if (type.isUInt32()) return pointer.writeU32(coerceJSPrimitive(value, type));
+            if (type.isInt64()) return pointer.writeS64(coerceJSPrimitive(value, type));
+            if (type.isUInt64()) return pointer.writeU64(coerceJSPrimitive(value, type));
+            if (type.isSingle()) return pointer.writeFloat(coerceJSPrimitive(value, type));
+            if (type.isDouble()) return pointer.writeDouble(coerceJSPrimitive(value, type));
+            if (type.isIntPtr()) return pointer.writePointer(coerceJSPrimitive(value, type));
+            if (type.isUIntPtr()) return pointer.writePointer(coerceJSPrimitive(value, type));
             raise(
                 `couldn't write primitive value ${value} to ${pointer} using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
             );
@@ -139,12 +165,12 @@ namespace Il2Cpp {
 
     export function write(
         pointer: NativePointer,
-        value: Il2Cpp.Parameter.Value,
+        value: Il2Cpp.ParameterLike,
         type: Il2Cpp.Type
     ): NativePointer {
         if (Il2Cpp.isPrimitiveLike(value)) return writePrimitive(pointer, value, type);
         if (Il2Cpp.isStringLike(value)) {
-            if (Il2Cpp.isStringJsType(value)) value = Il2Cpp.string(value);
+            if (Il2Cpp.isJsString(value)) value = Il2Cpp.string(value);
             return pointer.writePointer(value);
         }
         if (Il2Cpp.isArrayLike(value)) {
@@ -177,21 +203,26 @@ namespace Il2Cpp {
         );
     }
 
-    export function fromFridaValue(
+    export function fridaToIl2Cpp(
         value: NativeCallbackArgumentValue,
         type: Il2Cpp.Type
-    ): Il2Cpp.Parameter.Value;
+    ): Il2Cpp.Il2CppValue;
 
-    export function fromFridaValue(
+    export function fridaToIl2Cpp(
         value: NativeFunctionReturnValue,
         type: Il2Cpp.Type
-    ): Il2Cpp.Method.ReturnType;
+    ): Il2Cpp.Il2CppValue;
 
-    // TODO: should we unify `boolean` in some joint frida type?
-    export function fromFridaValue(value: boolean, type: Il2Cpp.Type): Il2Cpp.WrappedPrimitive;
+    export function fridaToIl2Cpp(
+        value: NativeFunctionArgumentValue,
+        type: Il2Cpp.Type
+    ): Il2Cpp.Il2CppValue;
 
-    export function fromFridaValue(
-        value: NativeCallbackArgumentValue | NativeFunctionReturnValue | boolean,
+    export function fridaToIl2Cpp(
+        value:
+            | NativeCallbackArgumentValue
+            | NativeFunctionReturnValue
+            | NativeFunctionArgumentValue,
         type: Il2Cpp.Type
     ): Il2Cpp.Parameter.Value | Il2Cpp.Method.ReturnType {
         // Note: it's now impossible for arrays to be returned by Frida
@@ -218,19 +249,19 @@ namespace Il2Cpp {
         // }
 
         if (type.isPrimitive()) {
-            const pointer = Memory.alloc(type.class.valueTypeSize);
+            const handle = Memory.alloc(type.class.valueTypeSize);
             // TODO double check use case
             if (value === undefined) {
                 warn(`Got undefined for ${type.name}, returning unallocated pointer`);
-                return pointer;
+                return handle;
             }
             if (!Il2Cpp.isPrimitiveJSType(value)) {
                 raise(
                     `Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`
                 );
             }
-            Il2Cpp.write(pointer, value, type);
-            return new Il2Cpp.Primitive(pointer, type);
+            Il2Cpp.write(handle, value, type);
+            return new Il2Cpp.Primitive(handle, type);
         }
 
         if (value === undefined) raise(`Expected a value, got undefined for ${type.name}`);
@@ -273,6 +304,48 @@ namespace Il2Cpp {
         // }
     }
 
+    // TODO clean up and simplify this whole function
+    /**
+     * Converts a JS or Il2Cpp value to an Il2Cpp value.
+     */
+    export function toIl2Cpp(value: Il2Cpp.ParameterLike, type?: Il2Cpp.Type): Il2Cpp.Il2CppValue {
+        if (!type) type = guessType(value);
+
+        // TODO check if type works, or at least assert if we don't want coercion logic
+        // TODO consider a base Il2Cpp class that all Il2Cpp values inherit from
+        if (value instanceof Il2Cpp.ObjectLike) return value;
+
+        if (typeof value === 'boolean' && !type.isBoolean())
+            raise(`Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`);
+        if (
+            (Il2Cpp.isJsString(value) && !type.isString()) ||
+            (!Il2Cpp.isJsString(value) && type.isString())
+        )
+            raise(`Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`);
+
+        if (Il2Cpp.isJsString(value)) return Il2Cpp.string(value);
+
+        if (typeof value === 'boolean') {
+            // Frida doesn't have booleans, so handle those separately
+            const handle = Memory.alloc(type.class.valueTypeSize);
+            if (!Il2Cpp.isPrimitiveJSType(value)) {
+                raise(
+                    `Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`
+                );
+            }
+            Il2Cpp.write(handle, value, type);
+            if (!type.isPrimitive()) raise(`Expected a primitive type, got ${type.name}`);
+            return new Il2Cpp.Primitive(handle, type);
+        }
+
+        if (Il2Cpp.isJsArray(value)) raise(`Raw JS arrays not yet supported in toIl2Cpp()`);
+
+        return fridaToIl2Cpp(value, type);
+    }
+
+    /**
+     * Guess the best Il2Cpp type for a given JS or Il2Cpp value.
+     */
     export function guessType(value: Il2Cpp.Parameter.Value): Il2Cpp.Type {
         const t = (kls: string) => Il2Cpp.corlib.class(kls).type;
 
@@ -297,18 +370,18 @@ namespace Il2Cpp {
         return (value as any).type;
     }
 
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.Type<'System.Void'>
     ): undefined;
     // Any number can be coerced to a boolean (lossy)
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.Type<'System.Boolean'>
     ): boolean;
     // All 1 to 4 byte primitives fit into a regular JS `number` (double) without loss, as do doubles
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type:
             | Il2Cpp.Type<'System.SByte'>
             | Il2Cpp.Type<'System.Byte'>
@@ -321,27 +394,27 @@ namespace Il2Cpp {
             | Il2Cpp.Type<'System.Double'>
     ): number;
     // Any primitive can be upcast to a long (signed or unsigned) without loss
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.Type<'System.Int64'>
     ): globalThis.Int64;
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.Type<'System.UInt64'>
     ): globalThis.UInt64;
     // Any primitive can be upcast to a pointer without loss
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.Type<'System.IntPtr'> | Il2Cpp.Type<'System.UIntPtr'>
     ): NativePointer;
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.WrappedPrimitiveType
-    ): Il2Cpp.Primitive.JSType;
-    export function coercePrimitive(
-        value: Il2Cpp.Primitive.JSType,
+    ): Il2Cpp.Primitive.JsType;
+    export function coerceJSPrimitive(
+        value: Il2Cpp.Primitive.JsType,
         type: Il2Cpp.WrappedPrimitiveType
-    ): Il2Cpp.Primitive.JSType {
+    ): Il2Cpp.Primitive.JsType {
         if (value === undefined) return value;
 
         // Be sure to convert booleans manually (TODO necessary??)
@@ -364,12 +437,14 @@ namespace Il2Cpp {
         return +value;
     }
 
+    // TODO have a complementary function that also parses value types to plain JS objects -> toJs
     /**
+     * Turns either a JS or Il2Cpp value into a Frida value.
      * For use as a parameter to a native function.
      * It's useful to provide `type` to get an accurate match. For example when passing an Int64 into an Int32 (number), which frida won't like.
      */
-    export function toFridaValue(
-        value: Il2Cpp.Parameter.Value,
+    export function toFrida(
+        value: Il2Cpp.ParameterLike,
         type?: Il2Cpp.Type
     ): NativeFunctionArgumentValue | NativeFunctionReturnValue {
         if (!type) type = Il2Cpp.guessType(value);
@@ -410,7 +485,7 @@ namespace Il2Cpp {
 
         if (Il2Cpp.isWrappedPrimitive(value) && type.isPrimitive()) {
             // For cases like Int64 -> Int32, otherwise il2cpp or frida will throw
-            const coerced = Il2Cpp.coercePrimitive(value.read(), type);
+            const coerced = Il2Cpp.coerceJSPrimitive(value.read(), type);
             if (typeof coerced === 'boolean') return +coerced;
             return coerced;
         }

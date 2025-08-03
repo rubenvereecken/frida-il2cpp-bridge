@@ -319,14 +319,14 @@ namespace Il2Cpp {
                         : method.parameters;
 
                     // prettier-ignore
-                    state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(state.depth++)}┌─\x1b[35m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m(${parameters.map(e => `\x1b[32m${e.name}\x1b[0m = \x1b[31m${fromFridaValue(args[e.position + startIndex], e.type)}\x1b[0m`).join(", ")})`);
+                    state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(state.depth++)}┌─\x1b[35m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m(${parameters.map(e => `\x1b[32m${e.name}\x1b[0m = \x1b[31m${fridaToIl2Cpp(args[e.position + startIndex], e.type)}\x1b[0m`).join(", ")})`);
                 }
 
                 const returnValue = method.nativeFunction(...args);
 
                 if ((this as InvocationContext).threadId == threadId) {
                     // prettier-ignore
-                    state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(--state.depth)}└─\x1b[33m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m${returnValue == undefined ? "" : ` = \x1b[36m${fromFridaValue(returnValue, method.returnType)}`}\x1b[0m`);
+                    state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(--state.depth)}└─\x1b[33m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m${returnValue == undefined ? "" : ` = \x1b[36m${fridaToIl2Cpp(returnValue, method.returnType)}`}\x1b[0m`);
                     state.flush();
                 }
 

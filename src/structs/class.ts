@@ -290,7 +290,7 @@ namespace Il2Cpp {
         }
 
         /** Gets the field identified by the given name. */
-        field<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.Field<T> {
+        field<T extends Il2Cpp.Il2CppValue>(name: string): Il2Cpp.Field<T> {
             return (
                 this.tryField<T>(name) ??
                 raise(`couldn't find field ${name} in class ${this.type.name}`)
@@ -410,7 +410,7 @@ namespace Il2Cpp {
         }
 
         /** Gets the field with the given name. */
-        tryField<T extends Il2Cpp.Wrapped>(name: string): Il2Cpp.Field<T> | null {
+        tryField<T extends Il2Cpp.Il2CppValue>(name: string): Il2Cpp.Field<T> | null {
             return new Il2Cpp.Field<T>(
                 Il2Cpp.exports.classGetFieldFromName(this, Memory.allocUtf8String(name))
             ).asNullable();
@@ -495,7 +495,12 @@ namespace Il2Cpp {
         }
     }
 
-    export type WrappedArrayClass<T extends string = string> = Il2Cpp.Class<T> & {
+    // TODO investigate whether pointer and by-ref classes have any special properties
+    export type PointerClass<T extends `${string}*`> = Il2Cpp.Class<T> & {};
+
+    export type ByRefClass<T extends `${string}&`> = Il2Cpp.Class<T> & {};
+
+    export type ArrayClass<T extends `${string}[]`> = Il2Cpp.Class<T> & {
         // TODO make these not crash in non-array classes (and instead return nullable)
         arrayElementSize: number;
         elementClass: Il2Cpp.Class<Il2Cpp.StripArraySuffix<T>>;

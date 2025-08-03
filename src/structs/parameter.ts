@@ -22,11 +22,12 @@ namespace Il2Cpp {
     }
 
     export namespace Parameter {
+        // TODO consider moving to Il2Cpp.ParameterValue? Or `Il2Cpp.Method.Parameter` like `Il2Cpp.Method.ReturnType`
         export type Value =
             | Il2Cpp.PrimitiveLike
             | Il2Cpp.StringLike
             | Il2Cpp.ArrayLike
-            | Il2Cpp.Wrapped
+            | Il2Cpp.Il2CppValue
             | Il2Cpp.ByRef;
 
         export type TypedValue = {

@@ -43,8 +43,8 @@ namespace Il2Cpp {
         read(this: Primitive<'System.Double'>): number;
         read(this: Primitive<'System.IntPtr'>): NativePointer;
         read(this: Primitive<'System.UIntPtr'>): NativePointer;
-        read(this: WrappedPrimitive): Il2Cpp.Primitive.JSType;
-        read(this: WrappedPrimitive): Il2Cpp.Primitive.JSType {
+        read(this: WrappedPrimitive): Il2Cpp.Primitive.JsType;
+        read(this: WrappedPrimitive): Il2Cpp.Primitive.JsType {
             const pointer = this.handle;
             switch (this.type.typeEnum) {
                 case 0:
@@ -102,11 +102,11 @@ namespace Il2Cpp {
         write(this: Primitive<'System.Double'>, value: number): void;
         write(this: Primitive<'System.IntPtr'>, value: NativePointer): void;
         write(this: Primitive<'System.UIntPtr'>, value: NativePointer): void;
-        write(this: Primitive<PrimitiveClassName>, value: Primitive.JSType): void {
+        write(this: Primitive<PrimitiveClassName>, value: Primitive.JsType): void {
             Il2Cpp.write(this.handle, value, this.type);
         }
 
-        isAssignableFromValue(value: Il2Cpp.Parameter.Value): value is Primitive.JSType {
+        isAssignableFromValue(value: Il2Cpp.Parameter.Value): value is Primitive.JsType {
             return Il2Cpp.isPrimitiveJSType(value) && this.type.isPrimitive();
         }
     }
@@ -128,7 +128,7 @@ namespace Il2Cpp {
     export type UIntPtr = Primitive<'System.UIntPtr'>;
 
     export namespace Primitive {
-        export type JSType =
+        export type JsType =
             | undefined
             | boolean
             | number
@@ -154,10 +154,10 @@ namespace Il2Cpp {
         | Il2Cpp.IntPtr
         | Il2Cpp.UIntPtr;
 
-    export type PrimitiveLike = WrappedPrimitive | Primitive.JSType;
+    export type PrimitiveLike = WrappedPrimitive | Primitive.JsType;
 
     // TODO find a better home for all these foundational type checker methods – perhaps memory.ts?
-    export function isPrimitiveJSType(value: unknown): value is Il2Cpp.Primitive.JSType {
+    export function isPrimitiveJSType(value: unknown): value is Il2Cpp.Primitive.JsType {
         return (
             typeof value === 'boolean' ||
             typeof value === 'number' ||
@@ -174,7 +174,7 @@ namespace Il2Cpp {
     export function isWrappedPrimitive(
         value: Il2Cpp.Parameter.Value
     ): value is Il2Cpp.WrappedPrimitive {
-        if (!Il2Cpp.isWrappedType(value)) {
+        if (!Il2Cpp.isIl2Cpp(value)) {
             return false;
         }
 

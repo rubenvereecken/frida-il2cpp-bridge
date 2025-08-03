@@ -3,11 +3,11 @@ namespace CS {
     class B {}
 
     export abstract class BaseObjectLike {
-        constructor(public readonly $object: Il2Cpp.Wrapped) {}
+        constructor(public readonly $object: Il2Cpp.Il2CppValue) {}
 
-        $get<R extends CS.BaseObjectLike, S extends Il2Cpp.Wrapped>(
+        $get<R extends CS.BaseObjectLike, S extends Il2Cpp.Il2CppValue>(
             key: string,
-            ctor: new ($object: Il2Cpp.Wrapped) => R
+            ctor: new ($object: Il2Cpp.Il2CppValue) => R
         ): R {
             const value = this.$object.class.field<S>(key).bind(this.$object).value;
             return new ctor(value);

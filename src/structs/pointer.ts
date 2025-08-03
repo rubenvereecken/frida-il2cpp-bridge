@@ -1,7 +1,8 @@
 namespace Il2Cpp {
+    // TODO should pointer subclass ObjectLike? Should it support fields, methods, etc?
     // TODO check what broke now that Pointer extends ObjectLike – what needs overriding?
     export class Pointer<
-        T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped,
+        U extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue,
         S extends string = string,
     > extends ObjectLike<S> {
         get constructorName() {

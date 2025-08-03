@@ -59,7 +59,7 @@ namespace Il2Cpp {
 
     export type StringLike = string | Il2Cpp.String;
 
-    export function isStringJsType(value: unknown): value is string {
+    export function isJsString(value: unknown): value is string {
         return typeof value === 'string';
     }
 

@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class Field<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
+    export class Field<T extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue> extends NativeStruct {
         constructor(native: NativePointerValue) {
             super(native);
 
@@ -109,7 +109,7 @@ namespace Il2Cpp {
             const handle = Memory.alloc(this.type.class.valueTypeSize);
             Il2Cpp.exports.fieldGetStaticValue(this.handle, handle);
 
-            return readWrapped(handle, this.type) as T;
+            return readIl2Cpp(handle, this.type) as T;
         }
 
         /** Sets the value of this field. Thread static or literal values cannot be altered yet. */
@@ -172,7 +172,9 @@ namespace Il2Cpp {
         }
     }
 
-    export class BoundField<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends Il2Cpp.Field<T> {
+    export class BoundField<
+        T extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue,
+    > extends Il2Cpp.Field<T> {
         /** @internal */
         constructor(
             handle: NativePointerValue,
@@ -196,7 +198,7 @@ namespace Il2Cpp {
 
         /** Gets the value of this field. */
         get value(): T {
-            return readWrapped(this.valueHandle, this.type) as T;
+            return readIl2Cpp(this.valueHandle, this.type) as T;
         }
 
         /** Sets the value of this field. Thread static or literal values cannot be altered yet. */
