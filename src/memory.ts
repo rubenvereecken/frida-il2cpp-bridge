@@ -239,7 +239,7 @@ namespace Il2Cpp {
                 `Expected a pointer for type ${type.name}, got ${value?.constructor?.name} (${value})`
             );
 
-        if (type._isByRef) {
+        if (type.isByRef()) {
             return new Il2Cpp.ByRef(value, type);
         }
 

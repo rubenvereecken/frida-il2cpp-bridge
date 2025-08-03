@@ -29,7 +29,7 @@ namespace Il2Cpp {
 
             return {
                 // TODO: IL2CPP_TYPE_END        = 0x00,       /* End of List */
-                
+
                 // IL2CPP_TYPE_VOID       = 0x01,
                 void: Il2Cpp.System.Void.type.typeEnum,
                 // IL2CPP_TYPE_BOOLEAN    = 0x02,
@@ -74,9 +74,9 @@ namespace Il2Cpp {
                 valueType: lookupTypeEnum('System.Decimal'),
                 // IL2CPP_TYPE_CLASS      = 0x12,       /* arg: <type> token */
                 referenceType: lookupTypeEnum('System.Array'),
-                
+
                 // TODO: IL2CPP_TYPE_VAR        = 0x13,       /* Generic parameter in a generic type definition, represented as number (compressed unsigned integer) number */
-                
+
                 // IL2CPP_TYPE_ARRAY      = 0x14,       /* type, rank, boundsCount, bound1, loCount, lo1 */
                 multidimensionalArray: lookupTypeEnum(
                     'System.Void',
@@ -87,13 +87,13 @@ namespace Il2Cpp {
                     'System.Int32',
                     kls => kls.interfaces.find(iface => iface.name.endsWith('`1'))!
                 ),
-                
+
                 // TODO: IL2CPP_TYPE_TYPEDBYREF = 0x16,
                 // TODO: IL2CPP_TYPE_FNPTR      = 0x1b,        /* arg: full method signature */
-                
+
                 // IL2CPP_TYPE_OBJECT     = 0x1c,
                 object: lookupTypeEnum('System.Object'),
-                
+
                 // TODO: IL2CPP_TYPE_MVAR       = 0x1e,       /* Generic parameter in a generic method definition, represented as number (compressed unsigned integer)  */
                 // TODO: IL2CPP_TYPE_CMOD_REQD  = 0x1f,       /* arg: typedef or typeref token */
                 // TODO: IL2CPP_TYPE_CMOD_OPT   = 0x20,       /* optional arg: typedef or typref token */
@@ -436,7 +436,7 @@ namespace Il2Cpp {
                 // ✔️ Assign T to T&
                 if (
                     this.isByRef() &&
-                    this.getElementType().isAssignableFromType(other.referredType)
+                    this.getElementType().isAssignableFromType(other.elementType)
                 ) {
                     return true;
                 }
@@ -535,6 +535,4 @@ namespace Il2Cpp {
         | Il2Cpp.PointerType<Extract<T, `${string}*`>>
         | Il2Cpp.ByRefType<Extract<T, `${string}&`>>
         | Il2Cpp.ArrayType<Extract<T, `${string}[]`>>;
-
-
 }

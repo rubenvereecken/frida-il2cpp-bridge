@@ -2,35 +2,29 @@ namespace Il2Cpp {
     /**
      * As in, "pass parameter by reference". Not to be confused with C#'s `ReferenceType`
      *
+     * Practical use:
      * - Prevents copies of value types.
      */
-    export class ByRef<T extends Il2Cpp.Wrapped = Il2Cpp.Wrapped> extends NativeStruct {
-        constructor(
-            handle: NativePointerValue,
-            readonly referredType: Il2Cpp.Type
-        ) {
-            super(handle);
+    export class ByRef<
+        U extends Il2Cpp.Wrapped = Il2Cpp.Wrapped,
+        T extends `${string}&` = `${string}&`,
+    > extends Il2Cpp.ObjectLike<T> {
+        get constructorName(): string {
+            return 'Il2Cpp.ByRef';
+        }
 
-            globalThis.Object.defineProperty(this, '_il2cpp', {
-                get: () => `Il2Cpp.Reference<${this.referredType.name}>`,
-                enumerable: true,
-            });
+        constructor(handle: NativePointerValue, type: Il2Cpp.Type<T>) {
+            super(handle, type);
         }
 
         /** Gets the element referenced by the current reference. */
-        get value(): T {
-            return readWrapped(this.handle, this.referredType) as T;
+        get value(): U {
+            return readWrapped(this.handle, this.type) as U;
         }
 
         /** Sets the element referenced by the current reference. */
-        set value(value: T) {
-            write(this.handle, value, this.referredType);
-        }
-
-        get type(): Il2Cpp.Type {
-            // TODO: how to create a by reference type?
-            raise('havent figured out how to create a by reference type yet');
-            return this.type;
+        set value(value: U) {
+            write(this.handle, value, this.type);
         }
 
         /** */
@@ -39,7 +33,22 @@ namespace Il2Cpp {
         }
 
         toString(): string {
-            return `->${this.valueToString()} (&${this.referredType.name})`;
+            return `->${this.valueToString()} (&${this.type.name})`;
+        }
+
+        get type(): Il2Cpp.ByRefType<T> {
+            if (!this._type || !this._type.isByRef())
+                raise(`${this._type?.name} is not a by-ref type`);
+            return this._type;
+        }
+
+        get class() {
+            // TODO: confirm – because sometimes classes don't have the same modifiers?
+            return this.type.class;
+        }
+
+        get elementType() {
+            return this.type.getElementType();
         }
     }
 
@@ -53,6 +62,7 @@ namespace Il2Cpp {
         value: T
     ): Il2Cpp.ByRef<T>;
 
+    // TODO unify with other memory writing functions
     /** Creates a reference to the specified value. */
     export function reference<T extends Il2Cpp.Wrapped>(
         value: T,
@@ -64,54 +74,63 @@ namespace Il2Cpp {
             case 'boolean':
                 return new Il2Cpp.ByRef(
                     handle.writeS8(+value),
-                    Il2Cpp.corlib.class('System.Boolean').type
+                    Il2Cpp.System.Boolean.type.makeByRefType()
                 );
             case 'number':
                 switch (type?.typeEnum) {
                     case Il2Cpp.Type.enum.unsignedByte:
-                        return new Il2Cpp.ByRef<T>(handle.writeU8(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeU8(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.byte:
-                        return new Il2Cpp.ByRef<T>(handle.writeS8(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeS8(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.char:
                     case Il2Cpp.Type.enum.unsignedShort:
-                        return new Il2Cpp.ByRef<T>(handle.writeU16(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeU16(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.short:
-                        return new Il2Cpp.ByRef<T>(handle.writeS16(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeS16(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.unsignedInt:
-                        return new Il2Cpp.ByRef<T>(handle.writeU32(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeU32(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.int:
-                        return new Il2Cpp.ByRef<T>(handle.writeS32(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeS32(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.unsignedLong:
-                        return new Il2Cpp.ByRef<T>(handle.writeU64(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeU64(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.long:
-                        return new Il2Cpp.ByRef<T>(handle.writeS64(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeS64(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.float:
-                        return new Il2Cpp.ByRef<T>(handle.writeFloat(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeFloat(value), type.makeByRefType());
                     case Il2Cpp.Type.enum.double:
-                        return new Il2Cpp.ByRef<T>(handle.writeDouble(value), type);
+                        return new Il2Cpp.ByRef<T>(handle.writeDouble(value), type.makeByRefType());
                 }
             case 'object':
                 if (value instanceof Il2Cpp.ValueType || value instanceof Il2Cpp.Pointer) {
-                    return new Il2Cpp.ByRef<T>(value.handle, value.type);
+                    return new Il2Cpp.ByRef<T>(value.handle, value.type.makeByRefType());
                 } else if (value instanceof Il2Cpp.String || value instanceof Il2Cpp.Array) {
-                    return new Il2Cpp.ByRef<T>(handle.writePointer(value), value.class.type);
+                    return new Il2Cpp.ByRef<T>(
+                        handle.writePointer(value),
+                        value.class.type.makeByRefType()
+                    );
                 } else if (value instanceof Il2Cpp.ReferenceType) {
-                    return new Il2Cpp.ByRef<T>(handle.writePointer(value), value.class.type);
+                    return new Il2Cpp.ByRef<T>(
+                        handle.writePointer(value),
+                        value.class.type.makeByRefType()
+                    );
                 } else if (value instanceof NativePointer) {
                     switch (type?.typeEnum) {
                         case Il2Cpp.Type.enum.unsignedNativePointer:
                         case Il2Cpp.Type.enum.nativePointer:
-                            return new Il2Cpp.ByRef<T>(handle.writePointer(value), type);
+                            return new Il2Cpp.ByRef<T>(
+                                handle.writePointer(value),
+                                type.makeByRefType()
+                            );
                     }
                 } else if (value instanceof Int64) {
                     return new Il2Cpp.ByRef<T>(
                         handle.writeS64(value),
-                        Il2Cpp.corlib.class('System.Int64').type
+                        Il2Cpp.System.Int64.type.makeByRefType()
                     );
                 } else if (value instanceof UInt64) {
                     return new Il2Cpp.ByRef<T>(
                         handle.writeU64(value),
-                        Il2Cpp.corlib.class('System.UInt64').type
+                        Il2Cpp.System.UInt64.type.makeByRefType()
                     );
                 }
             default:
