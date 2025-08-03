@@ -56,7 +56,7 @@ namespace Il2Cpp {
     // export function reference<T extends number | NativePointer>(
     //     value: T,
     //     type: Il2Cpp.Type
-    // ): Il2Cpp.Reference<T>;
+    // ): Il2Cpp.ByRef<T>;
 
     export function reference<T extends Exclude<Il2Cpp.Wrapped, number | NativePointer>>(
         value: T

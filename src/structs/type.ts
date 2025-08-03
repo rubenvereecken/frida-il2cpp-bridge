@@ -63,12 +63,16 @@ namespace Il2Cpp {
                 // IL2CPP_TYPE_STRING     = 0x0e,
                 string: Il2Cpp.System.String.type.typeEnum,
 
+                // TODO: using `makePointerType` leads to infinite recursion, so find another way
                 // IL2CPP_TYPE_PTR        = 0x0f,       /* arg: <type> token */
-                pointer: Il2Cpp.System.Int32.type.makePointerType().typeEnum,
+                // pointer: Il2Cpp.System.Int32.type.makePointerType().typeEnum,
+                pointer: 0x0f,
                 // IL2CPP_TYPE_BYREF      = 0x10,       /* arg: <type> token */
-                byRef: Il2Cpp.System.Int32.type.makeByRefType().typeEnum,
-                // IL2CPP_TYPE_SZARRAY    = 0x1d,       /* 0-based one-dim-array */
-                array: Il2Cpp.System.Void.type.makeArrayType().typeEnum,
+                // byRef: Il2Cpp.System.Int32.type.makeByRefType().typeEnum,
+                byRef: 0x10,
+                // IL2CPP_TYPE_SZARRAY = 0x1d /* 0-based one-dim-array */,
+                // array: Il2Cpp.System.Void.type.makeArrayType().typeEnum,
+                array: 0x1d,
 
                 // IL2CPP_TYPE_VALUETYPE  = 0x11,       /* arg: <type> token */
                 valueType: lookupTypeEnum('System.Decimal'),
@@ -122,7 +126,7 @@ namespace Il2Cpp {
                     : instanceFields.map(_ => _.type.fridaAlias);
             }
 
-            if (this._isByRef) {
+            if (this.isByRef()) {
                 return 'pointer';
             }
 

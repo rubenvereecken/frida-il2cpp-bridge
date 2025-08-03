@@ -81,7 +81,7 @@ namespace Il2Cpp {
         // Value types can't be null
         if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
 
-        if (!type._isByRef)
+        if (!type.isByRef())
             switch (type.typeEnum) {
                 case Il2Cpp.Type.enum.string:
                     return new Il2Cpp.String(dereferenced);
