@@ -77,7 +77,7 @@ namespace Il2Cpp {
                     : instanceFields.map(_ => _.type.fridaAlias);
             }
 
-            if (this.isByReference) {
+            if (this.isByRef) {
                 return 'pointer';
             }
 
@@ -153,16 +153,16 @@ namespace Il2Cpp {
         }
 
         /** Determines whether this type is passed by reference. */
-        get isByReference(): boolean {
+        get isByRef(): boolean {
             return !!Il2Cpp.exports.typeIsByRef(this);
         }
 
-        getIsByReference(): this is Il2Cpp.Type & { isByReference: true } {
-            return this.isByReference;
+        getIsByRef(): this is Il2Cpp.Type & { isByRef: true } {
+            return this.isByRef;
         }
 
         getReferredType(
-            this: (Il2Cpp.Type & { isByReference: true }) | (Il2Cpp.Type & { isPointer: true })
+            this: (Il2Cpp.Type & { isByRef: true }) | (Il2Cpp.Type & { isPointer: true })
         ): Il2Cpp.Type {
             return this.class.type;
         }
@@ -241,11 +241,12 @@ namespace Il2Cpp {
          * console.log(intPtrType.name); // "System.Int32*"
          * ```
          */
-        asPointerType(): Il2Cpp.Type {
+        asPointerType() {
             const pointerRuntimeType = this.runtimeType
                 .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakePointerType', 0)
                 .invoke();
-            return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(pointerRuntimeType)).type;
+            return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(pointerRuntimeType))
+                .type as Il2Cpp.Type<`${T}*`> & { isPointer: true };
         }
 
         /** Gets the type enum of the current type. */
@@ -307,11 +308,11 @@ namespace Il2Cpp {
                 return this.class.elementClass.type.isAssignableFromValue(firstElement);
             }
 
-            if (other instanceof Il2Cpp.ByReference) {
+            if (other instanceof Il2Cpp.ByRef) {
                 // ✔️ Assign T& to T&
                 // ✔️ Assign T to T&
                 if (
-                    this.getIsByReference() &&
+                    this.getIsByRef() &&
                     this.getReferredType().isAssignableFromType(other.referredType)
                 ) {
                     return true;

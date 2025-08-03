@@ -81,7 +81,7 @@ namespace Il2Cpp {
         // Value types can't be null
         if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
 
-        if (!type.isByReference)
+        if (!type.isByRef)
             switch (type.typeEnum) {
                 case Il2Cpp.Type.enum.string:
                     return new Il2Cpp.String(dereferenced);
@@ -239,8 +239,8 @@ namespace Il2Cpp {
                 `Expected a pointer for type ${type.name}, got ${value?.constructor?.name} (${value})`
             );
 
-        if (type.isByReference) {
-            return new Il2Cpp.ByReference(value, type);
+        if (type.isByRef) {
+            return new Il2Cpp.ByRef(value, type);
         }
 
         switch (type.typeEnum) {
@@ -376,9 +376,9 @@ namespace Il2Cpp {
 
         if (type.name === 'System.Void') return undefined;
 
-        if (type.getIsByReference()) {
+        if (type.getIsByRef()) {
             // ✔️ Assign T& to T& (probably rare, because who has a T& lying around?)
-            if (value instanceof Il2Cpp.ByReference) return value;
+            if (value instanceof Il2Cpp.ByRef) return value;
 
             // ✔️ Assign T to T& (both value and reference types)
             // Note: this only works for primitives right now because I write them to a memory location first

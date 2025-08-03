@@ -27,7 +27,7 @@ namespace Il2Cpp {
             | Il2Cpp.StringLike
             | Il2Cpp.ArrayLike
             | Il2Cpp.Wrapped
-            | Il2Cpp.ByReference;
+            | Il2Cpp.ByRef;
 
         export type TypedValue = {
             type: Il2Cpp.Type;

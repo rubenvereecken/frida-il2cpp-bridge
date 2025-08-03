@@ -36,37 +36,30 @@ namespace Il2Cpp {
             return r('il2cpp_init', 'int', ['pointer']);
         },
 
-        // TODO
         get initializeUtf16() {
             return r('il2cpp_init_utf16', 'int', ['pointer']);
         },
 
-        // TODO
         get shutdown() {
             return r('il2cpp_shutdown', 'void', []);
         },
 
-        // TODO
         get setConfigDir() {
             return r('il2cpp_set_config_dir', 'void', ['pointer']);
         },
 
-        // TODO
         get setDataDir() {
             return r('il2cpp_set_data_dir', 'void', ['pointer']);
         },
 
-        // TODO
         get setTempDir() {
             return r('il2cpp_set_temp_dir', 'void', ['pointer']);
         },
 
-        // TODO
         get setCommandlineArguments() {
             return r('il2cpp_set_commandline_arguments', 'void', ['int', 'pointer', 'pointer']);
         },
 
-        // TODO
         get setCommandlineArgumentsUtf16() {
             return r('il2cpp_set_commandline_arguments_utf16', 'void', [
                 'int',
@@ -75,22 +68,18 @@ namespace Il2Cpp {
             ]);
         },
 
-        // TODO
         get setConfigUtf16() {
             return r('il2cpp_set_config_utf16', 'void', ['pointer']);
         },
 
-        // TODO
         get setConfig() {
             return r('il2cpp_set_config', 'void', ['pointer']);
         },
 
-        // TODO
         get setMemoryCallbacks() {
             return r('il2cpp_set_memory_callbacks', 'void', ['pointer']);
         },
 
-        // TODO
         get addInternalCall() {
             return r('il2cpp_add_internal_call', 'void', ['pointer', 'pointer']);
         },
