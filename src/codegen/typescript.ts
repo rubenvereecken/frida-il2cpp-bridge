@@ -342,10 +342,10 @@ ${staticStr}set ${Namer.name(field.type)} ${field.name}(value: ${Namer.name(fiel
             const abstractStr = klass.isAbstract ? `abstract ` : ``;
 
             if (klass.isInterface) throw new Error(`Interfaces not supported yet`);
-            if (klass.isEnum) throw new Error(`Enums not supported yet`);
+            if (klass._isEnum) throw new Error(`Enums not supported yet`);
             if (klass.isStruct) throw new Error(`Structs not supported yet`);
             if (klass.isGeneric) throw new Error(`Generic classes not supported yet`);
-            if (klass.isValueType) throw new Error(`Value types not supported yet`);
+            if (klass._isValueType) throw new Error(`Value types not supported yet`);
 
             const fieldsStr = writer.writeLine(`\
 // ${klass.type.name} @ ${klass.assemblyName}

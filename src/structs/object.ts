@@ -4,9 +4,9 @@ namespace Il2Cpp {
      *
      * Opposite of `Il2Cpp.ValueType`.
      */
-    export class ReferenceType<T extends string = string> extends Il2Cpp.ObjectLike<T> {
+    export class Object_<T extends string = string> extends Il2Cpp.BaseObject<T> {
         get constructorName() {
-            return 'Il2Cpp.ReferenceType';
+            return 'Il2Cpp.Object';
         }
 
         valueToString(): string {
@@ -17,20 +17,35 @@ namespace Il2Cpp {
             return this.valueToString();
         }
 
-        /** Gets the Il2CppObject struct size, possibly equal to `Process.pointerSize * 2`. */
+        /**
+         * Il2CppObject struct size, which is the header all reference types and boxed value types have.
+         *
+         * Should be equal to `2 * Process.pointerSize`.
+         *
+         * ```c
+         * typedef Il2CppClass Il2CppVTable;
+         * typedef struct Il2CppObject
+         * {
+         *     union
+         *     {
+         *         Il2CppClass *klass;
+         *         Il2CppVTable *vtable;
+         *     };
+         *     MonitorData *monitor;
+         * } Il2CppObject;
+         * ```
+         */
         @lazy
         static get headerSize(): number {
             return Il2Cpp.corlib.class('System.Object').instanceSize;
         }
 
-        /** Gets the class of this object. */
         @lazy
         get class(): Il2Cpp.Class<T> {
-            // Can be read from the object header
+            // Can be read from the object header as the first pointer (of two)
             return new Il2Cpp.Class<T>(Il2Cpp.exports.objectGetClass(this));
         }
 
-        /** Gets the type of this object. */
         @lazy
         get type(): Il2Cpp.Type<T> {
             // TODO: by default fall back on this._type if available
@@ -38,9 +53,9 @@ namespace Il2Cpp {
             return this.class.type;
         }
 
-        /** Returns a monitor for this object. */
-        get monitor(): Il2Cpp.ReferenceType.Monitor {
-            return new Il2Cpp.ReferenceType.Monitor(this);
+        get monitor(): Il2Cpp.Object_.Monitor {
+            // TODO revisit
+            return new Il2Cpp.Object_.Monitor(this);
         }
 
         /** Gets the size of the current object. */
@@ -65,7 +80,7 @@ namespace Il2Cpp {
 
         /** Unboxes the value type (either a primitive, a struct or an enum) out of this object. */
         unbox(): Il2Cpp.ValueType {
-            return this.class.isValueType
+            return this.class._isValueType
                 ? new Il2Cpp.ValueType(Il2Cpp.exports.objectUnbox(this), this.class.type)
                 : raise(
                       `couldn't unbox instances of ${this.class.type.name} as they are not value types`
@@ -78,7 +93,7 @@ namespace Il2Cpp {
         }
     }
 
-    export namespace ReferenceType {
+    export namespace Object_ {
         export class Monitor {
             /** @internal */
             constructor(/** @internal */ readonly handle: NativePointerValue) {}

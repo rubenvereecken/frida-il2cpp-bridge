@@ -38,7 +38,7 @@ namespace Il2Cpp {
         /** Gets the array class which encompass the current class. */
         @lazy
         get arrayClass(): Il2Cpp.Class {
-            return new Il2Cpp.Class(Il2Cpp.exports.classGetArrayClass(this, 1));
+            return new Il2Cpp.Class(Il2Cpp.exports.arrayGetClass(this, 1));
         }
 
         /** Gets the size of the object encompassed by the current array class. */
@@ -127,7 +127,7 @@ namespace Il2Cpp {
             }
 
             const types = this.type.runtimeType
-                .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetGenericArguments')
+                .method<Il2Cpp.Array<Il2Cpp.Object_>>('GetGenericArguments')
                 .invoke();
             return globalThis.Array.from(types).map(
                 _ => new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(_))
@@ -171,9 +171,8 @@ namespace Il2Cpp {
             return !!Il2Cpp.exports.classIsBlittable(this);
         }
 
-        /** Determines whether the current class is an enumeration. */
         @lazy
-        get isEnum(): boolean {
+        get _isEnum(): boolean {
             return !!Il2Cpp.exports.classIsEnum(this);
         }
 
@@ -197,13 +196,17 @@ namespace Il2Cpp {
 
         /** Determines whether the current class is a struct. */
         get isStruct(): boolean {
-            return this.isValueType && !this.isEnum;
+            return this._isValueType && !this._isEnum;
         }
 
         /** Determines whether the current class is a value type. */
         @lazy
-        get isValueType(): boolean {
+        get _isValueType(): boolean {
             return !!Il2Cpp.exports.classIsValueType(this);
+        }
+
+        isValueType(): this is Il2Cpp.ValueTypeClass<T> {
+            return this._isValueType;
         }
 
         /** Gets the interfaces implemented or inherited by the current class. */
@@ -285,8 +288,8 @@ namespace Il2Cpp {
         }
 
         /** Allocates a new object of the current class. */
-        alloc(): Il2Cpp.ReferenceType {
-            return new Il2Cpp.ReferenceType(Il2Cpp.exports.objectNew(this));
+        alloc(): Il2Cpp.Object_ {
+            return new Il2Cpp.Object_(Il2Cpp.exports.objectNew(this));
         }
 
         /** Gets the field identified by the given name. */
@@ -313,7 +316,7 @@ namespace Il2Cpp {
             const typeArray = Il2Cpp.array(Il2Cpp.corlib.class('System.Type'), types);
 
             const inflatedType = this.type.runtimeType
-                .method<Il2Cpp.ReferenceType>('MakeGenericType', 1)
+                .method<Il2Cpp.Object_>('MakeGenericType', 1)
                 .invoke(typeArray);
             return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(inflatedType));
         }
@@ -378,7 +381,7 @@ namespace Il2Cpp {
         }
 
         /** Allocates a new object of the current class and calls its default constructor. */
-        defaultNew(): Il2Cpp.ReferenceType {
+        defaultNew(): Il2Cpp.Object_ {
             const object = this.alloc();
 
             const exceptionArray = Memory.alloc(Process.pointerSize);
@@ -388,7 +391,7 @@ namespace Il2Cpp {
             const exception = exceptionArray.readPointer();
 
             if (!exception.isNull()) {
-                raise(new Il2Cpp.ReferenceType(exception).toString());
+                raise(new Il2Cpp.Object_(exception).toString());
             }
 
             return object;
@@ -400,7 +403,7 @@ namespace Il2Cpp {
          */
         new(
             ...parameters: (Il2Cpp.Parameter.TypedValue | Il2Cpp.Parameter.Value)[]
-        ): Il2Cpp.ReferenceType {
+        ): Il2Cpp.Object_ {
             if (parameters.length == 0) return this.defaultNew();
 
             const object = this.alloc();
@@ -495,113 +498,178 @@ namespace Il2Cpp {
         }
     }
 
+    export type VoidClass = Il2Cpp.Class<'System.Void'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.VOID;
+    };
+
+    export type BooleanClass = Il2Cpp.Class<'System.Boolean'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.BOOLEAN;
+    };
+
+    export type CharClass = Il2Cpp.Class<'System.Char'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.CHAR;
+    };
+
+    export type ByteClass = Il2Cpp.Class<'System.SByte'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.BYTE;
+    };
+
+    export type UnsignedByteClass = Il2Cpp.Class<'System.Byte'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.UNSIGNED_BYTE;
+    };
+
+    export type ShortClass = Il2Cpp.Class<'System.Int16'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.SHORT;
+    };
+
+    export type UnsignedShortClass = Il2Cpp.Class<'System.UInt16'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.UNSIGNED_SHORT;
+    };
+
+    export type IntClass = Il2Cpp.Class<'System.Int32'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.INT;
+    };
+
+    export type UnsignedIntClass = Il2Cpp.Class<'System.UInt32'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.UNSIGNED_INT;
+    };
+
+    export type LongClass = Il2Cpp.Class<'System.Int64'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.LONG;
+    };
+
+    export type UnsignedLongClass = Il2Cpp.Class<'System.UInt64'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.UNSIGNED_LONG;
+    };
+
+    export type FloatClass = Il2Cpp.Class<'System.Single'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.FLOAT;
+    };
+
+    export type DoubleClass = Il2Cpp.Class<'System.Double'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.DOUBLE;
+    };
+
+    export type StringClass = Il2Cpp.Class<'System.String'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.STRING;
+    };
+
+    export type NativePointerClass = Il2Cpp.Class<'System.IntPtr'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.NATIVE_POINTER;
+    };
+
+    export type UnsignedNativePointerClass = Il2Cpp.Class<'System.UIntPtr'> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.UNSIGNED_NATIVE_POINTER;
+    };
+
+    export type ValueTypeClass<T extends string = string> = Il2Cpp.Class<T> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.VALUE_TYPE;
+    };
+
+    export type ReferenceTypeClass<T extends string = string> = Il2Cpp.Class<T> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.REFERENCE_TYPE;
+    };
+
+    export type EnumClass<T extends string = string> = Il2Cpp.Class<T> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.ENUM;
+    };
+
     // TODO investigate whether pointer and by-ref classes have any special properties
-    export type PointerClass<T extends `${string}*`> = Il2Cpp.Class<T> & {};
+    export type PointerClass<T extends `${string}*`> = Il2Cpp.Class<T> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.POINTER;
+    };
 
-    export type ByRefClass<T extends `${string}&`> = Il2Cpp.Class<T> & {};
+    export type ByRefClass<T extends `${string}&`> = Il2Cpp.Class<T> & {
+        _typeEnum: typeof Il2Cpp.TypeEnum.BY_REF;
+    };
 
+    // TODO look into multidimensional arrays
     export type ArrayClass<T extends `${string}[]`> = Il2Cpp.Class<T> & {
         // TODO make these not crash in non-array classes (and instead return nullable)
         arrayElementSize: number;
         elementClass: Il2Cpp.Class<Il2Cpp.StripArraySuffix<T>>;
+        _typeEnum: typeof Il2Cpp.TypeEnum.ARRAY;
     };
 
-    // Helper classes, helpfully typed
-    // export type PrimitiveClassName =
-    //     | 'System.Void'
-    //     | 'System.Boolean'
-    //     | 'System.SByte'
-    //     | 'System.Byte'
-    //     | 'System.Char'
-    //     | 'System.Int16'
-    //     | 'System.UInt16'
-    //     | 'System.Int32'
-    //     | 'System.UInt32'
-    //     | 'System.Int64'
-    //     | 'System.UInt64'
-    //     | 'System.Single'
-    //     | 'System.Double'
-    //     | 'System.IntPtr'
-    //     | 'System.UIntPtr';
     export class System {
         @lazy
         static get Void() {
-            return Il2Cpp.corlib.class('System.Void');
+            return Il2Cpp.corlib.class('System.Void') as Il2Cpp.VoidClass;
         }
 
         @lazy
         static get Boolean() {
-            return Il2Cpp.corlib.class('System.Boolean');
+            return Il2Cpp.corlib.class('System.Boolean') as Il2Cpp.BooleanClass;
         }
 
         @lazy
         static get SByte() {
-            return Il2Cpp.corlib.class('System.SByte');
+            return Il2Cpp.corlib.class('System.SByte') as Il2Cpp.ByteClass;
         }
 
         @lazy
         static get Byte() {
-            return Il2Cpp.corlib.class('System.Byte');
+            return Il2Cpp.corlib.class('System.Byte') as Il2Cpp.UnsignedByteClass;
         }
 
         @lazy
         static get Char() {
-            return Il2Cpp.corlib.class('System.Char');
+            return Il2Cpp.corlib.class('System.Char') as Il2Cpp.CharClass;
         }
 
         @lazy
         static get Int16() {
-            return Il2Cpp.corlib.class('System.Int16');
+            return Il2Cpp.corlib.class('System.Int16') as Il2Cpp.ShortClass;
         }
 
         @lazy
         static get UInt16() {
-            return Il2Cpp.corlib.class('System.UInt16');
+            return Il2Cpp.corlib.class('System.UInt16') as Il2Cpp.UnsignedShortClass;
         }
 
         @lazy
         static get Int32() {
-            return Il2Cpp.corlib.class('System.Int32');
+            return Il2Cpp.corlib.class('System.Int32') as Il2Cpp.IntClass;
         }
 
         @lazy
         static get UInt32() {
-            return Il2Cpp.corlib.class('System.UInt32');
+            return Il2Cpp.corlib.class('System.UInt32') as Il2Cpp.UnsignedIntClass;
         }
 
         @lazy
         static get Int64() {
-            return Il2Cpp.corlib.class('System.Int64');
+            return Il2Cpp.corlib.class('System.Int64') as Il2Cpp.LongClass;
         }
 
         @lazy
         static get UInt64() {
-            return Il2Cpp.corlib.class('System.UInt64');
+            return Il2Cpp.corlib.class('System.UInt64') as Il2Cpp.UnsignedLongClass;
         }
 
         @lazy
         static get Single() {
-            return Il2Cpp.corlib.class('System.Single');
+            return Il2Cpp.corlib.class('System.Single') as Il2Cpp.FloatClass;
         }
 
         @lazy
         static get Double() {
-            return Il2Cpp.corlib.class('System.Double');
+            return Il2Cpp.corlib.class('System.Double') as Il2Cpp.DoubleClass;
         }
 
         @lazy
         static get IntPtr() {
-            return Il2Cpp.corlib.class('System.IntPtr');
+            return Il2Cpp.corlib.class('System.IntPtr') as Il2Cpp.NativePointerClass;
         }
 
         @lazy
         static get UIntPtr() {
-            return Il2Cpp.corlib.class('System.UIntPtr');
+            return Il2Cpp.corlib.class('System.UIntPtr') as Il2Cpp.UnsignedNativePointerClass;
         }
 
         @lazy
         static get String() {
-            return Il2Cpp.corlib.class('System.String');
+            return Il2Cpp.corlib.class('System.String') as Il2Cpp.StringClass;
         }
     }
 

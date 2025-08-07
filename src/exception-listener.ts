@@ -36,7 +36,7 @@ namespace Il2Cpp {
                 return;
             }
 
-            inform(new Il2Cpp.ReferenceType(args[0].readPointer()));
+            inform(new Il2Cpp.Object_(args[0].readPointer()));
         });
     }
 }

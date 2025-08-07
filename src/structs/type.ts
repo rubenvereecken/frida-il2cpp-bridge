@@ -84,7 +84,7 @@ namespace Il2Cpp {
                 // IL2CPP_TYPE_ARRAY      = 0x14,       /* type, rank, boundsCount, bound1, loCount, lo1 */
                 multidimensionalArray: lookupTypeEnum(
                     'System.Void',
-                    kls => new Il2Cpp.Class(Il2Cpp.exports.classGetArrayClass(kls, 2))
+                    kls => new Il2Cpp.Class(Il2Cpp.exports.arrayGetClass(kls, 2))
                 ),
                 // IL2CPP_TYPE_GENERICINST = 0x15,     /* <type> <type-arg-count> <type-1> \x{2026} <type-n> */
                 genericInstance: lookupTypeEnum(
@@ -185,7 +185,7 @@ namespace Il2Cpp {
                     return 'pointer';
                 // TODO come back for these
                 case Il2Cpp.Type.enum.valueType:
-                    return this.class.isEnum
+                    return this.class._isEnum
                         ? this.class.baseType!.fridaAlias
                         : getValueTypeFields(this);
                 case Il2Cpp.Type.enum.referenceType:
@@ -193,7 +193,7 @@ namespace Il2Cpp {
                 case Il2Cpp.Type.enum.genericInstance:
                     return this.class.isStruct
                         ? getValueTypeFields(this)
-                        : this.class.isEnum
+                        : this.class._isEnum
                           ? this.class.baseType!.fridaAlias
                           : 'pointer';
                 default:
@@ -201,7 +201,7 @@ namespace Il2Cpp {
             }
         }
 
-        static fromRuntimeType<T extends string>(runtimeType: Il2Cpp.ReferenceType) {
+        static fromRuntimeType<T extends string>(runtimeType: Il2Cpp.Object_) {
             return new Il2Cpp.Class(Il2Cpp.exports.classFromSystemType(runtimeType))
                 .type as Il2Cpp.Type<T>;
         }
@@ -293,9 +293,7 @@ namespace Il2Cpp {
          */
         @lazy
         get runtimeType() {
-            return new Il2Cpp.ReferenceType<'System.RuntimeType'>(
-                Il2Cpp.exports.typeGetObject(this)
-            );
+            return new Il2Cpp.Object_<'System.RuntimeType'>(Il2Cpp.exports.typeGetObject(this));
         }
 
         /**
@@ -308,7 +306,7 @@ namespace Il2Cpp {
          */
         makePointerType(): Il2Cpp.PointerType<`${T}*`> {
             const pointerRuntimeType = this.runtimeType
-                .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakePointerType', 0)
+                .method<Il2Cpp.Object_<'System.RuntimeType'>>('MakePointerType', 0)
                 .invoke();
             return Il2Cpp.Type.fromRuntimeType<`${T}*`>(
                 pointerRuntimeType
@@ -325,7 +323,7 @@ namespace Il2Cpp {
          */
         makeByRefType(): Il2Cpp.ByRefType<`${T}&`> {
             const byRefRuntimeType = this.runtimeType
-                .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakeByRefType', 0)
+                .method<Il2Cpp.Object_<'System.RuntimeType'>>('MakeByRefType', 0)
                 .invoke();
             return Il2Cpp.Type.fromRuntimeType<`${T}&`>(
                 byRefRuntimeType
@@ -342,7 +340,7 @@ namespace Il2Cpp {
          */
         makeArrayType(): Il2Cpp.ArrayType<`${T}[]`> {
             const arrayRuntimeType = this.runtimeType
-                .method<Il2Cpp.ReferenceType<'System.RuntimeType'>>('MakeArrayType', 0)
+                .method<Il2Cpp.Object_<'System.RuntimeType'>>('MakeArrayType', 0)
                 .invoke();
             return Il2Cpp.Type.fromRuntimeType<`${T}[]`>(
                 arrayRuntimeType
@@ -370,7 +368,7 @@ namespace Il2Cpp {
         ): Il2Cpp.Type<Il2Cpp.StripArraySuffix<U>>;
         getElementType<U extends string>(this: Il2Cpp.HasElementType<U>): Il2Cpp.Type {
             const elementRuntimeType = this.runtimeType
-                .method<Il2Cpp.ReferenceType>('GetElementType', 0)
+                .method<Il2Cpp.Object_>('GetElementType', 0)
                 .invoke();
             // Overloads provide the precise return type; impl can be broad
             return Il2Cpp.Type.fromRuntimeType(elementRuntimeType) as Il2Cpp.Type;

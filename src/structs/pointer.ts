@@ -4,7 +4,7 @@ namespace Il2Cpp {
     export class Pointer<
         U extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue,
         S extends string = string,
-    > extends ObjectLike<S> {
+    > extends BaseObject<S> {
         get constructorName() {
             return 'Il2Cpp.Pointer';
         }
@@ -20,7 +20,7 @@ namespace Il2Cpp {
         // TODO check if this actually works??
         @lazy
         get object() {
-            return new Il2Cpp.ReferenceType<S>(this);
+            return new Il2Cpp.Object_<S>(this);
         }
 
         @lazy

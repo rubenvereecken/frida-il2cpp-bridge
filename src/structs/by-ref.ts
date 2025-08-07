@@ -8,7 +8,7 @@ namespace Il2Cpp {
     export class ByRef<
         U extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue,
         T extends `${string}&` = `${string}&`,
-    > extends Il2Cpp.ObjectLike<T> {
+    > extends Il2Cpp.BaseObject<T> {
         get constructorName(): string {
             return 'Il2Cpp.ByRef';
         }
@@ -105,7 +105,7 @@ namespace Il2Cpp {
                         handle.writePointer(value),
                         value.class.type.makeByRefType()
                     );
-                } else if (value instanceof Il2Cpp.ReferenceType) {
+                } else if (value instanceof Il2Cpp.Object_) {
                     return new Il2Cpp.ByRef(
                         handle.writePointer(value),
                         value.class.type.makeByRefType()

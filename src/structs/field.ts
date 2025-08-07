@@ -129,7 +129,7 @@ namespace Il2Cpp {
             const handle =
                 // pointer-like values should be passed as-is, but boxed
                 // value types (primitives included) must be unboxed first
-                value instanceof Il2Cpp.ReferenceType && this.type.class.isValueType
+                value instanceof Il2Cpp.Object_ && this.type.class._isValueType
                     ? value.unbox()
                     : value instanceof NativeStruct
                       ? value.handle
@@ -141,7 +141,7 @@ namespace Il2Cpp {
         }
 
         /** Derive a BoundField for access to this field's value for `instance`. */
-        bind(instance: Il2Cpp.ObjectLike): Il2Cpp.BoundField<T> {
+        bind(instance: Il2Cpp.BaseObject): Il2Cpp.BoundField<T> {
             if (this.isStatic) {
                 raise(
                     `cannot bind static field ${this.class.type.name}::${this.name} to an object`
@@ -178,7 +178,7 @@ namespace Il2Cpp {
         /** @internal */
         constructor(
             handle: NativePointerValue,
-            public instance: Il2Cpp.ObjectLike
+            public instance: Il2Cpp.BaseObject
         ) {
             super(handle);
         }
@@ -190,9 +190,7 @@ namespace Il2Cpp {
         get valueHandle(): NativePointer {
             return this.instance.handle.add(
                 this.offset -
-                    (this.instance instanceof Il2Cpp.ValueType
-                        ? Il2Cpp.ReferenceType.headerSize
-                        : 0)
+                    (this.instance instanceof Il2Cpp.ValueType ? Il2Cpp.Object_.headerSize : 0)
             );
         }
 

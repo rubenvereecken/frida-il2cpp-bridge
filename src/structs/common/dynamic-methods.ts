@@ -7,7 +7,7 @@ namespace Il2Cpp {
 
     export class DynamicMethodsLookup {
         constructor(
-            private readonly target: Il2Cpp.ObjectLike | Il2Cpp.Class,
+            private readonly target: Il2Cpp.BaseObject | Il2Cpp.Class,
             isStatic: boolean
         ) {
             this.class.methods
@@ -22,7 +22,7 @@ namespace Il2Cpp {
         }
 
         get class(): Il2Cpp.Class {
-            return this.target instanceof Il2Cpp.ObjectLike ? this.target.class : this.target;
+            return this.target instanceof Il2Cpp.BaseObject ? this.target.class : this.target;
         }
 
         #invokeMethod<T extends Il2Cpp.Method.ReturnType>(
@@ -37,7 +37,7 @@ namespace Il2Cpp {
         }
 
         static from(
-            target: Il2Cpp.ObjectLike | Il2Cpp.Class,
+            target: Il2Cpp.BaseObject | Il2Cpp.Class,
             isStatic: boolean
         ): Il2Cpp.DynamicMethods {
             return new DynamicMethodsLookup(target, isStatic) as unknown as Il2Cpp.DynamicMethods;

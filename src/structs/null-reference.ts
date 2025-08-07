@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class NullReference<T extends string = string> extends Il2Cpp.ReferenceType<T> {
+    export class NullReference<T extends string = string> extends Il2Cpp.Object_<T> {
         // Re-declare as non-nullable because, well... it's 0x0, so no info
         declare readonly _type: Il2Cpp.Type<T>;
 

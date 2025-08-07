@@ -2,6 +2,7 @@
     "compilerOptions": {
         "target": "ESNext",
         "lib": ["ESNext"],
+        "module": "amd",
         "moduleResolution": "node",
         "outDir": "dist",
         "outFile": "dist/index.js",

@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export class String extends Il2Cpp.ReferenceType<'System.String'> {
+    export class String extends Il2Cpp.Object_<'System.String'> {
         get constructorName() {
             return 'Il2Cpp.String';
         }

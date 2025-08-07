@@ -59,13 +59,13 @@ namespace Il2Cpp {
          * Returns the heap allocated objects of the specified class. \
          * This variant reads GC descriptors.
          */
-        choose(klass: Il2Cpp.Class): Il2Cpp.ReferenceType[] {
-            const matches: Il2Cpp.ReferenceType[] = [];
+        choose(klass: Il2Cpp.Class): Il2Cpp.Object_[] {
+            const matches: Il2Cpp.Object_[] = [];
 
             const callback = (objects: NativePointer, size: number) => {
                 for (let i = 0; i < size; i++) {
                     matches.push(
-                        new Il2Cpp.ReferenceType(objects.add(i * Process.pointerSize).readPointer())
+                        new Il2Cpp.Object_(objects.add(i * Process.pointerSize).readPointer())
                     );
                 }
             };

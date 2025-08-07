@@ -1,5 +1,7 @@
 /// <reference types="frida-gum" />
 
+/// <reference path="./enums/type-enum.ts">/>
+
 /// <reference path="./utils/type-helpers.ts">/>
 /// <reference path="./utils/android.ts">/>
 /// <reference path="./utils/console.ts">/>
@@ -27,13 +29,13 @@
 /// <reference path="./codegen/pseudo-csharp.ts">/>
 /// <reference path="./codegen/typescript.ts">/>
 
-/// <reference path="./structs/common/object-like.ts">/>
+/// <reference path="./structs/common/base-object.ts">/>
 /// <reference path="./structs/common/dynamic-methods.ts">/>
 /// <reference path="./structs/method.ts">/>
 /// <reference path="./structs/field.ts">/>
 /// <reference path="./structs/class.ts">/>
 /// <reference path="./structs/type.ts">/>
-/// <reference path="./structs/reference-type.ts">/>
+/// <reference path="./structs/object.ts">/>
 /// <reference path="./structs/string.ts">/>
 /// <reference path="./structs/array.ts">/>
 /// <reference path="./structs/value-type.ts">/>

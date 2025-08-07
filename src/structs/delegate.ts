@@ -3,7 +3,7 @@ namespace Il2Cpp {
     export function delegate<
         P extends Il2Cpp.Parameter.Value[],
         R extends Il2Cpp.Method.ReturnType,
-    >(klass: Il2Cpp.Class, block: (...args: P) => R): Il2Cpp.ReferenceType {
+    >(klass: Il2Cpp.Class, block: (...args: P) => R): Il2Cpp.Object_ {
         const SystemDelegate = Il2Cpp.corlib.class('System.Delegate');
         const SystemMulticastDelegate = Il2Cpp.corlib.class('System.MulticastDelegate');
         if (!SystemDelegate.isAssignableFrom(klass)) {

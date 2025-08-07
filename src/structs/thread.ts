@@ -28,10 +28,8 @@ namespace Il2Cpp {
 
         /** Gets the encompassing internal object (System.Threding.InternalThreead) of the current thread. */
         @lazy
-        get internal(): Il2Cpp.ReferenceType {
-            return (
-                this.object.tryField<Il2Cpp.ReferenceType>('internal_thread')?.value ?? this.object
-            );
+        get internal(): Il2Cpp.Object_ {
+            return this.object.tryField<Il2Cpp.Object_>('internal_thread')?.value ?? this.object;
         }
 
         /** Determines whether the current thread is the garbage collector finalizer one. */
@@ -48,8 +46,8 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the current thread. */
         @lazy
-        get object(): Il2Cpp.ReferenceType {
-            return new Il2Cpp.ReferenceType(this);
+        get object(): Il2Cpp.Object_ {
+            return new Il2Cpp.Object_(this);
         }
 
         /** @internal */
@@ -60,16 +58,16 @@ namespace Il2Cpp {
 
         /** @internal */
         @lazy
-        private get synchronizationContext(): Il2Cpp.ReferenceType {
+        private get synchronizationContext(): Il2Cpp.Object_ {
             const get_ExecutionContext =
-                this.object.tryMethod<Il2Cpp.ReferenceType>('GetMutableExecutionContext') ??
+                this.object.tryMethod<Il2Cpp.Object_>('GetMutableExecutionContext') ??
                 this.object.method('get_ExecutionContext');
             const executionContext = get_ExecutionContext.invoke();
 
             let synchronizationContext =
-                executionContext.tryField<Il2Cpp.ReferenceType>('_syncContext')?.value ??
+                executionContext.tryField<Il2Cpp.Object_>('_syncContext')?.value ??
                 executionContext
-                    .tryMethod<Il2Cpp.ReferenceType>('get_SynchronizationContext')
+                    .tryMethod<Il2Cpp.Object_>('get_SynchronizationContext')
                     ?.invoke() ??
                 this.tryLocalValue(Il2Cpp.corlib.class('System.Threading.SynchronizationContext'));
 
@@ -132,11 +130,11 @@ namespace Il2Cpp {
         }
 
         /** @internal */
-        tryLocalValue(klass: Il2Cpp.Class): Il2Cpp.ReferenceType | undefined {
+        tryLocalValue(klass: Il2Cpp.Class): Il2Cpp.Object_ | undefined {
             for (let i = 0; i < 16; i++) {
                 const base = this.staticData.add(i * Process.pointerSize).readPointer();
                 if (!base.isNull()) {
-                    const object = new Il2Cpp.ReferenceType(base.readPointer()).asNullable();
+                    const object = new Il2Cpp.Object_(base.readPointer()).asNullable();
                     if (object?.class?.isSubclassOf(klass, false)) {
                         return object;
                     }

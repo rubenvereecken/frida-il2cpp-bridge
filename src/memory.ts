@@ -6,7 +6,7 @@ namespace Il2Cpp {
         | Il2Cpp.ByRef
         | Il2Cpp.Pointer
         | Il2Cpp.ValueType
-        | Il2Cpp.ReferenceType
+        | Il2Cpp.Object_
         | Il2Cpp.Array
         | Il2Cpp.NullReference;
 
@@ -43,7 +43,7 @@ namespace Il2Cpp {
             type instanceof Il2Cpp.ByRef ||
             type instanceof Il2Cpp.Pointer ||
             type instanceof Il2Cpp.ValueType ||
-            type instanceof Il2Cpp.ReferenceType ||
+            type instanceof Il2Cpp.Object_ ||
             type instanceof Il2Cpp.Array
         );
     }
@@ -96,13 +96,14 @@ namespace Il2Cpp {
         // reference types (classes, arrays, etc) need dereferencing,
         // while value types (primitives and value types) never do
         // TODO that might not be entirely true, so double check
-        options = { derefPointer: !type.class.isValueType, ...options };
+        options = { derefPointer: !type.class._isValueType, ...options };
         const dereferenced = options.derefPointer ? pointer.readPointer() : pointer;
 
         if (type.isPrimitive()) return new Il2Cpp.Primitive(pointer, type);
 
         // Only reference types can be null
-        if (dereferenced.isNull() && !type.class.isValueType) return new Il2Cpp.NullReference(type);
+        if (dereferenced.isNull() && !type.class._isValueType)
+            return new Il2Cpp.NullReference(type);
 
         // Value types can't be null
         if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
@@ -118,11 +119,11 @@ namespace Il2Cpp {
                     return new Il2Cpp.ValueType(dereferenced, type);
                 case Il2Cpp.Type.enum.object:
                 case Il2Cpp.Type.enum.referenceType:
-                    return new Il2Cpp.ReferenceType(dereferenced);
+                    return new Il2Cpp.Object_(dereferenced);
                 case Il2Cpp.Type.enum.genericInstance:
-                    return type.class.isValueType
+                    return type.class._isValueType
                         ? new Il2Cpp.ValueType(dereferenced, type)
-                        : new Il2Cpp.ReferenceType(dereferenced);
+                        : new Il2Cpp.Object_(dereferenced);
                 case Il2Cpp.Type.enum.array:
                 case Il2Cpp.Type.enum.multidimensionalArray:
                     return new Il2Cpp.Array(dereferenced);
@@ -285,7 +286,7 @@ namespace Il2Cpp {
             case Il2Cpp.Type.enum.referenceType:
             case Il2Cpp.Type.enum.genericInstance:
             case Il2Cpp.Type.enum.object:
-                return new Il2Cpp.ReferenceType(value);
+                return new Il2Cpp.Object_(value);
             case Il2Cpp.Type.enum.array:
             case Il2Cpp.Type.enum.multidimensionalArray:
                 return new Il2Cpp.Array(value);
@@ -313,7 +314,7 @@ namespace Il2Cpp {
 
         // TODO check if type works, or at least assert if we don't want coercion logic
         // TODO consider a base Il2Cpp class that all Il2Cpp values inherit from
-        if (value instanceof Il2Cpp.ObjectLike) return value;
+        if (value instanceof Il2Cpp.BaseObject) return value;
 
         if (typeof value === 'boolean' && !type.isBoolean())
             raise(`Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`);
@@ -360,7 +361,7 @@ namespace Il2Cpp {
         if (typeof value === 'string') return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.String) return Il2Cpp.System.String.type;
         if (value instanceof Il2Cpp.Array) return value.class.type;
-        if (value instanceof Il2Cpp.ReferenceType) return value.class.type;
+        if (value instanceof Il2Cpp.Object_) return value.class.type;
 
         // TODO: Handle array types properly - they don't always have a .type property
         if (value instanceof globalThis.Array) {
@@ -459,7 +460,7 @@ namespace Il2Cpp {
             // Note: this only works for primitives right now because I write them to a memory location first
             if (
                 type.isAssignableFromValue(value) &&
-                (value instanceof Il2Cpp.ValueType || value instanceof Il2Cpp.ReferenceType)
+                (value instanceof Il2Cpp.ValueType || value instanceof Il2Cpp.Object_)
             )
                 return value.handle;
 
@@ -496,7 +497,7 @@ namespace Il2Cpp {
             return Il2Cpp.string(value);
         }
 
-        if (value instanceof Il2Cpp.ValueType && value.type.class.isEnum) {
+        if (value instanceof Il2Cpp.ValueType && value.type.class._isEnum) {
             // return value.field<number | Int64 | UInt64>('value__').value;
             // TODO does this work? We used to unwrap the enum value first
             return value;

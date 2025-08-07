@@ -1,5 +1,5 @@
 namespace Il2Cpp {
-    export abstract class ObjectLike<T extends string = string> extends NativeStruct {
+    export abstract class BaseObject<T extends string = string> extends NativeStruct {
         constructor(
             native: NativePointerValue,
             readonly _type: Il2Cpp.Type<T> | undefined = undefined

@@ -34,13 +34,13 @@ namespace Il2Cpp {
                 // (despite being excluded from System.Reflection.Assembly::GetTypes).
                 const runtimeModule =
                     this.object
-                        .tryMethod<Il2Cpp.ReferenceType>('GetType', 1)
+                        .tryMethod<Il2Cpp.Object_>('GetType', 1)
                         ?.invoke(Il2Cpp.string('<Module>'))
                         ?.asNullable()
-                        ?.tryMethod<Il2Cpp.ReferenceType>('get_Module')
+                        ?.tryMethod<Il2Cpp.Object_>('get_Module')
                         ?.invoke() ??
                     this.object
-                        .tryMethod<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetModules', 1)
+                        .tryMethod<Il2Cpp.Array<Il2Cpp.Object_>>('GetModules', 1)
                         ?.invoke(false)
                         ?.get(0) ??
                     raise(`couldn't find the runtime module object of assembly ${this.name}`);
@@ -59,9 +59,9 @@ namespace Il2Cpp {
 
         /** Gets the encompassing object of the current assembly. */
         @lazy
-        get object(): Il2Cpp.ReferenceType {
+        get object(): Il2Cpp.Object_ {
             for (const _ of Il2Cpp.domain.object
-                .method<Il2Cpp.Array<Il2Cpp.ReferenceType>>('GetAssemblies', 1)
+                .method<Il2Cpp.Array<Il2Cpp.Object_>>('GetAssemblies', 1)
                 .invoke(false)) {
                 if (_.field<Il2Cpp.IntPtr>('_mono_assembly').value.read().equals(this)) {
                     return _;

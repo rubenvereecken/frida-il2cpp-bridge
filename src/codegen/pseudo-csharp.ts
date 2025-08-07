@@ -9,7 +9,7 @@ namespace Il2Cpp {
 
             return `\
 // ${klass.assemblyName}
-${klass.isEnum ? `enum` : klass.isStruct ? `struct` : klass.isInterface ? `interface` : `class`} \
+${klass._isEnum ? `enum` : klass.isStruct ? `struct` : klass.isInterface ? `interface` : `class`} \
 ${klass.type.name}\
 ${inherited ? ` : ${inherited.map(_ => _?.type.name).join(`, `)}` : ``}
 {
@@ -24,7 +24,7 @@ ${field.isThreadStatic ? `[ThreadStatic] ` : ``}\
 ${field.isStatic ? `static ` : ``}\
 ${field.type.name} \
 ${field.name}\
-${field.isLiteral ? ` = ${field.type.class.isEnum ? readIl2Cpp((field.value as Il2Cpp.ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
+${field.isLiteral ? ` = ${field.type.class._isEnum ? readIl2Cpp((field.value as Il2Cpp.ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
 ${field.isThreadStatic || field.isLiteral ? `` : ` // 0x${field.offset.toString(16)}`}`;
         }
 

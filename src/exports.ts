@@ -1501,6 +1501,8 @@ namespace Il2Cpp {
         // === OBJECT FUNCTIONS ===
         /**
          * Gets the class of an object.
+         * In practice, this is the first pointer of two in the object header.
+         *
          * @param obj Il2CppObject* - The object to get the class of
          * @returns Il2CppClass* - The class of the object
          */
@@ -1911,8 +1913,10 @@ namespace Il2Cpp {
         // === TYPE FUNCTIONS ===
         /**
          * Gets the reflection object for the specified type.
+         * Note that the original signature returns a Il2CppReflectionType*, but it's a full-blown Il2CppReflectionRuntimeType* underneath.
+         *
          * @param type Il2CppType* - The type to get the reflection object for
-         * @returns Il2CppReflectionType* - The reflection object
+         * @returns Il2CppReflectionRuntimeType* - Reflection object of type `System.RuntimeType`
          */
         get typeGetObject() {
             return r('il2cpp_type_get_object', 'pointer', ['pointer']);

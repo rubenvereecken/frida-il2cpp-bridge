@@ -1,7 +1,7 @@
 namespace Il2Cpp {
     // TODO Array now extends Object but it still doesn't support method calling
     export class Array<R extends Il2Cpp.Il2CppValue = Il2Cpp.Il2CppValue, T extends string = string>
-        extends Il2Cpp.ReferenceType<T>
+        extends Il2Cpp.Object_<T>
         implements Iterable<R>
     {
         constructor(handle: NativePointerValue, type: Il2Cpp.Type<T> | undefined = undefined) {
@@ -187,7 +187,7 @@ namespace Il2Cpp {
     ): value is Il2Cpp.Array<Il2Cpp.Il2CppValue> {
         return (
             value instanceof Il2Cpp.Array ||
-            (value instanceof Il2Cpp.ReferenceType && value.type.isArray())
+            (value instanceof Il2Cpp.Object_ && value.type.isArray())
         );
     }
 
