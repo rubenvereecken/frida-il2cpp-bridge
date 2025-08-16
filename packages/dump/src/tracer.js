@@ -1,0 +1,318 @@
+import { isUnityVersionIsBelow201830 } from '../../bridge/src/application.js';
+import { fridaToIl2Cpp } from '../../bridge/src/memory.js';
+import { getModule } from '../../bridge/src/module.js';
+import { getDomain } from '../../bridge/src/structs/domain.js';
+import { Parameter } from '../../bridge/src/structs/parameter.js';
+import { getMainThread } from '../../bridge/src/structs/thread.js';
+import { inform } from '../../bridge/src/utils/log.js';
+export class Tracer {
+    /** @internal */
+    #state = {
+        depth: 0,
+        buffer: [],
+        history: new globalThis.Set(),
+        flush: () => {
+            if (this.#state.depth == 0) {
+                const message = `\n${this.#state.buffer.join('\n')}\n`;
+                if (this.#verbose) {
+                    inform(message);
+                }
+                else {
+                    const hash = cyrb53(message);
+                    if (!this.#state.history.has(hash)) {
+                        this.#state.history.add(hash);
+                        inform(message);
+                    }
+                }
+                this.#state.buffer.length = 0;
+            }
+        },
+    };
+    /** @internal */
+    #threadId = getMainThread().id;
+    /** @internal */
+    #verbose = false;
+    /** @internal */
+    #applier;
+    /** @internal */
+    #targets = [];
+    /** @internal */
+    #domain;
+    /** @internal */
+    #assemblies;
+    /** @internal */
+    #classes;
+    /** @internal */
+    #methods;
+    /** @internal */
+    #assemblyFilter;
+    /** @internal */
+    #classFilter;
+    /** @internal */
+    #methodFilter;
+    /** @internal */
+    #parameterFilter;
+    constructor(applier) {
+        this.#applier = applier;
+    }
+    /** */
+    thread(thread) {
+        this.#threadId = thread.id;
+        return this;
+    }
+    /** Determines whether print duplicate logs. */
+    verbose(value) {
+        this.#verbose = value;
+        return this;
+    }
+    /** Sets the application domain as the place where to find the target methods. */
+    domain() {
+        this.#domain = getDomain();
+        return this;
+    }
+    /** Sets the passed `assemblies` as the place where to find the target methods. */
+    assemblies(...assemblies) {
+        this.#assemblies = assemblies;
+        return this;
+    }
+    /** Sets the passed `classes` as the place where to find the target methods. */
+    classes(...classes) {
+        this.#classes = classes;
+        return this;
+    }
+    /** Sets the passed `methods` as the target methods. */
+    methods(...methods) {
+        this.#methods = methods;
+        return this;
+    }
+    /** Filters the assemblies where to find the target methods. */
+    filterAssemblies(filter) {
+        this.#assemblyFilter = filter;
+        return this;
+    }
+    /** Filters the classes where to find the target methods. */
+    filterClasses(filter) {
+        this.#classFilter = filter;
+        return this;
+    }
+    /** Filters the target methods. */
+    filterMethods(filter) {
+        this.#methodFilter = filter;
+        return this;
+    }
+    /** Filters the target methods. */
+    filterParameters(filter) {
+        this.#parameterFilter = filter;
+        return this;
+    }
+    /** Commits the current changes by finding the target methods. */
+    and() {
+        const filterMethod = (method) => {
+            if (this.#parameterFilter == undefined) {
+                this.#targets.push(method);
+                return;
+            }
+            for (const parameter of method.parameters) {
+                if (this.#parameterFilter(parameter)) {
+                    this.#targets.push(method);
+                    break;
+                }
+            }
+        };
+        const filterMethods = (values) => {
+            for (const method of values) {
+                filterMethod(method);
+            }
+        };
+        const filterClass = (klass) => {
+            if (this.#methodFilter == undefined) {
+                filterMethods(klass.methods);
+                return;
+            }
+            for (const method of klass.methods) {
+                if (this.#methodFilter(method)) {
+                    filterMethod(method);
+                }
+            }
+        };
+        const filterClasses = (values) => {
+            for (const klass of values) {
+                filterClass(klass);
+            }
+        };
+        const filterAssembly = (assembly) => {
+            if (this.#classFilter == undefined) {
+                filterClasses(assembly.image.classes);
+                return;
+            }
+            for (const klass of assembly.image.classes) {
+                if (this.#classFilter(klass)) {
+                    filterClass(klass);
+                }
+            }
+        };
+        const filterAssemblies = (assemblies) => {
+            for (const assembly of assemblies) {
+                filterAssembly(assembly);
+            }
+        };
+        const filterDomain = (domain) => {
+            if (this.#assemblyFilter == undefined) {
+                filterAssemblies(domain.assemblies);
+                return;
+            }
+            for (const assembly of domain.assemblies) {
+                if (this.#assemblyFilter(assembly)) {
+                    filterAssembly(assembly);
+                }
+            }
+        };
+        this.#methods
+            ? filterMethods(this.#methods)
+            : this.#classes
+                ? filterClasses(this.#classes)
+                : this.#assemblies
+                    ? filterAssemblies(this.#assemblies)
+                    : this.#domain
+                        ? filterDomain(this.#domain)
+                        : undefined;
+        this.#assemblies = undefined;
+        this.#classes = undefined;
+        this.#methods = undefined;
+        this.#assemblyFilter = undefined;
+        this.#classFilter = undefined;
+        this.#methodFilter = undefined;
+        this.#parameterFilter = undefined;
+        return this;
+    }
+    /** Starts tracing. */
+    attach() {
+        for (const target of this.#targets) {
+            if (!target.virtualAddress.isNull()) {
+                try {
+                    this.#applier(target, this.#state, this.#threadId);
+                }
+                catch (e) {
+                    switch (e.message) {
+                        case /unable to intercept function at \w+; please file a bug/.exec(e.message)?.input:
+                        case 'already replaced this function':
+                            break;
+                        default:
+                            throw e;
+                    }
+                }
+            }
+        }
+    }
+}
+/** */
+export function trace(parameters = false) {
+    const applier = () => (method, state, threadId) => {
+        const paddedVirtualAddress = method.relativeVirtualAddress.toString(16).padStart(8, '0');
+        Interceptor.attach(method.virtualAddress, {
+            onEnter() {
+                if (this.threadId == threadId) {
+                    // prettier-ignore
+                    state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(state.depth++)}┌─\x1b[35m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m`);
+                }
+            },
+            onLeave() {
+                if (this.threadId == threadId) {
+                    // prettier-ignore
+                    state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(--state.depth)}└─\x1b[33m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m`);
+                    state.flush();
+                }
+            },
+        });
+    };
+    const applierWithParameters = () => (method, state, threadId) => {
+        const paddedVirtualAddress = method.relativeVirtualAddress.toString(16).padStart(8, '0');
+        const startIndex = +!method.isStatic | +isUnityVersionIsBelow201830();
+        const callback = function (...args) {
+            if (this.threadId == threadId) {
+                const thisParameter = method.isStatic
+                    ? undefined
+                    : new Parameter('this', -1, method.class.type);
+                const parameters = thisParameter
+                    ? [thisParameter].concat(method.parameters)
+                    : method.parameters;
+                // prettier-ignore
+                state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(state.depth++)}┌─\x1b[35m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m(${parameters.map(e => `\x1b[32m${e.name}\x1b[0m = \x1b[31m${fridaToIl2Cpp(args[e.position + startIndex], e.type)}\x1b[0m`).join(", ")})`);
+            }
+            const returnValue = method.nativeFunction(...args);
+            if (this.threadId == threadId) {
+                // prettier-ignore
+                state.buffer.push(`\x1b[2m0x${paddedVirtualAddress}\x1b[0m ${`│ `.repeat(--state.depth)}└─\x1b[33m${method.class.type.name}::\x1b[1m${method.name}\x1b[0m\x1b[0m${returnValue == undefined ? "" : ` = \x1b[36m${fridaToIl2Cpp(returnValue, method.returnType)}`}\x1b[0m`);
+                state.flush();
+            }
+            return returnValue;
+        };
+        method.revert();
+        const nativeCallback = new NativeCallback(callback, method.returnType.fridaAlias, method.fridaSignature);
+        Interceptor.replace(method.virtualAddress, nativeCallback);
+    };
+    return new Tracer(parameters ? applierWithParameters() : applier());
+}
+/** */
+export function backtrace(mode) {
+    const methods = getDomain()
+        .assemblies.flatMap(_ => _.image.classes.flatMap(_ => _.methods.filter(_ => !_.virtualAddress.isNull())))
+        .sort((_, __) => _.virtualAddress.compare(__.virtualAddress));
+    const searchInsert = (target) => {
+        let left = 0;
+        let right = methods.length - 1;
+        while (left <= right) {
+            const pivot = Math.floor((left + right) / 2);
+            const comparison = methods[pivot].virtualAddress.compare(target);
+            if (comparison == 0) {
+                return methods[pivot];
+            }
+            else if (comparison > 0) {
+                right = pivot - 1;
+            }
+            else {
+                left = pivot + 1;
+            }
+        }
+        return methods[right];
+    };
+    const applier = () => (method, state, threadId) => {
+        Interceptor.attach(method.virtualAddress, function () {
+            if (this.threadId == threadId) {
+                const handles = globalThis.Thread.backtrace(this.context, mode);
+                handles.unshift(method.virtualAddress);
+                for (const handle of handles) {
+                    if (handle.compare(getModule().base) > 0 &&
+                        handle.compare(getModule().base.add(getModule().size)) < 0) {
+                        const method = searchInsert(handle);
+                        if (method) {
+                            const offset = handle.sub(method.virtualAddress);
+                            if (offset.compare(0xfff) < 0) {
+                                // prettier-ignore
+                                state.buffer.push(`\x1b[2m0x${method.relativeVirtualAddress.toString(16).padStart(8, "0")}\x1b[0m\x1b[2m+0x${offset.toString(16).padStart(3, `0`)}\x1b[0m ${method.class.type.name}::\x1b[1m${method.name}\x1b[0m`);
+                            }
+                        }
+                    }
+                }
+                state.flush();
+            }
+        });
+    };
+    return new Tracer(applier());
+}
+/** https://stackoverflow.com/a/52171480/16885569 */
+function cyrb53(str) {
+    let h1 = 0xdeadbeef;
+    let h2 = 0x41c6ce57;
+    for (let i = 0, ch; i < str.length; i++) {
+        ch = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+    h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+    h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+//# sourceMappingURL=tracer.js.map

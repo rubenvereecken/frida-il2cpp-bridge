@@ -1,13 +1,15 @@
-import { Il2CppValue, JsObject } from '../../memory.js';
+import type { Il2CppValue, JsObject } from '../../memory.js';
 import { cached } from '../../utils/cache.js';
 import { NativeStruct } from '../../utils/native-struct.js';
 import type { Class } from '../class.js';
-import { BoundField } from '../field.js';
-import { BoundMethod, MethodReturnType } from '../method.js';
-import { ParameterValue } from '../parameter.js';
-import { Type } from '../type.js';
-import { DynamicFields, DynamicFieldsLookup } from './dynamic-fields.js';
-import { DynamicMethods, DynamicMethodsLookup } from './dynamic-methods.js';
+import type { BoundField } from '../field.js';
+import type { BoundMethod, MethodReturnType } from '../method.js';
+import type { ParameterValue } from '../parameter.js';
+import type { Type } from '../type.js';
+import type { DynamicFields} from './dynamic-fields.js';
+import { DynamicFieldsLookup } from './dynamic-fields.js';
+import type { DynamicMethods} from './dynamic-methods.js';
+import { DynamicMethodsLookup } from './dynamic-methods.js';
 
 export abstract class BaseObject<T extends string = string> extends NativeStruct {
     constructor(

@@ -22,7 +22,7 @@ import {
     nativeLivenessFinalize,
     nativeLivenessFreeStruct,
 } from './native/index.js';
-import { Class } from './structs/class.js';
+import type { Class } from './structs/class.js';
 import { Object_ } from './structs/object.js';
 
 /**

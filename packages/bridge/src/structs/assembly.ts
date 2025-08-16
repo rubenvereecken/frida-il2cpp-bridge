@@ -3,12 +3,12 @@ import { NativeStruct } from '../utils/native-struct.js';
 import { cached } from '../utils/cache.js';
 import { raise } from '../utils/error.js';
 import { Image } from './image.js';
-import { Object_ } from './object.js';
+import type { Object_ } from './object.js';
 import { string } from './string.js';
 import { nativeAssemblyGetImage } from '../native/index.js';
-import { IntPtr } from './primitive.js';
+import type { IntPtr } from './primitive.js';
 import { getDomain } from './domain.js';
-import { Array } from './array.js';
+import type { Array } from './array.js';
 
 /**
  * ```c

@@ -1,13 +1,13 @@
-import { isUnityVersionIsBelow201830 } from './application.js';
-import { fridaToIl2Cpp } from './memory.js';
-import { getModule } from './module.js';
-import { Assembly } from './structs/assembly.js';
-import { Class } from './structs/class.js';
-import { Domain, getDomain } from './structs/domain.js';
-import { Method } from './structs/method.js';
-import { Parameter } from './structs/parameter.js';
-import { getMainThread, Thread } from './structs/thread.js';
-import { inform } from './utils/log.js';
+import { isUnityVersionIsBelow201830 } from '../../bridge/src/application.js';
+import { fridaToIl2Cpp } from '../../bridge/src/memory.js';
+import { getModule } from '../../bridge/src/module.js';
+import { Assembly } from '../../bridge/src/structs/assembly.js';
+import { Class } from '../../bridge/src/structs/class.js';
+import { Domain, getDomain } from '../../bridge/src/structs/domain.js';
+import { Method } from '../../bridge/src/structs/method.js';
+import { Parameter } from '../../bridge/src/structs/parameter.js';
+import { getMainThread, Thread } from '../../bridge/src/structs/thread.js';
+import { inform } from '../../bridge/src/utils/log.js';
 
 export class Tracer {
     /** @internal */

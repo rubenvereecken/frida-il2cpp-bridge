@@ -1,13 +1,14 @@
 import { System } from '../corlib.js';
 import { TypeEnum } from '../enums/type.js';
-import { Il2CppValue, ParameterLike, readIl2Cpp, write } from '../memory.js';
+import type { Il2CppValue, ParameterLike} from '../memory.js';
+import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { Array } from './array.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import { Pointer } from './pointer.js';
 import { String } from './string.js';
-import { ByRefType, Type } from './type.js';
+import type { ByRefType, Type } from './type.js';
 import { ValueType } from './value-type.js';
 
 /**

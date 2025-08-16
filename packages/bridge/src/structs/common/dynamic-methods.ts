@@ -1,6 +1,7 @@
-import { isIl2Cpp, ParameterLike } from '../../memory.js';
+import type { ParameterLike } from '../../memory.js';
+import { isIl2Cpp } from '../../memory.js';
 import type { Class } from '../class.js';
-import { MethodReturnType } from '../method.js';
+import type { MethodReturnType } from '../method.js';
 import { isTypeValue } from '../parameter.js';
 import { isWrappedPrimitive } from '../primitive.js';
 import { BaseObject } from './base-object.js';

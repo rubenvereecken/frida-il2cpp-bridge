@@ -1,6 +1,6 @@
 import { Class } from './structs/class.js';
-import { Object_ } from './structs/object.js';
-import { Type } from './structs/type.js';
+import type { Object_ } from './structs/object.js';
+import type { Type } from './structs/type.js';
 
 namespace Il2Cpp {
     /**

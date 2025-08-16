@@ -1,32 +1,35 @@
+import type {
+    ArrayLike} from './structs/array.js';
 import {
     array,
     Array,
     isArrayLike,
     isJsArray,
-    isWrappedArray,
-    ArrayLike,
+    isWrappedArray
 } from './structs/array.js';
 import { ByRef } from './structs/by-ref.js';
 import { NullReference } from './structs/null-reference.js';
 import { Object_ } from './structs/object.js';
 import { Pointer } from './structs/pointer.js';
+import type {
+    PrimitiveJSType,
+    PrimitiveLike} from './structs/primitive.js';
 import {
     isPrimitiveJSType,
     isPrimitiveLike,
     isWrappedPrimitive,
-    Primitive,
-    PrimitiveJSType,
-    PrimitiveLike,
+    Primitive
 } from './structs/primitive.js';
-import { isJsString, isStringLike, String, StringLike } from './structs/string.js';
+import type { StringLike } from './structs/string.js';
+import { isJsString, isStringLike, String } from './structs/string.js';
 import { ValueType } from './structs/value-type.js';
 import { nativeAlloc as allocExport, nativeFree as freeExport } from './native/index.js';
-import { Type, WrappedPrimitiveType } from './structs/type.js';
+import type { Type, WrappedPrimitiveType } from './structs/type.js';
 import { TypeEnum } from './enums/type.js';
 import { warn } from './utils/log.js';
 import { raise } from './utils/error.js';
 import { corlib, System } from './corlib.js';
-import { MethodReturnType } from './structs/method.js';
+import type { MethodReturnType } from './structs/method.js';
 import { BaseObject } from './structs/common/base-object.js';
 
 // TODO figure out where I want to put all these types – probably in types/*.ts files

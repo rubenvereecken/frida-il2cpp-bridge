@@ -2,7 +2,7 @@ import { recycle } from '../utils/recycle.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { cached, slow } from '../utils/cache.js';
 import { raise } from '../utils/error.js';
-import { Object_ } from './object.js';
+import type { Object_ } from './object.js';
 import { Assembly } from './assembly.js';
 import { readNativeList } from '../utils/read-native-list.js';
 import {
@@ -11,10 +11,10 @@ import {
     nativeDomainGetAssemblyFromName,
     nativeThreadAttach,
 } from '../native/index.js';
-import { IntPtr } from './primitive.js';
+import type { IntPtr } from './primitive.js';
 import { corlib } from '../corlib.js';
 import { Thread } from './thread.js';
-import { Array } from './array.js';
+import type { Array } from './array.js';
 
 /**
  * ```c

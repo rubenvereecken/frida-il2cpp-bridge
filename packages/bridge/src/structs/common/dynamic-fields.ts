@@ -1,4 +1,4 @@
-import { Il2CppValue } from '../../memory.js';
+import type { Il2CppValue } from '../../memory.js';
 import type { Class } from '../class.js';
 import { BaseObject } from './base-object.js';
 

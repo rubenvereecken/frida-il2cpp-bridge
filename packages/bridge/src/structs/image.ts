@@ -11,10 +11,10 @@ import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
-import { Array } from './array.js';
+import type { Array } from './array.js';
 import { Assembly } from './assembly.js';
 import { Class } from './class.js';
-import { Object_ } from './object.js';
+import type { Object_ } from './object.js';
 
 /**
  * ```c

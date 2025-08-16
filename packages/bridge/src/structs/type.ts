@@ -11,15 +11,18 @@ import {
     nativeTypeIsByRef,
     nativeTypeIsPointer,
 } from '../native/index.js';
-import { isIl2Cpp, ParameterLike } from '../memory.js';
+import type { ParameterLike } from '../memory.js';
+import { isIl2Cpp } from '../memory.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
-import { StripArraySuffix, StripByRefSuffix, StripPointerSuffix } from '../utils/type-helpers.js';
+import type { StripArraySuffix, StripByRefSuffix, StripPointerSuffix } from '../utils/type-helpers.js';
 import { isArrayLike } from './array.js';
-import { ArrayClass, ByRefClass, Class, PointerClass } from './class.js';
+import type { ArrayClass, ByRefClass, PointerClass } from './class.js';
+import { Class } from './class.js';
 import { Object_ } from './object.js';
-import { Boolean, isPrimitiveLike, WrappedPrimitive } from './primitive.js';
+import type { Boolean, WrappedPrimitive } from './primitive.js';
+import { isPrimitiveLike } from './primitive.js';
 import { isStringLike } from './string.js';
 
 @recycle

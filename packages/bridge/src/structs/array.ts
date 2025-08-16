@@ -1,15 +1,16 @@
 import { corlib, System } from '../corlib.js';
 import { nativeArrayGetLength, nativeArrayNew } from '../native/index.js';
-import { Il2CppValue, ParameterLike, readIl2Cpp, write } from '../memory.js';
+import type { Il2CppValue, ParameterLike} from '../memory.js';
+import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
-import { StripArraySuffix } from '../utils/type-helpers.js';
+import type { StripArraySuffix } from '../utils/type-helpers.js';
 import type { Class } from './class.js';
-import { BaseObject } from './common/base-object.js';
+import type { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import { Pointer } from './pointer.js';
-import { Primitive, PrimitiveClassName, PrimitiveJSType, PrimitiveLike } from './primitive.js';
-import { String, StringLike } from './string.js';
+import type { Primitive, PrimitiveClassName, PrimitiveJSType, PrimitiveLike } from './primitive.js';
+import type { String, StringLike } from './string.js';
 import type { Type } from './type.js';
 
 // TODO Array now extends Object but it still doesn't support method calling

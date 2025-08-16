@@ -1,8 +1,9 @@
 import { getModule } from '../module.js';
 import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
+import type { $INLINE_FILE } from 'ts-transformer-inline-file';
 
-declare const $inline_file: typeof import('ts-transformer-inline-file').$INLINE_FILE;
+declare const $inline_file: typeof $INLINE_FILE;
 
 export const nativeGetMemorySnapshotExports = memoize(
     () => new CModule($inline_file('../cmodules/memory-snapshot.c'))

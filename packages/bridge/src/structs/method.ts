@@ -17,17 +17,20 @@ import {
     nativeMethodIsInflated,
     nativeMethodIsInstance,
 } from '../native/index.js';
-import { fridaToIl2Cpp, Il2CppValue, ParameterLike, toFrida } from '../memory.js';
+import type { Il2CppValue, ParameterLike} from '../memory.js';
+import { fridaToIl2Cpp, toFrida } from '../memory.js';
 import { getModule } from '../module.js';
 import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
-import { Array, array } from './array.js';
+import type { Array} from './array.js';
+import { array } from './array.js';
 import { Class } from './class.js';
-import { BaseObject } from './common/base-object.js';
+import type { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
-import { Parameter, ParameterValue } from './parameter.js';
-import { IntPtr } from './primitive.js';
+import type { ParameterValue } from './parameter.js';
+import { Parameter } from './parameter.js';
+import type { IntPtr } from './primitive.js';
 import { Type } from './type.js';
 import { ValueType } from './value-type.js';
 

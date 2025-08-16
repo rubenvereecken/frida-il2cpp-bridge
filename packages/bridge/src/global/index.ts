@@ -7,7 +7,6 @@ import * as gc from '../gc.js';
 import * as memory from '../memory.js';
 import * as module from '../module.js';
 import * as perform from '../perform.js';
-import * as tracer from '../tracer.js';
 
 // Import barrel exports
 import * as structs from '../structs/index.js';
@@ -25,7 +24,6 @@ const Il2Cpp = {
     ...memory,
     ...module,
     ...perform,
-    ...tracer,
 };
 
 (globalThis as any).Il2Cpp = Il2Cpp;

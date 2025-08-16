@@ -9,7 +9,6 @@ export * from './gc.js';
 export * from './memory.js';
 export * from './module.js';
 export * from './perform.js';
-export * from './tracer.js';
 
 // Barrel exports
 export * from './structs/index.js';

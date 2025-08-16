@@ -1,9 +1,9 @@
 import { corlib } from '../corlib.js';
-import { ParameterLike } from '../memory.js';
+import type { ParameterLike } from '../memory.js';
 import { raise } from '../utils/error.js';
-import { Class } from './class.js';
-import { MethodReturnType } from './method.js';
-import { Object_ } from './object.js';
+import type { Class } from './class.js';
+import type { MethodReturnType } from './method.js';
+import type { Object_ } from './object.js';
 
 /** Creates a delegate object of the given delegate class. */
 export function delegate<P extends ParameterLike[], R extends MethodReturnType>(

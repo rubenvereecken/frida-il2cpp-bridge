@@ -1,8 +1,8 @@
 import { nativeValueTypeBox } from '../native/index.js';
-import { Class } from './class.js';
+import type { Class } from './class.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
-import { String } from './string.js';
+import type { String } from './string.js';
 import type { Type } from './type.js';
 
 export class ValueType<T extends string = string> extends BaseObject<T> {

@@ -1,5 +1,5 @@
 import { TypeAttributeFlags } from '../enums/type-attribute.js';
-import { TypeEnum } from '../enums/type.js';
+import type { TypeEnum } from '../enums/type.js';
 import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
@@ -47,12 +47,16 @@ import { Type } from './type.js';
 import { Field } from './field.js';
 import { readNativeIterator } from '../utils/read-native-iterator.js';
 import { Object_ } from './object.js';
-import { Method, MethodReturnType } from './method.js';
-import { Il2CppValue, ParameterLike } from '../memory.js';
-import { Array, array } from './array.js';
-import { DynamicMethods, DynamicMethodsLookup } from './common/dynamic-methods.js';
-import { DynamicFields, DynamicFieldsLookup } from './common/dynamic-fields.js';
-import { StripArraySuffix } from '../utils/type-helpers.js';
+import type { MethodReturnType } from './method.js';
+import { Method } from './method.js';
+import type { Il2CppValue, ParameterLike } from '../memory.js';
+import type { Array} from './array.js';
+import { array } from './array.js';
+import type { DynamicMethods} from './common/dynamic-methods.js';
+import { DynamicMethodsLookup } from './common/dynamic-methods.js';
+import type { DynamicFields} from './common/dynamic-fields.js';
+import { DynamicFieldsLookup } from './common/dynamic-fields.js';
+import type { StripArraySuffix } from '../utils/type-helpers.js';
 import { corlib } from '../corlib.js';
 
 @recycle

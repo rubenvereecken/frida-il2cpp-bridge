@@ -19,9 +19,10 @@ import { cached } from '../utils/cache.js';
 import { Class } from './class.js';
 import { BaseObject } from './common/base-object.js';
 import { GCHandle } from './gc-handle.js';
-import { BoundMethod, Method, MethodReturnType } from './method.js';
-import { String } from './string.js';
-import { Type } from './type.js';
+import type { BoundMethod, MethodReturnType } from './method.js';
+import { Method } from './method.js';
+import type { String } from './string.js';
+import type { Type } from './type.js';
 import { ValueType } from './value-type.js';
 
 /**

@@ -9,12 +9,13 @@ import {
     nativeFieldGetType,
     nativeFieldSetStaticValue,
 } from '../native/index.js';
-import { Il2CppValue, ParameterLike, readIl2Cpp, write } from '../memory.js';
+import type { Il2CppValue, ParameterLike} from '../memory.js';
+import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { Class } from './class.js';
-import { BaseObject } from './common/base-object.js';
+import type { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import { Type } from './type.js';
 import { ValueType } from './value-type.js';

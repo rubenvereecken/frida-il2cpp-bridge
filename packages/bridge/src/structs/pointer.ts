@@ -3,7 +3,7 @@
 import { cached } from '../utils/cache.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
-import { Type } from './type.js';
+import type { Type } from './type.js';
 
 // TODO check what broke now that Pointer extends ObjectLike – what needs overriding?
 export class Pointer<T extends `${string}*` = `${string}*`> extends BaseObject<T> {

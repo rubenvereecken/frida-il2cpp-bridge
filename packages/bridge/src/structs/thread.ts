@@ -1,6 +1,6 @@
 import { NativeStruct } from '../utils/native-struct.js';
 import { raise } from '../utils/error.js';
-import { Int32, IntPtr, UInt64, Void } from './primitive.js';
+import type { Int32, IntPtr, UInt64, Void } from './primitive.js';
 import { cached, memoize } from '../utils/cache.js';
 import { getter } from '../utils/getter.js';
 import { Object_ } from './object.js';
@@ -11,7 +11,7 @@ import {
     nativeThreadGetCurrent,
     nativeThreadIsVm,
 } from '../native/index.js';
-import { Class } from './class.js';
+import type { Class } from './class.js';
 import { readNativeList } from '../utils/read-native-list.js';
 import { corlib } from '../corlib.js';
 import { delegate } from './delegate.js';
@@ -81,7 +81,7 @@ export class Thread extends NativeStruct {
             this.object.method('get_ExecutionContext');
         const executionContext = get_ExecutionContext.invoke();
 
-        let synchronizationContext =
+        const synchronizationContext =
             executionContext.tryField<Object_>('_syncContext')?.value ??
             executionContext.tryMethod<Object_>('get_SynchronizationContext')?.invoke() ??
             this.tryLocalValue(corlib.class('System.Threading.SynchronizationContext'));

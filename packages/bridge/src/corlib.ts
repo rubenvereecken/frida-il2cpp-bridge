@@ -1,4 +1,4 @@
-import { TypeEnum } from './enums/type.js';
+import type { TypeEnum } from './enums/type.js';
 import { nativeGetCorlib } from './native/index.js';
 import { Image } from './structs/image.js';
 import { cached, slow } from './utils/cache.js';
