@@ -19,7 +19,9 @@
         "vfsfitvnm"
     ],
     "type": "module",
-    "sideEffects": false,
+    "sideEffects": [
+        "./dist/global/index.js"
+    ],
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -28,6 +30,10 @@
         "./native": {
             "types": "./dist/native/index.d.ts",
             "import": "./dist/native/index.js"
+        },
+        "./global": {
+            "types": "./dist/global/index.d.ts",
+            "import": "./dist/global/index.js"
         }
     },
     "types": "dist/index.d.ts",
