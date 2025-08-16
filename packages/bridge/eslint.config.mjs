@@ -18,6 +18,19 @@ export default tseslint.config(
         },
         rules: {
             'file-extension-in-import-ts/file-extension-in-import-ts': 'error',
+            // Disallow bare globals in *value* position, so as not to confuse with Il2Cpp classes
+            'no-restricted-globals': [
+                'error',
+                { name: 'Array', message: 'Use globalThis.Array' },
+                { name: 'Map', message: 'Use globalThis.Map' },
+                { name: 'Set', message: 'Use globalThis.Set' },
+                { name: 'Object', message: 'Use globalThis.Object' },
+                { name: 'Symbol', message: 'Use globalThis.Symbol' },
+                { name: 'Number', message: 'Use globalThis.Number' },
+                { name: 'String', message: 'Use globalThis.String' },
+                { name: 'Boolean', message: 'Use globalThis.Boolean' },
+                { name: 'BigInt', message: 'Use globalThis.BigInt' },
+            ],
         },
     }
 );
