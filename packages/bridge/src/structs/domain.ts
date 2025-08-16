@@ -1,6 +1,6 @@
 import { recycle } from '../utils/recycle.js';
 import { NativeStruct } from '../utils/native-struct.js';
-import { cached, slow } from '../utils/cache.js';
+import { cached, lazy } from '../utils/cache.js';
 import { raise } from '../utils/error.js';
 import type { Object_ } from './object.js';
 import { Assembly } from './assembly.js';
@@ -75,5 +75,5 @@ export class Domain extends NativeStruct {
     }
 }
 
-export const domain = slow(() => new Domain(nativeDomainGet()));
+export const domain = lazy(() => new Domain(nativeDomainGet()));
 export const getDomain = () => domain;

@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === THREAD AFFINITY FUNCTIONS ===
@@ -6,6 +6,6 @@ import { lookup } from './common.js';
  * Sets the default thread affinity mask for new threads.
  * @param affinity int64_t - The thread affinity mask
  */
-export const nativeSetDefaultThreadAffinity = slow(() =>
+export const nativeSetDefaultThreadAffinity = lazy(() =>
     lookup('il2cpp_set_default_thread_affinity', 'void', ['int64'])
 );

@@ -1,9 +1,9 @@
 import type { TypeEnum } from './enums/type.js';
 import { nativeGetCorlib } from './native/index.js';
 import { Image } from './structs/image.js';
-import { cached, slow } from './utils/cache.js';
+import { cached, lazy } from './utils/cache.js';
 
-export const corlib = slow(() => new Image(nativeGetCorlib()));
+export const corlib = lazy(() => new Image(nativeGetCorlib()));
 export const getCorlib = () => corlib;
 
 /**

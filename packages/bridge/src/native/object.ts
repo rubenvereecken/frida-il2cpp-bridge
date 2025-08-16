@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === OBJECT FUNCTIONS ===
@@ -9,7 +9,7 @@ import { lookup } from './common.js';
  * @param obj Il2CppObject* - The object to get the class of
  * @returns Il2CppClass* - The class of the object
  */
-export const nativeObjectGetClass = slow(() =>
+export const nativeObjectGetClass = lazy(() =>
     lookup('il2cpp_object_get_class', 'pointer', ['pointer'])
 );
 
@@ -18,7 +18,7 @@ export const nativeObjectGetClass = slow(() =>
  * @param obj Il2CppObject* - The object to get the size of
  * @returns uint32_t - The object size in bytes
  */
-export const nativeObjectGetSize = slow(() =>
+export const nativeObjectGetSize = lazy(() =>
     lookup('il2cpp_object_get_size', 'uint32', ['pointer'])
 );
 
@@ -28,7 +28,7 @@ export const nativeObjectGetSize = slow(() =>
  * @param method MethodInfo* - The virtual method to resolve
  * @returns MethodInfo* - The actual method implementation
  */
-export const nativeObjectGetVirtualMethod = slow(() =>
+export const nativeObjectGetVirtualMethod = lazy(() =>
     lookup('il2cpp_object_get_virtual_method', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -37,14 +37,14 @@ export const nativeObjectGetVirtualMethod = slow(() =>
  * @param klass Il2CppClass* - The class to instantiate
  * @returns Il2CppObject* - The newly allocated object
  */
-export const nativeObjectNew = slow(() => lookup('il2cpp_object_new', 'pointer', ['pointer']));
+export const nativeObjectNew = lazy(() => lookup('il2cpp_object_new', 'pointer', ['pointer']));
 
 /**
  * Unboxes a boxed value type object.
  * @param obj Il2CppObject* - The boxed object to unbox
  * @returns void* - Pointer to the unboxed value
  */
-export const nativeObjectUnbox = slow(() => lookup('il2cpp_object_unbox', 'pointer', ['pointer']));
+export const nativeObjectUnbox = lazy(() => lookup('il2cpp_object_unbox', 'pointer', ['pointer']));
 
 /**
  * Boxes a value type into an object.
@@ -52,7 +52,7 @@ export const nativeObjectUnbox = slow(() => lookup('il2cpp_object_unbox', 'point
  * @param data void* - Pointer to the value to box
  * @returns Il2CppObject* - The boxed object
  */
-export const nativeValueTypeBox = slow(() =>
+export const nativeValueTypeBox = lazy(() =>
     lookup('il2cpp_value_box', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -60,7 +60,7 @@ export const nativeValueTypeBox = slow(() =>
  * Initializes an object by calling its constructor.
  * @param obj Il2CppObject* - The object to initialize
  */
-export const nativeObjectInitialize = slow(() =>
+export const nativeObjectInitialize = lazy(() =>
     lookup('il2cpp_runtime_object_init', 'void', ['pointer'])
 );
 
@@ -69,6 +69,6 @@ export const nativeObjectInitialize = slow(() =>
  * @param obj Il2CppObject* - The object to initialize
  * @param exc Il2CppException** - Output parameter for exceptions
  */
-export const nativeObjectInitializeException = slow(() =>
+export const nativeObjectInitializeException = lazy(() =>
     lookup('il2cpp_runtime_object_init_exception', 'void', ['pointer', 'pointer'])
 );

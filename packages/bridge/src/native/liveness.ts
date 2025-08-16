@@ -1,8 +1,8 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === LIVENESS FUNCTIONS ===
-export const nativeLivenessCalculationBegin = slow(() =>
+export const nativeLivenessCalculationBegin = lazy(() =>
     lookup('il2cpp_unity_liveness_calculation_begin', 'pointer', [
         'pointer',
         'int',
@@ -13,15 +13,15 @@ export const nativeLivenessCalculationBegin = slow(() =>
     ])
 );
 
-export const nativeLivenessCalculationEnd = slow(() =>
+export const nativeLivenessCalculationEnd = lazy(() =>
     lookup('il2cpp_unity_liveness_calculation_end', 'void', ['pointer'])
 );
 
-export const nativeLivenessCalculationFromRoot = slow(() =>
+export const nativeLivenessCalculationFromRoot = lazy(() =>
     lookup('il2cpp_unity_liveness_calculation_from_root', 'void', ['pointer', 'pointer'])
 );
 
-export const nativeLivenessCalculationFromStatics = slow(() =>
+export const nativeLivenessCalculationFromStatics = lazy(() =>
     lookup('il2cpp_unity_liveness_calculation_from_statics', 'void', ['pointer'])
 );
 
@@ -34,7 +34,7 @@ export const nativeLivenessCalculationFromStatics = slow(() =>
  * @param worldChanged Il2CppLivenessWorldChangedCallback - World changed callback
  * @returns Il2CppLivenessCalculation* - The liveness calculation struct
  */
-export const nativeLivenessAllocateStruct = slow(() =>
+export const nativeLivenessAllocateStruct = lazy(() =>
     lookup('il2cpp_unity_liveness_allocate_struct', 'pointer', [
         'pointer',
         'int',
@@ -48,7 +48,7 @@ export const nativeLivenessAllocateStruct = slow(() =>
  * Finalizes a liveness calculation.
  * @param liveness Il2CppLivenessCalculation* - The liveness calculation to finalize
  */
-export const nativeLivenessFinalize = slow(() =>
+export const nativeLivenessFinalize = lazy(() =>
     lookup('il2cpp_unity_liveness_finalize', 'void', ['pointer'])
 );
 
@@ -56,6 +56,6 @@ export const nativeLivenessFinalize = slow(() =>
  * Frees a liveness struct.
  * @param liveness Il2CppLivenessCalculation* - The liveness calculation to free
  */
-export const nativeLivenessFreeStruct = slow(() =>
+export const nativeLivenessFreeStruct = lazy(() =>
     lookup('il2cpp_unity_liveness_free_struct', 'void', ['pointer'])
 );

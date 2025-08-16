@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === DEBUG METADATA FUNCTIONS ===
@@ -8,6 +8,6 @@ import { lookup } from './common.js';
  * @param debugInfo Il2CppMethodDebugInfo* - Output parameter for debug information
  * @returns bool - True if debug information was found
  */
-export const nativeDebugGetMethodInfo = slow(() =>
+export const nativeDebugGetMethodInfo = lazy(() =>
     lookup('il2cpp_debug_get_method_info', 'bool', ['pointer', 'pointer'])
 );

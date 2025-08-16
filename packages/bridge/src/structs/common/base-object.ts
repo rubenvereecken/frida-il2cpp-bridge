@@ -6,9 +6,9 @@ import type { BoundField } from '../field.js';
 import type { BoundMethod, MethodReturnType } from '../method.js';
 import type { ParameterValue } from '../parameter.js';
 import type { Type } from '../type.js';
-import type { DynamicFields} from './dynamic-fields.js';
+import type { DynamicFields } from './dynamic-fields.js';
 import { DynamicFieldsLookup } from './dynamic-fields.js';
-import type { DynamicMethods} from './dynamic-methods.js';
+import type { DynamicMethods } from './dynamic-methods.js';
 import { DynamicMethodsLookup } from './dynamic-methods.js';
 
 export abstract class BaseObject<T extends string = string> extends NativeStruct {

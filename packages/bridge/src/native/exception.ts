@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === EXCEPTION FUNCTIONS ===
@@ -6,7 +6,7 @@ import { lookup } from './common.js';
  * Raises an exception (does not return).
  * @param ex Il2CppException* - The exception to raise
  */
-export const nativeRaiseException = slow(() =>
+export const nativeRaiseException = lazy(() =>
     lookup('il2cpp_raise_exception', 'void', ['pointer'])
 );
 
@@ -18,7 +18,7 @@ export const nativeRaiseException = slow(() =>
  * @param msg const char* - The exception message
  * @returns Il2CppException* - The created exception
  */
-export const nativeExceptionFromNameMsg = slow(() =>
+export const nativeExceptionFromNameMsg = lazy(() =>
     lookup('il2cpp_exception_from_name_msg', 'pointer', [
         'pointer',
         'pointer',
@@ -32,7 +32,7 @@ export const nativeExceptionFromNameMsg = slow(() =>
  * @param arg const char* - The name of the null argument
  * @returns Il2CppException* - The ArgumentNullException
  */
-export const nativeGetExceptionArgumentNull = slow(() =>
+export const nativeGetExceptionArgumentNull = lazy(() =>
     lookup('il2cpp_get_exception_argument_null', 'pointer', ['pointer'])
 );
 
@@ -42,7 +42,7 @@ export const nativeGetExceptionArgumentNull = slow(() =>
  * @param message char* - Buffer to store the formatted message
  * @param message_size int - Size of the message buffer
  */
-export const nativeFormatException = slow(() =>
+export const nativeFormatException = lazy(() =>
     lookup('il2cpp_format_exception', 'void', ['pointer', 'pointer', 'int'])
 );
 
@@ -52,7 +52,7 @@ export const nativeFormatException = slow(() =>
  * @param output char* - Buffer to store the formatted stack trace
  * @param output_size int - Size of the output buffer
  */
-export const nativeFormatStackTrace = slow(() =>
+export const nativeFormatStackTrace = lazy(() =>
     lookup('il2cpp_format_stack_trace', 'void', ['pointer', 'pointer', 'int'])
 );
 
@@ -60,7 +60,7 @@ export const nativeFormatStackTrace = slow(() =>
  * Handles an unhandled exception.
  * @param ex Il2CppException* - The unhandled exception
  */
-export const nativeUnhandledException = slow(() =>
+export const nativeUnhandledException = lazy(() =>
     lookup('il2cpp_unhandled_exception', 'void', ['pointer'])
 );
 
@@ -71,6 +71,6 @@ export const nativeUnhandledException = slow(() =>
  * @param numFrames int* - Pointer to store number of frames
  * @param imageUUID char* - Buffer to store image UUID
  */
-export const nativeStackTrace = slow(() =>
+export const nativeStackTrace = lazy(() =>
     lookup('il2cpp_native_stack_trace', 'void', ['pointer', 'pointer', 'pointer', 'pointer'])
 );

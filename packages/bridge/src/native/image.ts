@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === IMAGE FUNCTIONS ===
@@ -7,7 +7,7 @@ import { lookup } from './common.js';
  * @param image Il2CppImage* - The image to get the assembly from
  * @returns Il2CppAssembly* - The assembly containing the image
  */
-export const nativeImageGetAssembly = slow(() =>
+export const nativeImageGetAssembly = lazy(() =>
     lookup('il2cpp_image_get_assembly', 'pointer', ['pointer'])
 );
 
@@ -16,7 +16,7 @@ export const nativeImageGetAssembly = slow(() =>
  * @param image Il2CppImage* - The image to get the name of
  * @returns const char* - The name of the image
  */
-export const nativeImageGetName = slow(() =>
+export const nativeImageGetName = lazy(() =>
     lookup('il2cpp_image_get_name', 'pointer', ['pointer'])
 );
 
@@ -25,7 +25,7 @@ export const nativeImageGetName = slow(() =>
  * @param image Il2CppImage* - The image to get the filename of
  * @returns const char* - The filename of the image
  */
-export const nativeImageGetFilename = slow(() =>
+export const nativeImageGetFilename = lazy(() =>
     lookup('il2cpp_image_get_filename', 'pointer', ['pointer'])
 );
 
@@ -34,7 +34,7 @@ export const nativeImageGetFilename = slow(() =>
  * @param image Il2CppImage* - The image to get the entry point from
  * @returns Il2CppMethod* - The entry point method
  */
-export const nativeImageGetEntryPoint = slow(() =>
+export const nativeImageGetEntryPoint = lazy(() =>
     lookup('il2cpp_image_get_entry_point', 'pointer', ['pointer'])
 );
 
@@ -43,7 +43,7 @@ export const nativeImageGetEntryPoint = slow(() =>
  * @param image Il2CppImage* - The image to get the class count from
  * @returns size_t - The number of classes in the image
  */
-export const nativeImageGetClassCount = slow(() =>
+export const nativeImageGetClassCount = lazy(() =>
     lookup('il2cpp_image_get_class_count', 'size_t', ['pointer'])
 );
 
@@ -53,6 +53,6 @@ export const nativeImageGetClassCount = slow(() =>
  * @param index size_t - The index of the class to retrieve
  * @returns Il2CppClass* - The class at the specified index
  */
-export const nativeImageGetClass = slow(() =>
+export const nativeImageGetClass = lazy(() =>
     lookup('il2cpp_image_get_class', 'pointer', ['pointer', 'size_t'])
 );

@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === MEMORY SNAPSHOT FUNCTIONS ===
@@ -6,7 +6,7 @@ import { lookup } from './common.js';
  * Captures a memory snapshot of the IL2CPP runtime.
  * @returns Il2CppManagedMemorySnapshot* - The captured memory snapshot
  */
-export const nativeMemorySnapshotCapture = slow(() =>
+export const nativeMemorySnapshotCapture = lazy(() =>
     lookup('il2cpp_capture_memory_snapshot', 'pointer', [])
 );
 
@@ -14,7 +14,7 @@ export const nativeMemorySnapshotCapture = slow(() =>
  * Frees a previously captured memory snapshot.
  * @param snapshot Il2CppManagedMemorySnapshot* - The snapshot to free
  */
-export const nativeMemorySnapshotFree = slow(() =>
+export const nativeMemorySnapshotFree = lazy(() =>
     lookup('il2cpp_free_captured_memory_snapshot', 'void', ['pointer'])
 );
 
@@ -24,7 +24,7 @@ export const nativeMemorySnapshotFree = slow(() =>
  * @param size size_t* - Output parameter for the number of classes
  * @returns Il2CppManagedMemorySnapshotClasses* - Array of classes
  */
-export const nativeMemorySnapshotGetClasses = slow(() =>
+export const nativeMemorySnapshotGetClasses = lazy(() =>
     lookup('il2cpp_memory_snapshot_get_classes', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -34,6 +34,6 @@ export const nativeMemorySnapshotGetClasses = slow(() =>
  * @param size size_t* - Output parameter for the number of objects
  * @returns Il2CppManagedMemorySnapshotObjects* - Array of objects
  */
-export const nativeMemorySnapshotGetObjects = slow(() =>
+export const nativeMemorySnapshotGetObjects = lazy(() =>
     lookup('il2cpp_memory_snapshot_get_objects', 'pointer', ['pointer', 'pointer'])
 );

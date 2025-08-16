@@ -60,7 +60,7 @@ export function memoize<Args extends unknown[], R, This = unknown>(
 type NonPrimitive = object | ((...args: unknown[]) => unknown);
 
 /** @internal */
-export function slow<T extends NonPrimitive>(factory: () => T): T {
+export function lazy<T extends NonPrimitive>(factory: () => T): T {
     let inited = false;
     let value!: T;
 

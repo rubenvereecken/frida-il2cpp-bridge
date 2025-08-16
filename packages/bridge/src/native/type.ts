@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === TYPE FUNCTIONS ===
@@ -9,7 +9,7 @@ import { lookup } from './common.js';
  * @param type Il2CppType* - The type to get the reflection object for
  * @returns Il2CppReflectionRuntimeType* - Reflection object of type `System.RuntimeType`
  */
-export const nativeTypeGetObject = slow(() =>
+export const nativeTypeGetObject = lazy(() =>
     lookup('il2cpp_type_get_object', 'pointer', ['pointer'])
 );
 
@@ -18,14 +18,14 @@ export const nativeTypeGetObject = slow(() =>
  * @param type Il2CppType* - The type to get the enum value for
  * @returns int - The type enum value
  */
-export const nativeTypeGetTypeEnum = slow(() => lookup('il2cpp_type_get_type', 'int', ['pointer']));
+export const nativeTypeGetTypeEnum = lazy(() => lookup('il2cpp_type_get_type', 'int', ['pointer']));
 
 /**
  * Gets the class from the specified type.
  * @param type Il2CppType* - The type to get the class from
  * @returns Il2CppClass* - The class representing the type
  */
-export const nativeTypeGetClass = slow(() =>
+export const nativeTypeGetClass = lazy(() =>
     lookup('il2cpp_class_from_type', 'pointer', ['pointer'])
 );
 
@@ -34,7 +34,7 @@ export const nativeTypeGetClass = slow(() =>
  * @param type Il2CppType* - The type to get the class from
  * @returns Il2CppClass* - The class or element class
  */
-export const nativeTypeGetClassOrElementClass = slow(() =>
+export const nativeTypeGetClassOrElementClass = lazy(() =>
     lookup('il2cpp_type_get_class_or_element_class', 'pointer', ['pointer'])
 );
 
@@ -43,21 +43,21 @@ export const nativeTypeGetClassOrElementClass = slow(() =>
  * @param type Il2CppType* - The type to get the name of
  * @returns char* - The name of the type (must be freed with il2cpp_free)
  */
-export const nativeTypeGetName = slow(() => lookup('il2cpp_type_get_name', 'pointer', ['pointer']));
+export const nativeTypeGetName = lazy(() => lookup('il2cpp_type_get_name', 'pointer', ['pointer']));
 
 /**
  * Determines whether the specified type is a by-reference type.
  * @param type Il2CppType* - The type to check
  * @returns bool - True if the type is by-reference
  */
-export const nativeTypeIsByRef = slow(() => lookup('il2cpp_type_is_byref', 'bool', ['pointer']));
+export const nativeTypeIsByRef = lazy(() => lookup('il2cpp_type_is_byref', 'bool', ['pointer']));
 
 /**
  * Gets the attributes of the specified type.
  * @param type Il2CppType* - The type to get the attributes of
  * @returns uint32_t - The type attributes
  */
-export const nativeTypeGetAttrs = slow(() =>
+export const nativeTypeGetAttrs = lazy(() =>
     lookup('il2cpp_type_get_attrs', 'uint32', ['pointer'])
 );
 
@@ -67,7 +67,7 @@ export const nativeTypeGetAttrs = slow(() =>
  * @param type2 Il2CppType* - The second type to compare
  * @returns bool - True if the types are equal
  */
-export const nativeTypeEquals = slow(() =>
+export const nativeTypeEquals = lazy(() =>
     lookup('il2cpp_type_equals', 'bool', ['pointer', 'pointer'])
 );
 
@@ -76,7 +76,7 @@ export const nativeTypeEquals = slow(() =>
  * @param type Il2CppType* - The type to get the name of
  * @returns char* - The assembly-qualified name (must be freed with il2cpp_free)
  */
-export const nativeTypeGetAssemblyQualifiedName = slow(() =>
+export const nativeTypeGetAssemblyQualifiedName = lazy(() =>
     lookup('il2cpp_type_get_assembly_qualified_name', 'pointer', ['pointer'])
 );
 
@@ -85,14 +85,14 @@ export const nativeTypeGetAssemblyQualifiedName = slow(() =>
  * @param type Il2CppType* - The type to check
  * @returns bool - True if the type is static
  */
-export const nativeTypeIsStatic = slow(() => lookup('il2cpp_type_is_static', 'bool', ['pointer']));
+export const nativeTypeIsStatic = lazy(() => lookup('il2cpp_type_is_static', 'bool', ['pointer']));
 
 /**
  * Determines whether the specified type is a pointer type.
  * @param type Il2CppType* - The type to check
  * @returns bool - True if the type is a pointer type
  */
-export const nativeTypeIsPointer = slow(() =>
+export const nativeTypeIsPointer = lazy(() =>
     lookup('il2cpp_type_is_pointer_type', 'bool', ['pointer'])
 );
 
@@ -102,6 +102,6 @@ export const nativeTypeIsPointer = slow(() =>
  * @param chunkReportFunc void(*)(void* data, void* userData) - Callback for each chunk
  * @param userData void* - User data passed to the callback
  */
-export const nativeTypeGetNameChunked = slow(() =>
+export const nativeTypeGetNameChunked = lazy(() =>
     lookup('il2cpp_type_get_name_chunked', 'void', ['pointer', 'pointer', 'pointer'])
 );

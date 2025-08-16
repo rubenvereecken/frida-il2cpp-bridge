@@ -1,6 +1,6 @@
 import { corlib, System } from '../corlib.js';
 import { nativeArrayGetLength, nativeArrayNew } from '../native/index.js';
-import type { Il2CppValue, ParameterLike} from '../memory.js';
+import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';

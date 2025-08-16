@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === MONITOR FUNCTIONS ===
@@ -6,7 +6,7 @@ import { lookup } from './common.js';
  * Enters the monitor on the specified object.
  * @param obj Il2CppObject* - The object to monitor
  */
-export const nativeMonitorEnter = slow(() => lookup('il2cpp_monitor_enter', 'void', ['pointer']));
+export const nativeMonitorEnter = lazy(() => lookup('il2cpp_monitor_enter', 'void', ['pointer']));
 
 /**
  * Attempts to enter the monitor on the specified object with a timeout.
@@ -14,7 +14,7 @@ export const nativeMonitorEnter = slow(() => lookup('il2cpp_monitor_enter', 'voi
  * @param timeout uint32_t - Timeout in milliseconds
  * @returns bool - True if the monitor was entered successfully
  */
-export const nativeMonitorTryEnter = slow(() =>
+export const nativeMonitorTryEnter = lazy(() =>
     lookup('il2cpp_monitor_try_enter', 'bool', ['pointer', 'uint32'])
 );
 
@@ -22,19 +22,19 @@ export const nativeMonitorTryEnter = slow(() =>
  * Exits the monitor on the specified object.
  * @param obj Il2CppObject* - The object to release monitor from
  */
-export const nativeMonitorExit = slow(() => lookup('il2cpp_monitor_exit', 'void', ['pointer']));
+export const nativeMonitorExit = lazy(() => lookup('il2cpp_monitor_exit', 'void', ['pointer']));
 
 /**
  * Pulses (notifies) one waiting thread on the specified object.
  * @param obj Il2CppObject* - The object to pulse
  */
-export const nativeMonitorPulse = slow(() => lookup('il2cpp_monitor_pulse', 'void', ['pointer']));
+export const nativeMonitorPulse = lazy(() => lookup('il2cpp_monitor_pulse', 'void', ['pointer']));
 
 /**
  * Pulses (notifies) all waiting threads on the specified object.
  * @param obj Il2CppObject* - The object to pulse all threads on
  */
-export const nativeMonitorPulseAll = slow(() =>
+export const nativeMonitorPulseAll = lazy(() =>
     lookup('il2cpp_monitor_pulse_all', 'void', ['pointer'])
 );
 
@@ -42,7 +42,7 @@ export const nativeMonitorPulseAll = slow(() =>
  * Waits indefinitely on the specified object's monitor.
  * @param obj Il2CppObject* - The object to wait on
  */
-export const nativeMonitorWait = slow(() => lookup('il2cpp_monitor_wait', 'void', ['pointer']));
+export const nativeMonitorWait = lazy(() => lookup('il2cpp_monitor_wait', 'void', ['pointer']));
 
 /**
  * Waits on the specified object's monitor with a timeout.
@@ -50,6 +50,6 @@ export const nativeMonitorWait = slow(() => lookup('il2cpp_monitor_wait', 'void'
  * @param timeout uint32_t - Timeout in milliseconds
  * @returns bool - True if signaled before timeout
  */
-export const nativeMonitorTryWait = slow(() =>
+export const nativeMonitorTryWait = lazy(() =>
     lookup('il2cpp_monitor_try_wait', 'bool', ['pointer', 'uint32'])
 );

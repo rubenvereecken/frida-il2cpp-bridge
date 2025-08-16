@@ -1,24 +1,15 @@
-import type {
-    ArrayLike} from './structs/array.js';
-import {
-    array,
-    Array,
-    isArrayLike,
-    isJsArray,
-    isWrappedArray
-} from './structs/array.js';
+import type { ArrayLike } from './structs/array.js';
+import { array, Array, isArrayLike, isJsArray, isWrappedArray } from './structs/array.js';
 import { ByRef } from './structs/by-ref.js';
 import { NullReference } from './structs/null-reference.js';
 import { Object_ } from './structs/object.js';
 import { Pointer } from './structs/pointer.js';
-import type {
-    PrimitiveJSType,
-    PrimitiveLike} from './structs/primitive.js';
+import type { PrimitiveJSType, PrimitiveLike } from './structs/primitive.js';
 import {
     isPrimitiveJSType,
     isPrimitiveLike,
     isWrappedPrimitive,
-    Primitive
+    Primitive,
 } from './structs/primitive.js';
 import type { StringLike } from './structs/string.js';
 import { isJsString, isStringLike, String } from './structs/string.js';

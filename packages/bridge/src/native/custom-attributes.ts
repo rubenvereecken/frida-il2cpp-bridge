@@ -1,4 +1,4 @@
-import { slow } from '../utils/cache.js';
+import { lazy } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === CUSTOM ATTRIBUTES FUNCTIONS ===
@@ -7,7 +7,7 @@ import { lookup } from './common.js';
  * @param klass Il2CppClass* - The class to get custom attributes from
  * @returns Il2CppArray* - Array of custom attributes
  */
-export const nativeCustomAttrsFromClass = slow(() =>
+export const nativeCustomAttrsFromClass = lazy(() =>
     lookup('il2cpp_custom_attrs_from_class', 'pointer', ['pointer'])
 );
 
@@ -16,7 +16,7 @@ export const nativeCustomAttrsFromClass = slow(() =>
  * @param method Il2CppMethod* - The method to get custom attributes from
  * @returns Il2CppArray* - Array of custom attributes
  */
-export const nativeCustomAttrsFromMethod = slow(() =>
+export const nativeCustomAttrsFromMethod = lazy(() =>
     lookup('il2cpp_custom_attrs_from_method', 'pointer', ['pointer'])
 );
 
@@ -26,7 +26,7 @@ export const nativeCustomAttrsFromMethod = slow(() =>
  * @param attrClass Il2CppClass* - The attribute class to look for
  * @returns Il2CppObject* - The custom attribute instance, or null if not found
  */
-export const nativeCustomAttrsGetAttr = slow(() =>
+export const nativeCustomAttrsGetAttr = lazy(() =>
     lookup('il2cpp_custom_attrs_get_attr', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -36,7 +36,7 @@ export const nativeCustomAttrsGetAttr = slow(() =>
  * @param attrClass Il2CppClass* - The attribute class to look for
  * @returns bool - True if the attribute exists
  */
-export const nativeCustomAttrsHasAttr = slow(() =>
+export const nativeCustomAttrsHasAttr = lazy(() =>
     lookup('il2cpp_custom_attrs_has_attr', 'bool', ['pointer', 'pointer'])
 );
 
@@ -45,7 +45,7 @@ export const nativeCustomAttrsHasAttr = slow(() =>
  * @param attrs Il2CppCustomAttributeDataStorage* - The raw attribute data
  * @returns Il2CppArray* - Array of constructed custom attribute instances
  */
-export const nativeCustomAttrsConstruct = slow(() =>
+export const nativeCustomAttrsConstruct = lazy(() =>
     lookup('il2cpp_custom_attrs_construct', 'pointer', ['pointer'])
 );
 
@@ -53,6 +53,6 @@ export const nativeCustomAttrsConstruct = slow(() =>
  * Frees memory associated with custom attributes.
  * @param attrs Il2CppArray* - The custom attributes array to free
  */
-export const nativeCustomAttrsFree = slow(() =>
+export const nativeCustomAttrsFree = lazy(() =>
     lookup('il2cpp_custom_attrs_free', 'void', ['pointer'])
 );
