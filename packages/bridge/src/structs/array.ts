@@ -34,7 +34,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
         return new Proxy(this, {
             get: (target, prop) => {
                 if (typeof prop === 'string') {
-                    const index = Number(prop);
+                    const index = globalThis.Number(prop);
                     if (!isNaN(index)) {
                         return target.get(index); // Redirect array access
                     }
@@ -124,8 +124,8 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
 
     /** Writes the given elements starting at the given index. */
     write(values: ArrayLike<R>, offset: number = 0): void {
+        // TODO finish this
         if (isWrappedArray(values)) {
-            values;
             const v = values.get(0);
         }
         for (let i = 0; i < values.length; i++) {
@@ -147,7 +147,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
     }
 
     /** Iterable. */
-    *[Symbol.iterator](): IterableIterator<R> {
+    *[globalThis.Symbol.iterator](): IterableIterator<R> {
         for (let i = 0; i < this.length; i++) {
             yield this.get(i);
         }

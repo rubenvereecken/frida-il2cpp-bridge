@@ -78,9 +78,9 @@ export class Object_<T extends string = string> extends BaseObject<T> {
         return this.class.type;
     }
 
-    get monitor(): Object_.Monitor {
+    get monitor(): Monitor {
         // TODO revisit
-        return new Object_.Monitor(this);
+        return new Monitor(this);
     }
 
     /** Gets the size of the current object. */
@@ -114,44 +114,43 @@ export class Object_<T extends string = string> extends BaseObject<T> {
     }
 }
 
-export namespace Object_ {
-    export class Monitor {
-        /** @internal */
-        constructor(/** @internal */ readonly handle: NativePointerValue) {}
+/** TODO: revisit */
+export class Monitor {
+    /** @internal */
+    constructor(/** @internal */ readonly handle: NativePointerValue) {}
 
-        /** Acquires an exclusive lock on the current object. */
-        enter(): void {
-            return nativeMonitorEnter(this.handle);
-        }
+    /** Acquires an exclusive lock on the current object. */
+    enter(): void {
+        return nativeMonitorEnter(this.handle);
+    }
 
-        /** Release an exclusive lock on the current object. */
-        exit(): void {
-            return nativeMonitorExit(this.handle);
-        }
+    /** Release an exclusive lock on the current object. */
+    exit(): void {
+        return nativeMonitorExit(this.handle);
+    }
 
-        /** Notifies a thread in the waiting queue of a change in the locked object's state. */
-        pulse(): void {
-            return nativeMonitorPulse(this.handle);
-        }
+    /** Notifies a thread in the waiting queue of a change in the locked object's state. */
+    pulse(): void {
+        return nativeMonitorPulse(this.handle);
+    }
 
-        /** Notifies all waiting threads of a change in the object's state. */
-        pulseAll(): void {
-            return nativeMonitorPulseAll(this.handle);
-        }
+    /** Notifies all waiting threads of a change in the object's state. */
+    pulseAll(): void {
+        return nativeMonitorPulseAll(this.handle);
+    }
 
-        /** Attempts to acquire an exclusive lock on the current object. */
-        tryEnter(timeout: number): boolean {
-            return !!nativeMonitorTryEnter(this.handle, timeout);
-        }
+    /** Attempts to acquire an exclusive lock on the current object. */
+    tryEnter(timeout: number): boolean {
+        return !!nativeMonitorTryEnter(this.handle, timeout);
+    }
 
-        /** Releases the lock on an object and attempts to block the current thread until it reacquires the lock. */
-        tryWait(timeout: number): boolean {
-            return !!nativeMonitorTryWait(this.handle, timeout);
-        }
+    /** Releases the lock on an object and attempts to block the current thread until it reacquires the lock. */
+    tryWait(timeout: number): boolean {
+        return !!nativeMonitorTryWait(this.handle, timeout);
+    }
 
-        /** Releases the lock on an object and blocks the current thread until it reacquires the lock. */
-        wait(): void {
-            return nativeMonitorWait(this.handle);
-        }
+    /** Releases the lock on an object and blocks the current thread until it reacquires the lock. */
+    wait(): void {
+        return nativeMonitorWait(this.handle);
     }
 }

@@ -44,7 +44,7 @@ export type Il2CppValue =
 
 export type JsObject = {
     // TODO type this using RecursiveValuesOf (see Frida's NativeFunctionReturnValue)
-    [key: string]: any;
+    [key: string]: unknown;
 };
 
 // TODO consolidate

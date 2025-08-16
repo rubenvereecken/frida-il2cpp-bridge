@@ -9,10 +9,10 @@ export default tseslint.config(
         ignores: ['dist/**/*', 'node_modules/**/*'],
     },
     // eslint.configs.recommended,
-    tseslint.configs.recommended,
+    // tseslint.configs.recommended,
     // tseslint.configs.stylistic,
     {
-        files: ['src/**/*.{ts,js,mjs}'],
+        files: ['src/**/*.{ts}'],
         languageOptions: {
             parserOptions: {
                 project: './tsconfig.json',
@@ -23,7 +23,16 @@ export default tseslint.config(
             'file-extension-in-import-ts': fileExtensionInImportTs,
         },
         rules: {
-            'file-extension-in-import-ts/file-extension-in-import-ts': 'error',
+            // 'file-extension-in-import-ts/file-extension-in-import-ts': 'error',
+            // 🔧 Auto-fixes to `import type` where safe
+            '@typescript-eslint/consistent-type-imports': [
+                'error',
+                {
+                    prefer: 'type-imports',
+                    fixStyle: 'inline-type-imports', // results in: import { type Foo, Bar } from 'pkg'
+                    disallowTypeAnnotations: false,
+                },
+            ],
             // Disallow bare globals in *value* position, so as not to confuse with Il2Cpp classes
             'no-restricted-globals': [
                 'error',
