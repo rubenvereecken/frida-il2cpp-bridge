@@ -1,7 +1,7 @@
 import { corlib, System } from '../corlib.js';
 import { nativeArrayGetLength, nativeArrayNew } from '../native/index.js';
 import { Il2CppValue, ParameterLike, readIl2Cpp, write } from '../memory.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { StripArraySuffix } from '../utils/type-helpers.js';
 import type { Class } from './class.js';

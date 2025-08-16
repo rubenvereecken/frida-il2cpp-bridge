@@ -7,14 +7,14 @@ import { Domain, getDomain } from './structs/domain.js';
 import { Method } from './structs/method.js';
 import { Parameter } from './structs/parameter.js';
 import { getMainThread, Thread } from './structs/thread.js';
-import { inform } from './utils/console.js';
+import { inform } from './utils/log.js';
 
 export class Tracer {
     /** @internal */
     #state: Tracer.State = {
         depth: 0,
         buffer: [],
-        history: new Set(),
+        history: new globalThis.Set(),
         flush: () => {
             if (this.#state.depth == 0) {
                 const message = `\n${this.#state.buffer.join('\n')}\n`;

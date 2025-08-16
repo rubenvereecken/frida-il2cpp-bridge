@@ -1,6 +1,6 @@
 import { TypeAttributeFlags } from '../enums/type-attribute.js';
 import { TypeEnum } from '../enums/type.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';

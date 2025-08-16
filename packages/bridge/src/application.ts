@@ -1,5 +1,5 @@
 import { memoize } from './utils/cache.js';
-import { raise } from './utils/console.js';
+import { raise } from './utils/error.js';
 import { UnityVersion } from './utils/unity-version.js';
 import { nativeResolveInternalCall } from './native/index.js';
 import { getModule } from './module.js';

@@ -1,13 +1,13 @@
-import { Class } from '../structs/class.js';
-import { domain } from '../structs/domain.js';
-import { Field } from '../structs/field.js';
-import { Image } from '../structs/image.js';
-import { Method } from '../structs/method.js';
-import { Type } from '../structs/type.js';
-import { inform } from '../utils/console.js';
+import { Class } from '@frida-il2cpp/bridge';
+import { domain } from '@frida-il2cpp/bridge';
+import { Field } from '@frida-il2cpp/bridge';
+import { Image } from '@frida-il2cpp/bridge';
+import { Method } from '@frida-il2cpp/bridge';
+import { Type } from '@frida-il2cpp/bridge';
+import { log } from '@frida-il2cpp/bridge/utils';
 
 function uniqBy<T>(array: T[], keyFn: (item: T) => string): T[] {
-    return [...new Map(array.map(item => [keyFn(item), item])).values()];
+    return [...new globalThis.Map(array.map(item => [keyFn(item), item])).values()];
 }
 
 function attachToGlobal(keyValues: Record<string, any>) {
@@ -17,7 +17,7 @@ function attachToGlobal(keyValues: Record<string, any>) {
     }
 }
 
-function log(o: any) {
+function logdir(o: any) {
     if (o instanceof Map) {
     }
 
@@ -54,8 +54,8 @@ class Path {
     }
 
     static relative(from: string, to: string): string {
-        const fromParts = from.split('/').filter(Boolean);
-        const toParts = to.split('/').filter(Boolean);
+        const fromParts = from.split('/').filter(globalThis.Boolean);
+        const toParts = to.split('/').filter(globalThis.Boolean);
 
         // Find the common base
         let i = 0;
@@ -150,7 +150,7 @@ export class TypescriptIl2cppAnalyzer {
                     method.returnType,
                     ...method.parameters.map(p => p.type),
                 ]),
-                ...[klass.parent?.type].filter(Boolean),
+                ...[klass.parent?.type].filter(globalThis.Boolean),
                 // TODO reinstate once I'm willing to deal with complex types
                 // ...interfaces.map(kls => TypeIdWithType.from(kls.type)),
             ],
@@ -169,7 +169,7 @@ export class TypescriptIl2cppAnalyzer {
     }
 
     analyzeImage(image: Image, predicate: (klass: Class) => boolean = () => true) {
-        inform(`${image.name} -> ${image.classCount} classes`);
+        log.inform(`${image.name} -> ${image.classCount} classes`);
         const classes = image.classes
             // Skip the weird empty `<Module>` class
             .filter(klass => klass.name !== `<Module>`)
@@ -183,7 +183,7 @@ export class TypescriptIl2cppAnalyzer {
 
     analyzeAll() {
         const images = domain.assemblies.map(a => a.image).map(a => this.analyzeImage(a));
-        inform(`Analyzed ${images.length} images`);
+        log.inform(`Analyzed ${images.length} images`);
 
         const classes = images.flatMap(image => image.classes);
         const classesByNamespace: { [key: string]: ClassInfo[] } = {};
@@ -210,8 +210,8 @@ export class TypescriptIl2cppAnalyzer {
         const namespaces = globalThis.Object.entries(classesByNamespace).map(
             ([namespace, classes]) => this.analyzeNamespace(namespace, classes)
         );
-        inform(`Analyzed ${namespaces.length} namespaces`);
-        inform(namespaces.map(ns => ns.name));
+        log.inform(`Analyzed ${namespaces.length} namespaces`);
+        log.inform(namespaces.map(ns => ns.name));
         return namespaces;
     }
 
@@ -244,7 +244,7 @@ export class TypescriptIl2cppAnalyzer {
             const newKlasses = uniqNewDependencies.map(t => t.class);
             const oldNewClasses = newClasses;
             newClasses = newKlasses.map(k => this.analyzeClass(k));
-            inform(
+            log.inform(
                 `${oldNewClasses.map(c => c.klass.type.name)} -> ${newClasses.map(c => c.klass.type.name)}`
             );
             allClasses = [...allClasses, ...newClasses];
@@ -302,7 +302,7 @@ export class TypescriptIl2cppAnalyzer {
                 writer.writeLine(this.writeClass(klass));
                 writer.writeNewlines(2);
             } catch (e) {
-                inform(`Error writing class ${klass.klass.type.name}: ${e}`);
+                log.inform(`Error writing class ${klass.klass.type.name}: ${e}`);
             }
         });
 
@@ -383,7 +383,7 @@ constructor(public readonly ${DUNDER}${OBJECT}: Il2Cpp.ValueType) {}
             const writer = new Writer();
 
             const filename = Path.forNamespace(namespace.name);
-            inform('// ' + filename);
+            log.inform('// ' + filename);
             writer.writeLine(`// ${filename}`);
             writer.writeLine(this.writeNamespace(namespace));
             (globalThis as any).console.log(writer.text);

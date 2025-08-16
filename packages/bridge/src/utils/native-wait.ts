@@ -1,5 +1,6 @@
 import { getApiLevel } from './android.js';
-import { raise, warn } from './console.js';
+import { raise } from './error.js';
+import { warn } from './log.js';
 
 /** @internal */
 interface ResolvedExport {

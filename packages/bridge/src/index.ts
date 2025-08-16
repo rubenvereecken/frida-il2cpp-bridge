@@ -3,7 +3,6 @@
 // Main modules
 export * from './application.js';
 export * from './corlib.js';
-export * from './dump.js';
 export * from './exception-listener.js';
 export * from './filters.js';
 export * from './gc.js';

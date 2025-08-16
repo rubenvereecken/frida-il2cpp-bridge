@@ -1,5 +1,5 @@
 import { getModule } from '../module.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
 
 declare const $inline_file: typeof import('ts-transformer-inline-file').$INLINE_FILE;

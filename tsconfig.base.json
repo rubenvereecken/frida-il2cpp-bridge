@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "lib": ["ESNext"],
+        "module": "ESNext",
+        "declaration": true,
+        "declarationMap": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "stripInternal": true,
+        "verbatimModuleSyntax": false,
+        "types": ["frida-gum"],
+        "plugins": [{ "transform": "ts-transformer-inline-file/transformer" }]
+    }
+}

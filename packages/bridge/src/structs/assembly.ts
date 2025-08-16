@@ -1,7 +1,7 @@
 import { recycle } from '../utils/recycle.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { cached } from '../utils/cache.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { Image } from './image.js';
 import { Object_ } from './object.js';
 import { string } from './string.js';

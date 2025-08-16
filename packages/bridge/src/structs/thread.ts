@@ -1,5 +1,5 @@
 import { NativeStruct } from '../utils/native-struct.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { Int32, IntPtr, UInt64, Void } from './primitive.js';
 import { cached, memoize } from '../utils/cache.js';
 import { getter } from '../utils/getter.js';

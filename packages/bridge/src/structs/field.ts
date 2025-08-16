@@ -10,7 +10,7 @@ import {
     nativeFieldSetStaticValue,
 } from '../native/index.js';
 import { Il2CppValue, ParameterLike, readIl2Cpp, write } from '../memory.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { Class } from './class.js';

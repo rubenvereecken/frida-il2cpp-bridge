@@ -1,7 +1,7 @@
 import { nativeThreadGetCurrent } from './native/index.js';
 import { getModule } from './module.js';
 import { Object_ } from './structs/object.js';
-import { inform } from './utils/console.js';
+import { inform } from './utils/log.js';
 
 /**
  * Installs a listener to track any thrown (unrecoverable) C# exception. \

@@ -1,7 +1,6 @@
 // Import everything from the main ESM exports
 import * as application from '../application.js';
 import * as corlib from '../corlib.js';
-import * as dump from '../dump.js';
 import * as exceptionListener from '../exception-listener.js';
 import * as filters from '../filters.js';
 import * as gc from '../gc.js';
@@ -20,7 +19,6 @@ const Il2Cpp = {
     ...native,
     ...application,
     ...corlib,
-    ...dump,
     ...exceptionListener,
     ...filters,
     ...gc,

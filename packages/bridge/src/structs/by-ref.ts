@@ -1,7 +1,7 @@
 import { System } from '../corlib.js';
 import { TypeEnum } from '../enums/type.js';
 import { Il2CppValue, ParameterLike, readIl2Cpp, write } from '../memory.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { Array } from './array.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';

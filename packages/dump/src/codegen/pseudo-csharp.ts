@@ -1,10 +1,10 @@
-import { Image } from '../structs/image.js';
-import { Class } from '../structs/class.js';
-import { Field } from '../structs/field.js';
-import { readIl2Cpp } from '../memory.js';
-import { ValueType } from '../structs/value-type.js';
-import { Method } from '../structs/method.js';
-import { Parameter } from '../structs/parameter.js';
+import { Image } from '@frida-il2cpp/bridge';
+import { Class } from '@frida-il2cpp/bridge';
+import { Field } from '@frida-il2cpp/bridge';
+import { readIl2Cpp } from '@frida-il2cpp/bridge';
+import { ValueType } from '@frida-il2cpp/bridge';
+import { Method } from '@frida-il2cpp/bridge';
+import { Parameter } from '@frida-il2cpp/bridge';
 
 export class PseudoCsharpGenerator {
     writeImage(image: Image): string {

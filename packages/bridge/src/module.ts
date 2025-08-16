@@ -1,6 +1,6 @@
 import { nativeGetCorlib, nativeInitialize } from './native/index.js';
 import { getApiLevel } from './utils/android.js';
-import { raise } from './utils/console.js';
+import { raise } from './utils/error.js';
 import { memoize } from './utils/cache.js';
 import { forModule } from './utils/native-wait.js';
 

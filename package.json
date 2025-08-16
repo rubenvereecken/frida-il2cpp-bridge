@@ -4,8 +4,8 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "yarn workspaces foreach -At run build",
-        "dev": "yarn workspaces foreach -p run dev",
+        "build": "tsc -b tsconfig.build.json",
+        "dev": "tsc -b -w tsconfig.build.json",
         "clean": "yarn workspaces foreach -Aw run clean"
     }
 }

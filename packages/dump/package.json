@@ -1,7 +1,7 @@
 {
-    "name": "@frida-il2cpp/bridge",
+    "name": "@frida-il2cpp/dump",
     "version": "0.1.0",
-    "description": "A Frida module for hijacking any Il2Cpp application at runtime, without needing the global-metadata.dat file.",
+    "description": "A Frida module for dumping any Il2Cpp application at runtime, without needing the global-metadata.dat file.",
     "keywords": [
         "frida",
         "il2cpp",
@@ -30,14 +30,6 @@
         "./global": {
             "types": "./dist/global/index.d.ts",
             "import": "./dist/global/index.js"
-        },
-        "./native": {
-            "types": "./dist/native/index.d.ts",
-            "import": "./dist/native/index.js"
-        },
-        "./utils": {
-            "types": "./dist/utils/index.d.ts",
-            "import": "./dist/utils/index.js"
         }
     },
     "types": "dist/index.d.ts",
@@ -47,9 +39,10 @@
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "dev": "tsc -w -p tsconfig.json",
-        "clean": "rm -rf dist",
-        "prepare-TODO": "make dist",
-        "test-TODO": "make test"
+        "clean": "rm -rf dist"
+    },
+    "dependencies": {
+        "@frida-il2cpp/bridge": "workspace:*"
     },
     "devDependencies": {
         "@eslint/js": "^9.33.0",

@@ -1,9 +1,9 @@
-import { getDataPath, getIdentifier, getVersion } from './application.js';
+import { getDataPath, getIdentifier, getVersion } from '@frida-il2cpp/bridge';
 import { PseudoCsharpGenerator } from './codegen/pseudo-csharp.js';
-import { corlib } from './corlib.js';
-import { getDomain } from './structs/domain.js';
-import { Boolean } from './structs/primitive.js';
-import { inform, ok, raise } from './utils/console.js';
+import { corlib } from '@frida-il2cpp/bridge';
+import { getDomain } from '@frida-il2cpp/bridge';
+import { Boolean } from '@frida-il2cpp/bridge';
+import { log, raise } from '@frida-il2cpp/bridge/utils';
 
 /**
  * Dumps the application, i.e. it creates a dummy `.cs` file that contains
@@ -47,7 +47,7 @@ import { inform, ok, raise } from './utils/console.js';
  *   }
  * ```
  */
-export function dump(fileName?: string, path?: string | null): void {
+export function dumpSingle(fileName?: string, path?: string | null): void {
     fileName = fileName ?? `${getIdentifier() ?? 'unknown'}_${getVersion() ?? 'unknown'}.cs`;
     path = path ?? getDataPath()!;
 
@@ -62,7 +62,7 @@ export function dump(fileName?: string, path?: string | null): void {
 
     file.flush();
     file.close();
-    ok(`dump saved to ${destination}`);
+    log.ok(`dump saved to ${destination}`);
 }
 
 /**
@@ -89,7 +89,7 @@ export function dumpTree(path?: string, ignoreAlreadyExistingDirectory: boolean 
     }
 
     for (const assembly of getDomain().assemblies) {
-        inform(`dumping ${assembly.name}...`);
+        log.inform(`dumping ${assembly.name}...`);
 
         const destination = `${path}/${assembly.name.replaceAll('.', '/')}.cs`;
 
@@ -102,7 +102,7 @@ export function dumpTree(path?: string, ignoreAlreadyExistingDirectory: boolean 
         file.close();
     }
 
-    ok(`dump saved to ${path}`);
+    log.ok(`dump saved to ${path}`);
 }
 
 function directoryExists(path: string): boolean {

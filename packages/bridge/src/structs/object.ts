@@ -14,7 +14,7 @@ import {
     nativeObjectGetVirtualMethod,
     nativeObjectUnbox,
 } from '../native/index.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { cached } from '../utils/cache.js';
 import { Class } from './class.js';
 import { BaseObject } from './common/base-object.js';

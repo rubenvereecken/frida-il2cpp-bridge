@@ -1,6 +1,6 @@
 import { TypeEnum } from '../enums/type.js';
 import { isIl2Cpp, ParameterLike, write } from '../memory.js';
-import { raise } from '../utils/console.js';
+import { raise } from '../utils/error.js';
 import { Type } from './type.js';
 import { ValueType } from './value-type.js';
 
