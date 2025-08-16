@@ -1,42 +1,11 @@
 {
-    "name": "frida-il2cpp-bridge",
-    "version": "0.9.1",
-    "description": "A Frida module to dump, trace or hijack any Il2Cpp application at runtime, without needing the global-metadata.dat file.",
-    "keywords": [
-        "frida",
-        "il2cpp",
-        "dump",
-        "trace",
-        "global-metadata"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/vfsfitvnm/frida-il2cpp-bridge.git"
-    },
-    "license": "MIT",
-    "author": "vfsfitvnm",
-    "exports": "./dist/index.js",
-    "module": "dist/index.js",
-    "main": "dist/index.js",
-    "type": "module",
-    "types": "dist/index.d.ts",
-    "files": [
-        "dist"
+    "private": true,
+    "workspaces": [
+        "packages/*"
     ],
     "scripts": {
-        "prepare": "make dist",
-        "test": "make test"
-    },
-    "devDependencies": {
-        "@types/frida-gum": "^19.0.0",
-        "prettier": "^3.5.3",
-        "ts-patch": "^3.2.1",
-        "ts-transformer-inline-file": "^0.2.0",
-        "typescript": "^5.8.2"
-    },
-    "overrides": {
-        "ts-transformer-inline-file": {
-            "typescript": "^5.8.0"
-        }
+        "build": "yarn workspaces foreach -At run build",
+        "dev": "yarn workspaces foreach -p run dev",
+        "clean": "yarn workspaces foreach -Aw run clean"
     }
 }

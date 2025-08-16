@@ -1,0 +1,60 @@
+{
+    "name": "@frida-il2cpp/bridge",
+    "version": "0.1.0",
+    "description": "A Frida module to dump, trace or hijack any Il2Cpp application at runtime, without needing the global-metadata.dat file.",
+    "keywords": [
+        "frida",
+        "il2cpp",
+        "dump",
+        "trace",
+        "global-metadata"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rubenvereecken/frida-il2cpp-bridge.git"
+    },
+    "license": "MIT",
+    "author": "Ruben Vereecken (https://github.com/rubenvereecken)",
+    "contributors": [
+        "vfsfitvnm"
+    ],
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./native": {
+            "types": "./dist/native/index.d.ts",
+            "import": "./dist/native/index.js"
+        }
+    },
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "dev": "tsc -w -p tsconfig.json",
+        "clean": "rm -rf dist",
+        "prepare-TODO": "make dist",
+        "test-TODO": "make test"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.33.0",
+        "@types/frida-gum": "^19.0.0",
+        "eslint": "^9.33.0",
+        "eslint-plugin-file-extension-in-import-ts": "^2.1.1",
+        "prettier": "^3.5.3",
+        "ts-patch": "^3.2.1",
+        "ts-transformer-inline-file": "^0.2.0",
+        "typescript": "^5.9.2",
+        "typescript-eslint": "^8.39.1"
+    },
+    "overrides": {
+        "ts-transformer-inline-file": {
+            "typescript": "^5.8.0"
+        }
+    }
+}

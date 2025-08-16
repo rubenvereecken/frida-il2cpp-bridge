@@ -1,0 +1,39 @@
+import { getModule } from '../module.js';
+import { raise } from '../utils/console.js';
+import { memoize } from '../utils/cache.js';
+
+declare const $inline_file: typeof import('ts-transformer-inline-file').$INLINE_FILE;
+
+export const nativeGetMemorySnapshotExports = memoize(
+    () => new CModule($inline_file('../cmodules/memory-snapshot.c'))
+);
+
+export function lookup<
+    R extends NativeFunctionReturnType,
+    A extends NativeFunctionArgumentType[] | [],
+>(exportName: string, retType: R, argTypes: A) {
+    const handle: NativePointer | null | undefined =
+        (globalThis as any).IL2CPP_EXPORTS?.[exportName]?.() ??
+        getModule().findExportByName(exportName) ??
+        nativeGetMemorySnapshotExports()[exportName];
+
+    const target = new NativeFunction(handle ?? NULL, retType, argTypes);
+
+    return target.isNull()
+        ? new Proxy(target, {
+              get(value: typeof target, name: keyof typeof target) {
+                  const property = value[name];
+                  return typeof property === 'function' ? property.bind(value) : property;
+              },
+              apply() {
+                  if (handle == null) {
+                      raise(`couldn't resolve export ${exportName}`);
+                  } else if (handle.isNull()) {
+                      raise(
+                          `export ${exportName} points to NULL IL2CPP library has likely been stripped, obfuscated, or customized`
+                      );
+                  }
+              },
+          })
+        : target;
+}

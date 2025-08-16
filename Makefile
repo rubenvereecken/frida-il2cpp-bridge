@@ -3,6 +3,7 @@ MAKEFLAGS += --no-builtin-rules
 
 UNITY_DIRS := $(wildcard unity/*/)
 
+# TODO remove unnecessary after new multi-package build system
 dist: node_modules $(shell find src) tsconfig.json
 	@ ./node_modules/.bin/tspc
 	@ touch -m dist
