@@ -17,13 +17,13 @@ import {
     nativeMethodIsInflated,
     nativeMethodIsInstance,
 } from '../native/index.js';
-import type { Il2CppValue, ParameterLike} from '../memory.js';
+import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { fridaToIl2Cpp, toFrida } from '../memory.js';
 import { getModule } from '../module.js';
 import { raise } from '../utils/error.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
-import type { Array} from './array.js';
+import type { Array } from './array.js';
 import { array } from './array.js';
 import { Class } from './class.js';
 import type { BaseObject } from './common/base-object.js';
@@ -68,18 +68,18 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
 
     // TODO templated -> need method
     /** Gets the class in which this method is defined. */
-    @cached
+    @memoize
     get class(): Class {
         return new Class(nativeMethodGetClass(this));
     }
 
     // TODO: difference with `class`?
-    @cached
+    @memoize
     get declaringClass(): Class {
         return new Class(nativeMethodGetDeclaringClass(this));
     }
 
-    @cached
+    @memoize
     get flags() {
         return {
             isStatic: !!(this.flagsRaw & MethodAttributeFlags.STATIC),
@@ -90,13 +90,13 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** Gets the flags of the current method. */
-    @cached
+    @memoize
     get flagsRaw(): number {
         return nativeMethodGetFlags(this, NULL);
     }
 
     /** Gets the implementation flags of the current method. */
-    @cached
+    @memoize
     get implementationFlags(): number {
         const implementationFlagsPointer = Memory.alloc(Process.pointerSize);
         nativeMethodGetFlags(this, implementationFlagsPointer);
@@ -105,7 +105,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** */
-    @cached
+    @memoize
     get fridaSignature(): NativeCallbackArgumentType[] {
         const types: NativeCallbackArgumentType[] = [];
 
@@ -125,7 +125,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** Gets the generic parameters of this generic method. */
-    @cached
+    @memoize
     get generics(): Class[] {
         if (!this.isGeneric && !this.isInflated) {
             return [];
@@ -136,39 +136,39 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** Determines whether this method is external. */
-    @cached
+    @memoize
     get isExternal(): boolean {
         return (this.implementationFlags & MethodImplementationAttributeFlags.INTERNAL_CALL) != 0;
     }
 
     /** Determines whether this method is generic. */
-    @cached
+    @memoize
     get isGeneric(): boolean {
         return !!nativeMethodIsGeneric(this);
     }
 
     /** Determines whether this method is inflated (generic with a concrete type parameter). */
-    @cached
+    @memoize
     get isInflated(): boolean {
         return !!nativeMethodIsInflated(this);
     }
 
     /** Determines whether this method is static. */
-    @cached
+    @memoize
     get isStatic(): boolean {
         // Note: can also check using Static flag
         return !nativeMethodIsInstance(this);
     }
 
     /** Determines whether this method is synchronized. */
-    @cached
+    @memoize
     get isSynchronized(): boolean {
         return (this.implementationFlags & MethodImplementationAttributeFlags.SYNCHRONIZED) != 0;
     }
 
     // TODO move this to Writer classes
     /** Gets the access modifier of this method. */
-    @cached
+    @memoize
     get accessModifierStr(): string | undefined {
         switch (this.flagsRaw & MethodAttributeFlags.MEMBER_ACCESS_MASK) {
             case MethodAttributeFlags.PRIVATE:
@@ -187,13 +187,13 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** Gets the name of this method. */
-    @cached
+    @memoize
     get name(): string {
         return nativeMethodGetName(this).readUtf8String()!;
     }
 
     /** @internal */
-    @cached
+    @memoize
     get nativeFunction(): NativeFunction<any, any> {
         return new NativeFunction(
             this.virtualAddress,
@@ -203,19 +203,19 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** Gets the encompassing object of the current method. */
-    @cached
+    @memoize
     get object(): Object_ {
         return new Object_(nativeMethodGetObject(this, NULL));
     }
 
     /** Gets the amount of parameters of this method. */
-    @cached
+    @memoize
     get parameterCount(): number {
         return nativeMethodGetParameterCount(this);
     }
 
     /** Gets the parameters of this method. */
-    @cached
+    @memoize
     get parameters(): Parameter[] {
         return globalThis.Array.from(globalThis.Array(this.parameterCount), (_, i) => {
             const parameterName = nativeMethodGetParameterName(this, i).readUtf8String()!;
@@ -225,18 +225,18 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     }
 
     /** Gets the relative virtual address (RVA) of this method. */
-    @cached
+    @memoize
     get relativeVirtualAddress(): NativePointer {
         return this.virtualAddress.sub(getModule().base);
     }
 
     /** Gets the return type of this method. */
-    @cached
+    @memoize
     get returnType(): Type {
         return new Type(nativeMethodGetReturnType(this));
     }
 
-    @cached
+    @memoize
     static get virtualAddressOffset(): number {
         const FilterTypeName = corlib
             .class('System.Reflection.Module')

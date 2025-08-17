@@ -1,7 +1,7 @@
 import type { TypeEnum } from './enums/type.js';
 import { nativeGetCorlib } from './native/index.js';
 import { Image } from './structs/image.js';
-import { cached, lazy } from './utils/cache.js';
+import { memoize, lazy } from './utils/cache.js';
 
 export const corlib = lazy(() => new Image(nativeGetCorlib()));
 export const getCorlib = () => corlib;
@@ -14,157 +14,141 @@ export const getCorlib = () => corlib;
 export class System {
     // === OBJECT ===
 
-    @cached
+    @memoize
     static get Object() {
         const c = corlib.class('System.Object');
         return c as typeof c & {
-            _typeEnum: TypeEnum.OBJECT;
+            typeEnum: TypeEnum.OBJECT;
         };
     }
 
     // === PRIMITIVES ===
 
-    @cached
+    @memoize
     static get Void() {
         const c = corlib.class('System.Void');
         return c as typeof c & {
-            _typeEnum: TypeEnum.VOID;
+            typeEnum: TypeEnum.VOID;
         };
     }
 
-    @cached
+    @memoize
     static get Boolean() {
         const c = corlib.class('System.Boolean');
         return c as typeof c & {
-            _typeEnum: TypeEnum.BOOLEAN;
+            typeEnum: TypeEnum.BOOLEAN;
         };
     }
 
-    @cached
+    @memoize
     static get SByte() {
         const c = corlib.class('System.SByte');
         return c as typeof c & {
-            _typeEnum: TypeEnum.BYTE;
+            typeEnum: TypeEnum.SIGNED_BYTE;
         };
     }
 
-    @cached
+    @memoize
     static get Byte() {
         const c = corlib.class('System.Byte');
         return c as typeof c & {
-            _typeEnum: TypeEnum.UNSIGNED_BYTE;
+            typeEnum: TypeEnum.UNSIGNED_BYTE;
         };
     }
 
-    @cached
+    @memoize
     static get Char() {
         const c = corlib.class('System.Char');
         return c as typeof c & {
-            _typeEnum: TypeEnum.CHAR;
+            typeEnum: TypeEnum.CHAR;
         };
     }
 
-    @cached
+    @memoize
     static get Int16() {
         const c = corlib.class('System.Int16');
         return c as typeof c & {
-            _typeEnum: TypeEnum.SHORT;
+            typeEnum: TypeEnum.SHORT;
         };
     }
 
-    @cached
+    @memoize
     static get UInt16() {
         const c = corlib.class('System.UInt16');
         return c as typeof c & {
-            _typeEnum: TypeEnum.UNSIGNED_SHORT;
+            typeEnum: TypeEnum.UNSIGNED_SHORT;
         };
     }
 
-    @cached
+    @memoize
     static get Int32() {
         const c = corlib.class('System.Int32');
         return c as typeof c & {
-            _typeEnum: TypeEnum.INT;
+            typeEnum: TypeEnum.INT;
         };
     }
 
-    @cached
+    @memoize
     static get UInt32() {
         const c = corlib.class('System.UInt32');
         return c as typeof c & {
-            _typeEnum: TypeEnum.UNSIGNED_INT;
+            typeEnum: TypeEnum.UNSIGNED_INT;
         };
     }
 
-    @cached
+    @memoize
     static get Int64() {
         const c = corlib.class('System.Int64');
         return c as typeof c & {
-            _typeEnum: TypeEnum.LONG;
+            typeEnum: TypeEnum.LONG;
         };
     }
 
-    @cached
+    @memoize
     static get UInt64() {
         const c = corlib.class('System.UInt64');
         return c as typeof c & {
-            _typeEnum: TypeEnum.UNSIGNED_LONG;
+            typeEnum: TypeEnum.UNSIGNED_LONG;
         };
     }
 
-    @cached
+    @memoize
     static get Single() {
         const c = corlib.class('System.Single');
         return c as typeof c & {
-            _typeEnum: TypeEnum.FLOAT;
+            typeEnum: TypeEnum.FLOAT;
         };
     }
 
-    @cached
+    @memoize
     static get Double() {
         const c = corlib.class('System.Double');
         return c as typeof c & {
-            _typeEnum: TypeEnum.DOUBLE;
+            typeEnum: TypeEnum.DOUBLE;
         };
     }
 
-    @cached
+    @memoize
     static get IntPtr() {
         const c = corlib.class('System.IntPtr');
         return c as typeof c & {
-            _typeEnum: TypeEnum.NATIVE_POINTER;
+            typeEnum: TypeEnum.SIGNED_NATIVE_POINTER;
         };
     }
 
-    @cached
+    @memoize
     static get UIntPtr() {
         const c = corlib.class('System.UIntPtr');
         return c as typeof c & {
-            _typeEnum: TypeEnum.UNSIGNED_NATIVE_POINTER;
+            typeEnum: TypeEnum.UNSIGNED_NATIVE_POINTER;
         };
     }
 
-    @cached
+    @memoize
     static get String() {
         const c = corlib.class('System.String');
         return c as typeof c & {
-            _typeEnum: TypeEnum.STRING;
-        };
-    }
-
-    @cached
-    static get NativePointer() {
-        const c = corlib.class('System.IntPtr');
-        return c as typeof c & {
-            _typeEnum: TypeEnum.NATIVE_POINTER;
-        };
-    }
-
-    @cached
-    static get UnsignedNativePointer() {
-        const c = corlib.class('System.UIntPtr');
-        return c as typeof c & {
-            _typeEnum: TypeEnum.UNSIGNED_NATIVE_POINTER;
+            typeEnum: TypeEnum.STRING;
         };
     }
 }

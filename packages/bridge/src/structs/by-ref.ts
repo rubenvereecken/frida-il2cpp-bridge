@@ -1,6 +1,6 @@
 import { System } from '../corlib.js';
 import { TypeEnum } from '../enums/type.js';
-import type { Il2CppValue, ParameterLike} from '../memory.js';
+import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { Array } from './array.js';
@@ -50,6 +50,7 @@ export class ByRef<
 
     get type(): ByRefType<T> {
         if (!this._type || !this._type.isByRef()) raise(`${this._type?.name} is not a by-ref type`);
+        /** @ts-expect-error: TODO */
         return this._type;
     }
 
@@ -85,7 +86,7 @@ export function reference(value: ParameterLike, type?: Type): ByRef {
             switch (type?.typeEnum) {
                 case TypeEnum.UNSIGNED_BYTE:
                     return new ByRef(handle.writeU8(value), type.makeByRefType());
-                case TypeEnum.BYTE:
+                case TypeEnum.SIGNED_BYTE:
                     return new ByRef(handle.writeS8(value), type.makeByRefType());
                 case TypeEnum.CHAR:
                 case TypeEnum.UNSIGNED_SHORT:
@@ -115,7 +116,7 @@ export function reference(value: ParameterLike, type?: Type): ByRef {
             } else if (value instanceof NativePointer) {
                 switch (type?.typeEnum) {
                     case TypeEnum.UNSIGNED_NATIVE_POINTER:
-                    case TypeEnum.NATIVE_POINTER:
+                    case TypeEnum.SIGNED_NATIVE_POINTER:
                         return new ByRef(handle.writePointer(value), type.makeByRefType());
                 }
             } else if (value instanceof Int64) {

@@ -1,7 +1,7 @@
 import { NativeStruct } from '../utils/native-struct.js';
 import { raise } from '../utils/error.js';
 import type { Int32, IntPtr, UInt64, Void } from './primitive.js';
-import { cached, memoize } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { getter } from '../utils/getter.js';
 import { Object_ } from './object.js';
 import {
@@ -18,6 +18,7 @@ import { delegate } from './delegate.js';
 
 export class Thread extends NativeStruct {
     /** Gets the native id of the current thread. */
+    @memoize
     get id(): number {
         let get = function (this: Thread) {
             return this.internal.field<UInt64>('thread_id').value.read().toNumber();
@@ -38,43 +39,41 @@ export class Thread extends NativeStruct {
             };
         }
 
-        getter(Thread.prototype, 'id', get, cached);
-
-        return this.id;
+        return get.call(this);
     }
 
     /** Gets the encompassing internal object (System.Threding.InternalThreead) of the current thread. */
-    @cached
+    @memoize
     get internal(): Object_ {
         return this.object.tryField<Object_>('internal_thread')?.value ?? this.object;
     }
 
     /** Determines whether the current thread is the garbage collector finalizer one. */
-    @cached
+    @memoize
     get isFinalizer(): boolean {
         return !nativeThreadIsVm(this);
     }
 
     /** Gets the managed id of the current thread. */
-    @cached
+    @memoize
     get managedId(): number {
         return this.object.method<Int32>('get_ManagedThreadId').invoke().read();
     }
 
     /** Gets the encompassing object of the current thread. */
-    @cached
+    @memoize
     get object(): Object_ {
         return new Object_(this);
     }
 
     /** @internal */
-    @cached
+    @memoize
     private get staticData(): NativePointer {
         return this.internal.field<IntPtr>('static_data').value.read();
     }
 
     /** @internal */
-    @cached
+    @memoize
     private get synchronizationContext(): Object_ {
         const get_ExecutionContext =
             this.object.tryMethod<Object_>('GetMutableExecutionContext') ??

@@ -1,31 +1,3 @@
-/** @internal */
-export function cached(_: any, propertyKey: PropertyKey, descriptor: PropertyDescriptor) {
-    const getter = descriptor.get;
-
-    if (!getter) {
-        throw new Error('@lazy can only be applied to getter accessors');
-    }
-
-    descriptor.get = function (this: unknown & { _propertyCache?: Record<PropertyKey, any> }) {
-        if (!this._propertyCache) {
-            Object.defineProperty(this, '_propertyCache', {
-                value: {},
-                configurable: false,
-                enumerable: false,
-                writable: true,
-            });
-        }
-
-        if (!(propertyKey in this._propertyCache!)) {
-            this._propertyCache![propertyKey] = getter.call(this);
-        }
-
-        return this._propertyCache![propertyKey];
-    };
-
-    return descriptor;
-}
-
 type KeyFn<Args extends unknown[]> = (...args: Readonly<Args>) => unknown;
 
 /** @internal */
@@ -37,8 +9,12 @@ export interface MemoizedFunction<Args extends unknown[], R, This = unknown> {
 /** Default key: JSON of args (fine for primitives; swap out if you pass objects). */
 const defaultKey: KeyFn<unknown[]> = (...a) => (a.length ? JSON.stringify(a) : '__noargs__');
 
-/** @internal Memoize a function without using `any`. */
-export function memoize<Args extends unknown[], R, This = unknown>(
+// -----------------------------------------------------------------------------
+// Memoization utilities
+// -----------------------------------------------------------------------------
+
+/** @internal Memoize a standalone function (no _propertyCache involved). */
+function memoizeFunction<Args extends unknown[], R, This = unknown>(
     fn: (this: This, ...args: Args) => R,
     key: KeyFn<Args> = defaultKey as KeyFn<Args>
 ): MemoizedFunction<Args, R, This> {
@@ -46,7 +22,7 @@ export function memoize<Args extends unknown[], R, This = unknown>(
 
     const wrapped = function (this: This, ...args: Args): R {
         const k = key(...args);
-        if (cache.has(k)) return cache.get(k)!; // safe due to has(k)
+        if (cache.has(k)) return cache.get(k)!; // Safe due to has(k)
         const res = fn.apply(this, args);
         cache.set(k, res);
         return res;
@@ -54,6 +30,150 @@ export function memoize<Args extends unknown[], R, This = unknown>(
 
     wrapped.clear = () => cache.clear();
     return wrapped;
+}
+
+/** Ensure the given object owns a _propertyCache field */
+function ensurePropertyCache(host: unknown & { _propertyCache?: Record<PropertyKey, any> }) {
+    if (!host._propertyCache) {
+        Object.defineProperty(host, '_propertyCache', {
+            value: {},
+            configurable: false,
+            enumerable: false,
+            writable: true,
+        });
+    }
+    return host._propertyCache!;
+}
+
+/**
+ * @internal Decorator that memoizes the result of a method (instance or static).
+ * The cache lives inside `_propertyCache` so it is transferable just like `cached`.
+ *
+ * Usage:
+ *   @memoizeMethod
+ *   foo(x: number): number { ... }
+ */
+function memoizeMethod<Args extends unknown[], R>(
+    keyFn?: KeyFn<Args>
+): (target: any, propertyKey: PropertyKey, descriptor: PropertyDescriptor) => void;
+// Overload so it can be used as `@memoizeMethod` without parentheses
+function memoizeMethod(target: any, propertyKey: PropertyKey, descriptor: PropertyDescriptor): void;
+function memoizeMethod(...allArgs: any[]): any {
+    // Called as decorator factory? (first arg is keyFn)
+    if (
+        typeof allArgs[0] === 'function' ||
+        (typeof allArgs[0] === 'object' && 'get' in allArgs[2])
+    ) {
+        // Direct decorator usage: @memoizeMethod
+        const [target, propertyKey, descriptor] = allArgs as [any, PropertyKey, PropertyDescriptor];
+        return createMethodDecorator()(target, propertyKey, descriptor);
+    }
+
+    // Called as @memoizeMethod(customKey)
+    const [keyFn] = allArgs as [KeyFn<any>];
+    return createMethodDecorator(keyFn);
+
+    function createMethodDecorator(key: KeyFn<any> = defaultKey as KeyFn<any>) {
+        return (target: any, propertyKey: PropertyKey, descriptor: PropertyDescriptor) => {
+            // Method case ---------------------------------------------------
+            if (typeof descriptor.value === 'function') {
+                const original = descriptor.value;
+
+                descriptor.value = function (this: any, ...args: unknown[]) {
+                    const host = this ?? target; // for static methods `this` is the constructor
+                    const cacheHost = ensurePropertyCache(host);
+
+                    if (!(propertyKey in cacheHost)) {
+                        cacheHost[propertyKey] = new Map<unknown, unknown>();
+                    }
+
+                    const map: Map<unknown, unknown> = cacheHost[propertyKey];
+                    const k = key(...args);
+                    if (map.has(k)) return map.get(k);
+
+                    const res = original.apply(this, args);
+                    map.set(k, res);
+                    return res;
+                };
+                return;
+            }
+
+            // Getter case ---------------------------------------------------
+            if (typeof descriptor.get === 'function') {
+                const getter = descriptor.get;
+
+                descriptor.get = function (this: any) {
+                    const cacheHost = ensurePropertyCache(this ?? target);
+
+                    if (!(propertyKey in cacheHost)) {
+                        cacheHost[propertyKey] = getter.call(this);
+                    }
+
+                    return cacheHost[propertyKey];
+                };
+                return;
+            }
+
+            throw new Error('@memoizeMethod can only be applied to methods or getters');
+        };
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Clean public API – no ambiguities, explicit options bag
+// -----------------------------------------------------------------------------
+
+export interface MemoizeOptions<Args extends unknown[]> {
+    /** Custom key function (default: JSON of args). */
+    key?: KeyFn<Args>;
+}
+
+// Overload     ────────────────────────────────────────────────────────────────
+
+/**
+ * Memoize results.
+ *
+ * Use-cases
+ * 1. Function  – `const fast = memoize(slowFn)`
+ * 2. Decorator – `@memoize get heavy() { return calc() }`
+ * 3. Decorator with options – `@memoize({ key: ([o]) => o.id }) lookup(o) { … }`
+ */
+export function memoize<Args extends unknown[], R, This = unknown>(
+    fn: (this: This, ...args: Args) => R,
+    opts?: MemoizeOptions<Args>
+): MemoizedFunction<Args, R, This>;
+
+export function memoize<Args extends unknown[] = unknown[]>(
+    opts?: MemoizeOptions<Args>
+): MethodDecorator;
+
+export function memoize(
+    target: any,
+    propertyKey: PropertyKey,
+    descriptor: PropertyDescriptor
+): void;
+
+// Implementation
+export function memoize(...args: any[]): any {
+    // 1. Direct decorator form: (target, propertyKey, descriptor)
+    if (
+        args.length === 3 &&
+        typeof args[2] === 'object' &&
+        (typeof args[1] === 'string' || typeof args[1] === 'symbol')
+    ) {
+        return memoizeMethod()(args[0], args[1], args[2]);
+    }
+
+    // 2. memoize(fn, opts?)  ➜  wrap standalone function
+    if (typeof args[0] === 'function' && (args.length === 1 || args.length === 2)) {
+        const fn = args[0];
+        const opts: MemoizeOptions<any> = args[1] ?? {};
+        return memoizeFunction(fn, opts.key ?? defaultKey);
+    }
+
+    // 3. memoize(opts?)  ➜  returns decorator factory
+    const opts: MemoizeOptions<any> = args[0] ?? {};
+    return memoizeMethod(opts.key ?? defaultKey);
 }
 
 // Lazy-load an object or function on first use.

@@ -3,9 +3,9 @@ import { nativeArrayGetLength, nativeArrayNew } from '../native/index.js';
 import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import type { StripArraySuffix } from '../utils/type-helpers.js';
-import type { Class } from './class.js';
+import type { ArrayClass, Class } from './class.js';
 import type { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import { Pointer } from './pointer.js';
@@ -59,32 +59,36 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
         return this.valueToString();
     }
 
+    get class() {
+        return super.class as ArrayClass<T>;
+    }
+
     /** Gets the Il2CppArray struct size. Should be equal to `Process.pointerSize * 4`. */
-    @cached
+    @memoize
     static get headerSize(): number {
         return corlib.class('System.Array').instanceSize;
     }
 
-    @cached
+    @memoize
     static get elementsOffset(): number {
         // Elements start at the end, so right after the whole header
         return Array.headerSize;
     }
 
     /** @internal Gets a pointer to the first element of the current array. */
-    @cached
+    @memoize
     get elementsPointer() {
         return Pointer.from(this.handle.add(Array.elementsOffset), this.elementType);
     }
 
     /** Gets the size of the object encompassed by the current array. */
-    @cached
+    @memoize
     get elementSize(): number {
-        return this.elementType.class.arrayElementSize;
+        return this.elementType.class.getElementSize();
     }
 
     /** Gets the type of the object encompassed by the current array. */
-    @cached
+    @memoize
     get elementType() {
         // TODO
         raise('TODO');
@@ -93,7 +97,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
     }
 
     /** Gets the total number of elements in all the dimensions of the current array. */
-    @cached
+    @memoize
     get length(): number {
         return nativeArrayGetLength(this);
     }
@@ -105,7 +109,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
         }
 
         return readIl2Cpp(
-            this.elementsPointer.handle.add(index * this.elementType.class.arrayElementSize),
+            this.elementsPointer.handle.add(index * this.elementSize),
             this.elementType
         ) as R;
     }
@@ -116,11 +120,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
             raise(`cannot set element at index ${index} as the array length is ${this.length}`);
         }
 
-        write(
-            this.elementsPointer.handle.add(index * this.elementType.class.arrayElementSize),
-            value,
-            this.elementType
-        );
+        write(this.elementsPointer.handle.add(index * this.elementSize), value, this.elementType);
     }
 
     /** Writes the given elements starting at the given index. */

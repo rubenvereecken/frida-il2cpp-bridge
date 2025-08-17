@@ -16,7 +16,7 @@ export const enum TypeEnum {
     CHAR = 0x03,
 
     // IL2CPP_TYPE_I1         = 0x04,
-    BYTE = 0x04,
+    SIGNED_BYTE = 0x04,
 
     // IL2CPP_TYPE_U1         = 0x05,
     UNSIGNED_BYTE = 0x05,
@@ -72,7 +72,7 @@ export const enum TypeEnum {
     // TODO: IL2CPP_TYPE_FNPTR      = 0x1b,        /* arg: full method signature */
 
     // IL2CPP_TYPE_I          = 0x18,
-    NATIVE_POINTER = 0x18,
+    SIGNED_NATIVE_POINTER = 0x18,
 
     // IL2CPP_TYPE_U          = 0x19,
     UNSIGNED_NATIVE_POINTER = 0x19,

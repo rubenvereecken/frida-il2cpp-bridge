@@ -1,7 +1,7 @@
 import { TypeAttributeFlags } from '../enums/type-attribute.js';
-import type { TypeEnum } from '../enums/type.js';
+import { TypeEnum } from '../enums/type.js';
 import { raise } from '../utils/error.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
 import { Image } from './image.js';
@@ -57,12 +57,107 @@ import { DynamicMethodsLookup } from './common/dynamic-methods.js';
 import type { DynamicFields } from './common/dynamic-fields.js';
 import { DynamicFieldsLookup } from './common/dynamic-fields.js';
 import type { StripArraySuffix } from '../utils/type-helpers.js';
-import { corlib } from '../corlib.js';
+import { corlib, System } from '../corlib.js';
 
+/**
+ * TODO: document byval_arg (the usual type) vs this_arg (for functions maybe?)
+ * 
+ * ```c
+ * typedef struct Il2CppClass
+{
+    // The following fields are always valid for a Il2CppClass structure
+    const Il2CppImage* image;
+    void* gc_desc;
+    const char* name;
+    const char* namespaze;
+    Il2CppType byval_arg;
+    Il2CppType this_arg;
+    Il2CppClass* element_class;
+    Il2CppClass* castClass;
+    Il2CppClass* declaringType;
+    Il2CppClass* parent;
+    Il2CppGenericClass *generic_class;
+    Il2CppMetadataTypeHandle typeMetadataHandle; // non-NULL for Il2CppClass's constructed from type defintions
+    const Il2CppInteropData* interopData;
+    Il2CppClass* klass; // hack to pretend we are a MonoVTable. Points to ourself
+    // End always valid fields
+
+    // The following fields need initialized before access. This can be done per field or as an aggregate via a call to Class::Init
+    FieldInfo* fields; // Initialized in SetupFields
+    const EventInfo* events; // Initialized in SetupEvents
+    const PropertyInfo* properties; // Initialized in SetupProperties
+    const MethodInfo** methods; // Initialized in SetupMethods
+    Il2CppClass** nestedTypes; // Initialized in SetupNestedTypes
+    Il2CppClass** implementedInterfaces; // Initialized in SetupInterfaces
+    Il2CppRuntimeInterfaceOffsetPair* interfaceOffsets; // Initialized in Init
+    void* static_fields; // Initialized in Init
+    const Il2CppRGCTXData* rgctx_data; // Initialized in Init
+    // used for fast parent checks
+    Il2CppClass** typeHierarchy; // Initialized in SetupTypeHierachy
+    // End initialization required fields
+
+    void *unity_user_data;
+
+    uint32_t initializationExceptionGCHandle;
+
+    uint32_t cctor_started;
+    uint32_t cctor_finished;
+    ALIGN_TYPE(8) size_t cctor_thread;
+
+    // Remaining fields are always valid except where noted
+    Il2CppMetadataGenericContainerHandle genericContainerHandle;
+    uint32_t instance_size; // valid when size_inited is true
+    uint32_t actualSize;
+    uint32_t element_size;
+    int32_t native_size;
+    uint32_t static_fields_size;
+    uint32_t thread_static_fields_size;
+    int32_t thread_static_fields_offset;
+    uint32_t flags;
+    uint32_t token;
+
+    uint16_t method_count; // lazily calculated for arrays, i.e. when rank > 0
+    uint16_t property_count;
+    uint16_t field_count;
+    uint16_t event_count;
+    uint16_t nested_type_count;
+    uint16_t vtable_count; // lazily calculated for arrays, i.e. when rank > 0
+    uint16_t interfaces_count;
+    uint16_t interface_offsets_count; // lazily calculated for arrays, i.e. when rank > 0
+
+    uint8_t typeHierarchyDepth; // Initialized in SetupTypeHierachy
+    uint8_t genericRecursionDepth;
+    uint8_t rank;
+    uint8_t minimumAlignment; // Alignment of this type
+    uint8_t naturalAligment; // Alignment of this type without accounting for packing
+    uint8_t packingSize;
+
+    // this is critical for performance of Class::InitFromCodegen. Equals to initialized && !has_initialization_error at all times.
+    // Use Class::UpdateInitializedAndNoError to update
+    uint8_t initialized_and_no_error : 1;
+
+    uint8_t valuetype : 1;
+    uint8_t initialized : 1;
+    uint8_t enumtype : 1;
+    uint8_t is_generic : 1;
+    uint8_t has_references : 1; // valid when size_inited is true
+    uint8_t init_pending : 1;
+    uint8_t size_init_pending : 1;
+    uint8_t size_inited : 1;
+    uint8_t has_finalize : 1;
+    uint8_t has_cctor : 1;
+    uint8_t is_blittable : 1;
+    uint8_t is_import_or_windows_runtime : 1;
+    uint8_t is_vtable_initialized : 1;
+    uint8_t has_initialization_error : 1;
+    VirtualInvokeData vtable[IL2CPP_ZERO_LEN_ARRAY];
+} Il2CppClass;
+ ```
+ */
 @recycle
 export class Class<T extends string = string> extends NativeStruct {
-    constructor(native: NativePointerValue) {
-        super(native);
+    constructor(handle: NativePointerValue) {
+        super(handle);
 
         // Shows up on Frida REPL. Useful for debugging and reverse engineering
         globalThis.Object.defineProperty(this, '__toString', {
@@ -75,36 +170,88 @@ export class Class<T extends string = string> extends NativeStruct {
         });
     }
 
-    toString(): string {
+    toString() {
         return `${this.image.assembly.name}::${this.fullName}`;
     }
 
-    /** Gets the array class which encompass the current class. */
-    @cached
-    get arrayClass(): Class {
-        return new Class(nativeArrayGetClass(this, 1));
+    get typeEnum(): TypeEnum {
+        return this.type.typeEnum;
+    }
+
+    getTypeEnum(this: this & { readonly typeEnum: TypeEnum }): this['typeEnum'];
+    // Otherwise, fall back to the general enum:
+    getTypeEnum(this: this): TypeEnum;
+
+    getTypeEnum(this: Class<T>): number {
+        return this.typeEnum;
+    }
+
+    isByRef(): this is ByRefClass<T> {
+        return this.getTypeEnum() === TypeEnum.BY_REF;
+    }
+
+    isArray(): this is ArrayClass<T> {
+        return (
+            this.getTypeEnum() === TypeEnum.ARRAY ||
+            this.getTypeEnum() === TypeEnum.MULTIDIMENSIONAL_ARRAY
+        );
+    }
+
+    isPrimitive(): this is PrimitiveClass {
+        switch (this.typeEnum) {
+            case TypeEnum.VOID:
+            case TypeEnum.BOOLEAN:
+            case TypeEnum.CHAR:
+            case TypeEnum.SIGNED_BYTE:
+            case TypeEnum.UNSIGNED_BYTE:
+            case TypeEnum.SHORT:
+            case TypeEnum.UNSIGNED_SHORT:
+            case TypeEnum.INT:
+            case TypeEnum.UNSIGNED_INT:
+            case TypeEnum.LONG:
+            case TypeEnum.UNSIGNED_LONG:
+            case TypeEnum.FLOAT:
+            case TypeEnum.DOUBLE:
+            case TypeEnum.SIGNED_NATIVE_POINTER:
+            case TypeEnum.UNSIGNED_NATIVE_POINTER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Creates an array class with this class as the element class.
+     *
+     * @example
+     * ```ts
+     * Il2Cpp.System.Int32.makeArrayClass(); // -> System.Int32[]
+     * ```
+     */
+    makeArrayClass(this: Class<T>) {
+        return new Class<`T[]`>(nativeArrayGetClass(this, 1)) as ArrayClass<`T[]`>;
     }
 
     /** Gets the size of the object encompassed by the current array class. */
-    @cached
-    get arrayElementSize(): number {
+    @memoize
+    getElementSize(): number {
         return nativeClassGetArrayElementSize(this);
     }
 
     /** Gets the name of the assembly in which the current class is defined. */
-    @cached
+    @memoize
     get assemblyName(): string {
         return nativeClassGetAssemblyName(this).readUtf8String()!.replace('.dll', '');
     }
 
     /** Gets the class that declares the current nested class. */
-    @cached
+    @memoize
     get declaringClass(): Class | null {
         return new Class(nativeClassGetDeclaringType(this)).asNullable();
     }
 
     /** Declaring classes hierarchy, from inner to outer most */
-    @cached
+    @memoize
     get declaringClasses(): Class[] {
         const classes: Class[] = [this];
         while (classes[classes.length - 1].declaringClass) {
@@ -115,7 +262,7 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 
     /** Gets the encompassed type of this array, reference, pointer or enum type. */
-    @cached
+    @memoize
     get baseType(): Type | null {
         return new Type(nativeClassGetBaseType(this)).asNullable();
     }
@@ -128,41 +275,36 @@ export class Class<T extends string = string> extends NativeStruct {
      *   `System.Byte&` -> `System.Byte`
      *   `System.String` -> `System.String`
      */
-    @cached
+    @memoize
     get elementClass(): Class | null {
         return new Class(nativeClassGetElementClass(this)).asNullable();
     }
 
     /** Gets the fields of the current class. */
-    @cached
+    @memoize
     get fields(): Field[] {
         return readNativeIterator(_ => nativeClassGetFields(this, _)).map(_ => new Field(_));
     }
 
-    @cached
+    @memoize
     get flags() {
+        const flags = nativeClassGetFlags(this);
         return {
-            isInterface: !!(this.flagsRaw & TypeAttributeFlags.INTERFACE),
-            isAbstract: !!(this.flagsRaw & TypeAttributeFlags.ABSTRACT),
-            isSealed: !!(this.flagsRaw & TypeAttributeFlags.SEALED),
-            isSpecialName: !!(this.flagsRaw & TypeAttributeFlags.SPECIAL_NAME),
+            isInterface: !!(flags & TypeAttributeFlags.INTERFACE),
+            isAbstract: !!(flags & TypeAttributeFlags.ABSTRACT),
+            isSealed: !!(flags & TypeAttributeFlags.SEALED),
+            isSpecialName: !!(flags & TypeAttributeFlags.SPECIAL_NAME),
         };
     }
 
-    /** Gets the flags of the current class. */
-    @cached
-    get flagsRaw(): number {
-        return nativeClassGetFlags(this);
-    }
-
     /** Gets the full name (namespace + name) of the current class. */
-    @cached
+    @memoize
     get fullName(): string {
         return this.namespace ? `${this.namespace}.${this.name}` : this.name;
     }
 
     /** Gets the generics parameters of this generic class. */
-    @cached
+    @memoize
     get generics(): Class[] {
         if (!this.isGeneric && !this.isInflated) {
             return [];
@@ -173,61 +315,61 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 
     /** Determines whether the GC has tracking references to the current class instances. */
-    @cached
+    @memoize
     get hasReferences(): boolean {
         return !!nativeClassHasReferences(this);
     }
 
-    /** Determines whether ther current class has a valid static constructor. */
-    @cached
+    /** Determines whether the current class has a valid static constructor. */
+    @memoize
     get hasStaticConstructor(): boolean {
         const staticConstructor = this.tryMethod('.cctor');
         return staticConstructor != null && !staticConstructor.virtualAddress.isNull();
     }
 
     /** Gets the image in which the current class is defined. */
-    @cached
+    @memoize
     get image(): Image {
         return new Image(nativeClassGetImage(this));
     }
 
     /** Gets the size of the instance of the current class. */
-    @cached
+    @memoize
     get instanceSize(): number {
         return nativeClassGetInstanceSize(this);
     }
 
     /** Determines whether the current class is abstract. */
-    @cached
+    @memoize
     get isAbstract(): boolean {
         return !!nativeClassIsAbstract(this);
     }
 
     /** Determines whether the current class is blittable. */
-    @cached
+    @memoize
     get isBlittable(): boolean {
         return !!nativeClassIsBlittable(this);
     }
 
-    @cached
+    @memoize
     get _isEnum(): boolean {
         return !!nativeClassIsEnum(this);
     }
 
     /** Determines whether the current class is a generic one. */
-    @cached
+    @memoize
     get isGeneric(): boolean {
         return !!nativeClassIsGeneric(this);
     }
 
     /** Determines whether the current class is inflated. */
-    @cached
+    @memoize
     get isInflated(): boolean {
         return !!nativeClassIsInflated(this);
     }
 
     /** Determines whether the current class is an interface. */
-    @cached
+    @memoize
     get isInterface(): boolean {
         return !!nativeClassIsInterface(this);
     }
@@ -238,7 +380,7 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 
     /** Determines whether the current class is a value type. */
-    @cached
+    @memoize
     get _isValueType(): boolean {
         return !!nativeClassIsValueType(this);
     }
@@ -248,43 +390,43 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 
     /** Gets the interfaces implemented or inherited by the current class. */
-    @cached
+    @memoize
     get interfaces(): Class[] {
         return readNativeIterator(_ => nativeClassGetInterfaces(this, _)).map(_ => new Class(_));
     }
 
     /** Gets the methods implemented by the current class. */
-    @cached
+    @memoize
     get methods(): Method[] {
         return readNativeIterator(_ => nativeClassGetMethods(this, _)).map(_ => new Method(_));
     }
 
     /** Gets the name of the current class. */
-    @cached
-    get name(): string {
+    @memoize
+    get name() {
         return nativeClassGetName(this).readUtf8String()!;
     }
 
     /** Gets the namespace of the current class. */
-    @cached
+    @memoize
     get namespace(): string {
         return nativeClassGetNamespace(this).readUtf8String()!;
     }
 
     /** Gets the classes nested inside the current class. */
-    @cached
+    @memoize
     get nestedClasses(): Class[] {
         return readNativeIterator(_ => nativeClassGetNestedClasses(this, _)).map(_ => new Class(_));
     }
 
     /** Gets the class from which the current class directly inherits. */
-    @cached
+    @memoize
     get parent(): Class | null {
         return new Class(nativeClassGetParent(this)).asNullable();
     }
 
     /** Gets the rank (number of dimensions) of the current array class. */
-    @cached
+    @memoize
     get rank(): number {
         let rank = 0;
         const name = this.name;
@@ -302,20 +444,21 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 
     /** Gets a pointer to the static fields of the current class. */
-    @cached
+    @memoize
     get staticFieldsData(): NativePointer {
         return nativeClassGetStaticFieldData(this);
     }
 
     /** Gets the size of the instance - as a value type - of the current class. */
-    @cached
+    @memoize
     get valueTypeSize(): number {
         return nativeClassGetValueTypeSize(this, NULL);
     }
 
     /** Gets the type of the current class. */
-    @cached
+    @memoize
     get type(): Type<T> {
+        // TODO: important – derived type should have same typeEnum
         return new Type<T>(nativeClassGetType(this));
     }
 
@@ -484,12 +627,12 @@ export class Class<T extends string = string> extends NativeStruct {
         return this.nestedClasses.find(_ => _.name == name);
     }
 
-    @cached
+    @memoize
     get m(): DynamicMethods {
         return DynamicMethodsLookup.from(this, true);
     }
 
-    @cached
+    @memoize
     get f(): DynamicFields {
         return DynamicFieldsLookup.from(this, true);
     }
@@ -518,31 +661,50 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 }
 
+export type PrimitiveClass =
+    | typeof System.Void
+    | typeof System.Boolean
+    | typeof System.SByte
+    | typeof System.Byte
+    | typeof System.Char
+    | typeof System.Int16
+    | typeof System.UInt16
+    | typeof System.Int32
+    | typeof System.UInt32
+    | typeof System.Int64
+    | typeof System.UInt64
+    | typeof System.Single
+    | typeof System.Double
+    | typeof System.IntPtr
+    | typeof System.UIntPtr;
+
 export type ValueTypeClass<T extends string = string> = Class<T> & {
-    _typeEnum: TypeEnum.VALUE_TYPE;
+    typeEnum: TypeEnum.VALUE_TYPE;
 };
 
 export type ReferenceTypeClass<T extends string = string> = Class<T> & {
-    _typeEnum: TypeEnum.REFERENCE_TYPE;
+    typeEnum: TypeEnum.REFERENCE_TYPE;
 };
 
 export type EnumClass<T extends string = string> = Class<T> & {
-    _typeEnum: TypeEnum.ENUM;
+    typeEnum: TypeEnum.ENUM;
 };
 
-// TODO investigate whether pointer and by-ref classes have any special properties
-export type PointerClass<T extends `${string}*`> = Class<T> & {
-    _typeEnum: TypeEnum.POINTER;
-};
+export type PointerClass<T> = T extends `${string}*`
+    ? Class<T> & {
+          typeEnum: TypeEnum.POINTER;
+      }
+    : never;
 
-export type ByRefClass<T extends `${string}&`> = Class<T> & {
-    _typeEnum: TypeEnum.BY_REF;
-};
+export type ByRefClass<T> = T extends `${string}&`
+    ? Class<T> & {
+          typeEnum: TypeEnum.BY_REF;
+      }
+    : never;
 
 // TODO look into multidimensional arrays
-export type ArrayClass<T extends `${string}[]`> = Class<T> & {
-    // TODO make these not crash in non-array classes (and instead return nullable)
-    arrayElementSize: number;
-    elementClass: Class<StripArraySuffix<T>>;
-    _typeEnum: TypeEnum.ARRAY;
-};
+export type ArrayClass<T> = T extends `${string}[]`
+    ? Class<T> & {
+          typeEnum: TypeEnum.ARRAY;
+      }
+    : never;

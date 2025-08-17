@@ -8,7 +8,7 @@ import {
     nativeImageGetName,
 } from '../native/index.js';
 import { raise } from '../utils/error.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
 import type { Array } from './array.js';
@@ -59,13 +59,13 @@ export class Image extends NativeStruct {
     }
 
     /** Gets the assembly in which the current image is defined. */
-    @cached
+    @memoize
     get assembly(): Assembly {
         return new Assembly(nativeImageGetAssembly(this));
     }
 
     /** Gets the amount of classes defined in this image. */
-    @cached
+    @memoize
     get classCount(): number {
         if (isUnityVersionIsBelow201830()) {
             return this.classes.length;
@@ -75,7 +75,7 @@ export class Image extends NativeStruct {
     }
 
     /** Gets the classes defined in this image. */
-    @cached
+    @memoize
     get classes(): Class[] {
         if (isUnityVersionIsBelow201830()) {
             const types = this.assembly.object.method<Array<Object_>>('GetTypes').invoke(false);
@@ -104,7 +104,7 @@ export class Image extends NativeStruct {
     }
 
     /** Gets the name of this image. */
-    @cached
+    @memoize
     get name(): string {
         return nativeImageGetName(this).readUtf8String()!;
     }

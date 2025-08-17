@@ -1,5 +1,5 @@
 import { nativeStringGetChars, nativeStringGetLength, nativeStringNew } from '../native/index.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { Object_ } from './object.js';
 import { ParameterValue } from './parameter.js';
 
@@ -51,7 +51,7 @@ export class String extends Object_<'System.String'> {
         this.content = value;
     }
 
-    @cached
+    @memoize
     static get lengthOffset(): number {
         return Object_.headerSize;
     }

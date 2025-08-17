@@ -1,5 +1,5 @@
 import type { Il2CppValue, JsObject } from '../../memory.js';
-import { cached } from '../../utils/cache.js';
+import { memoize } from '../../utils/cache.js';
 import { NativeStruct } from '../../utils/native-struct.js';
 import type { Class } from '../class.js';
 import type { BoundField } from '../field.js';
@@ -88,12 +88,12 @@ export abstract class BaseObject<T extends string = string> extends NativeStruct
         return this.type.class.methodForValues<T>(name, ...paramValues).bind(this);
     }
 
-    @cached
+    @memoize
     get m(): DynamicMethods {
         return DynamicMethodsLookup.from(this, false);
     }
 
-    @cached
+    @memoize
     get f(): DynamicFields {
         return DynamicFieldsLookup.from(this, false);
     }

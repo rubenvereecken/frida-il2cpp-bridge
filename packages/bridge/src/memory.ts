@@ -14,7 +14,7 @@ import {
 import type { StringLike } from './structs/string.js';
 import { isJsString, isStringLike, String } from './structs/string.js';
 import { ValueType } from './structs/value-type.js';
-import { nativeAlloc as allocExport, nativeFree as freeExport } from './native/index.js';
+import { nativeAlloc, nativeFree } from './native/index.js';
 import type { Type, WrappedPrimitiveType } from './structs/type.js';
 import { TypeEnum } from './enums/type.js';
 import { warn } from './utils/log.js';
@@ -92,7 +92,7 @@ type maps = [
  * The allocated memory should be freed manually.
  */
 export function alloc(size: number | globalThis.UInt64 = Process.pointerSize): NativePointer {
-    return allocExport(size);
+    return nativeAlloc(size);
 }
 
 /**
@@ -108,7 +108,7 @@ export function alloc(size: number | globalThis.UInt64 = Process.pointerSize): N
  * ```
  */
 export function free(pointer: NativePointerValue): void {
-    return freeExport(pointer);
+    return nativeFree(pointer);
 }
 
 /**
@@ -161,6 +161,9 @@ export function readIl2Cpp(
 }
 
 function writePrimitive(pointer: NativePointer, value: PrimitiveLike, type: Type): NativePointer {
+    if (type.isSame(System.Boolean.type)) {
+    }
+
     if (isPrimitiveJSType(value)) {
         if (type.isSame(System.Boolean.type))
             return pointer.writeS8(+coerceJSPrimitive(value, type));
@@ -332,6 +335,7 @@ export function toIl2Cpp(value: ParameterLike, type?: Type): Il2CppValue {
 
     if (typeof value === 'boolean' && !type.isSame(System.Boolean.type))
         raise(`Type mismatch. Got: ${typeof value} (${value}) Expected: ${type.fridaAlias}`);
+
     if (
         (isJsString(value) && !type.isSame(System.String.type)) ||
         (!isJsString(value) && type.isSame(System.String.type))

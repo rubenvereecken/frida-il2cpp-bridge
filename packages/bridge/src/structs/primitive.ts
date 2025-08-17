@@ -1,5 +1,5 @@
 import { TypeEnum } from '../enums/type.js';
-import type { ParameterLike} from '../memory.js';
+import type { ParameterLike } from '../memory.js';
 import { isIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { Type } from './type.js';
@@ -53,15 +53,15 @@ export class Primitive<T extends PrimitiveClassName = PrimitiveClassName> extend
     read(this: WrappedPrimitive): PrimitiveJSType {
         const pointer = this.handle;
         switch (this.type.typeEnum) {
-            case 0:
-                raise(
-                    `Failed to read type enum from ${this.type.name} (except if you really wanted 0, ie "IL2CPP_TYPE_END")`
-                );
+            // case 0:
+            //     raise(
+            //         `Failed to read type enum from ${this.type.name} (except if you really wanted 0, ie "IL2CPP_TYPE_END")`
+            //     );
             case TypeEnum.VOID:
                 return undefined;
             case TypeEnum.BOOLEAN:
                 return !!pointer.readS8();
-            case TypeEnum.BYTE:
+            case TypeEnum.SIGNED_BYTE:
                 return pointer.readS8();
             case TypeEnum.UNSIGNED_BYTE:
                 return pointer.readU8();
@@ -83,7 +83,7 @@ export class Primitive<T extends PrimitiveClassName = PrimitiveClassName> extend
                 return pointer.readFloat();
             case TypeEnum.DOUBLE:
                 return pointer.readDouble();
-            case TypeEnum.NATIVE_POINTER:
+            case TypeEnum.SIGNED_NATIVE_POINTER:
             case TypeEnum.UNSIGNED_NATIVE_POINTER:
                 // TODO do we ever not need to do this?
                 // Note: pointers need to be dereferenced for
@@ -135,6 +135,7 @@ export type UIntPtr = Primitive<'System.UIntPtr'>;
 
 export type PrimitiveJSType =
     | undefined
+    // | null
     | boolean
     | number
     | globalThis.Int64

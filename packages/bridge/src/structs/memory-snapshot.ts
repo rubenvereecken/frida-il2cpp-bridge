@@ -4,7 +4,7 @@ import {
     nativeMemorySnapshotGetClasses,
     nativeMemorySnapshotGetObjects,
 } from '../native/index.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { readNativeIterator } from '../utils/read-native-iterator.js';
 import { readNativeList } from '../utils/read-native-list.js';
@@ -23,7 +23,7 @@ export class MemorySnapshot extends NativeStruct {
     }
 
     /** Gets any initialized class. */
-    @cached
+    @memoize
     get classes(): Class[] {
         return readNativeIterator(_ => nativeMemorySnapshotGetClasses(this, _)).map(
             _ => new Class(_)
@@ -31,7 +31,7 @@ export class MemorySnapshot extends NativeStruct {
     }
 
     /** Gets the objects tracked by this memory snapshot. */
-    @cached
+    @memoize
     get objects(): Object_[] {
         // prettier-ignore
         return readNativeList(_ => nativeMemorySnapshotGetObjects(this, _)).filter(_ => !_.isNull()).map(_ => new Object_(_));

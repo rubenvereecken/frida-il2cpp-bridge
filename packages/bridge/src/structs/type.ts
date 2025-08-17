@@ -12,11 +12,15 @@ import {
     nativeTypeIsPointer,
 } from '../native/index.js';
 import type { ParameterLike } from '../memory.js';
-import { isIl2Cpp } from '../memory.js';
-import { cached } from '../utils/cache.js';
+import { free, isIl2Cpp } from '../memory.js';
+import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
-import type { StripArraySuffix, StripByRefSuffix, StripPointerSuffix } from '../utils/type-helpers.js';
+import type {
+    StripArraySuffix,
+    StripByRefSuffix,
+    StripPointerSuffix,
+} from '../utils/type-helpers.js';
 import { isArrayLike } from './array.js';
 import type { ArrayClass, ByRefClass, PointerClass } from './class.js';
 import { Class } from './class.js';
@@ -46,13 +50,13 @@ export class Type<T extends string = string> extends NativeStruct {
     }
 
     /** Gets the class of this type. */
-    @cached
+    @memoize
     get class(): Class<T> {
         return new Class<T>(nativeTypeGetClass(this));
     }
 
     /** */
-    @cached
+    @memoize
     get fridaAlias(): NativeCallbackArgumentType {
         function getValueTypeFields(type: Type): NativeCallbackArgumentType {
             const instanceFields = type.class.fields.filter(_ => !_.isStatic);
@@ -74,7 +78,7 @@ export class Type<T extends string = string> extends NativeStruct {
             // TODO is this 1 or 2 bytes??
             case TypeEnum.CHAR:
                 return 'char';
-            case TypeEnum.BYTE:
+            case TypeEnum.SIGNED_BYTE:
                 return 'int8';
             case TypeEnum.UNSIGNED_BYTE:
                 return 'uint8';
@@ -111,7 +115,7 @@ export class Type<T extends string = string> extends NativeStruct {
             // case Il2Cpp.Type.enum.float:
             // case Il2Cpp.Type.enum.double:
             // return 'pointer';
-            case TypeEnum.NATIVE_POINTER:
+            case TypeEnum.SIGNED_NATIVE_POINTER:
             case TypeEnum.UNSIGNED_NATIVE_POINTER:
             case TypeEnum.POINTER:
             case TypeEnum.STRING:
@@ -140,7 +144,7 @@ export class Type<T extends string = string> extends NativeStruct {
         return new Class(nativeClassFromSystemType(runtimeType)).type as Type<T>;
     }
 
-    @cached
+    @memoize
     get _isByRef(): boolean {
         return !!nativeTypeIsByRef(this);
     }
@@ -149,7 +153,7 @@ export class Type<T extends string = string> extends NativeStruct {
         return this._isByRef;
     }
 
-    @cached
+    @memoize
     get _isPointer(): boolean {
         return !!nativeTypeIsPointer(this);
     }
@@ -158,7 +162,7 @@ export class Type<T extends string = string> extends NativeStruct {
         return this._isPointer;
     }
 
-    @cached
+    @memoize
     get _isArray(): boolean {
         return this.typeEnum === TypeEnum.ARRAY || this.typeEnum == TypeEnum.MULTIDIMENSIONAL_ARRAY;
     }
@@ -168,40 +172,14 @@ export class Type<T extends string = string> extends NativeStruct {
     }
 
     /** Determines whether this type is primitive. */
-    // TODO add @lazy for methods
     isPrimitive(): this is WrappedPrimitiveType {
-        switch (this.typeEnum) {
-            case TypeEnum.VOID:
-            case TypeEnum.BOOLEAN:
-            case TypeEnum.CHAR:
-            case TypeEnum.BYTE:
-            case TypeEnum.UNSIGNED_BYTE:
-            case TypeEnum.SHORT:
-            case TypeEnum.UNSIGNED_SHORT:
-            case TypeEnum.INT:
-            case TypeEnum.UNSIGNED_INT:
-            case TypeEnum.LONG:
-            case TypeEnum.UNSIGNED_LONG:
-            case TypeEnum.FLOAT:
-            case TypeEnum.DOUBLE:
-            case TypeEnum.NATIVE_POINTER:
-            case TypeEnum.UNSIGNED_NATIVE_POINTER:
-                return true;
-            default:
-                return false;
-        }
+        return this.class.isPrimitive();
     }
 
     /** Gets the name of this type. */
-    @cached
-    get name(): T {
-        const handle = nativeTypeGetName(this);
-
-        try {
-            return handle.readUtf8String()! as T;
-        } finally {
-            nativeFree(handle);
-        }
+    @memoize
+    get name() {
+        return nativeTypeGetName(this).readUtf8String()! as T;
     }
 
     /**
@@ -216,7 +194,7 @@ export class Type<T extends string = string> extends NativeStruct {
      * const intPtrType = (new Il2Cpp.Class(Il2Cpp.exports.nativeClassFromSystemType(intPtrRuntimeType))).type
      * ```
      */
-    @cached
+    @memoize
     get runtimeType() {
         return new Object_<'System.RuntimeType'>(nativeTypeGetObject(this));
     }
@@ -286,12 +264,13 @@ export class Type<T extends string = string> extends NativeStruct {
     }
 
     /** Gets the type enum of the current type. */
-    @cached
-    get typeEnum(): number {
+    @memoize
+    get typeEnum(): TypeEnum {
         return nativeTypeGetTypeEnum(this);
     }
 
     isSame<U extends string>(other: Type<U>): this is Type<U> {
+        // isSame<U extends string>(other: Type<U>): boolean {
         if (nativeTypeEquals.isNull()) {
             return !!this.runtimeType.method<Boolean>('Equals').invoke(other.runtimeType);
         }
@@ -338,6 +317,7 @@ export class Type<T extends string = string> extends NativeStruct {
 
             const firstElement = other[0];
 
+            /** @ts-expect-error: TODO */
             return this.class.elementClass.type.isAssignableFromValue(firstElement);
         }
 

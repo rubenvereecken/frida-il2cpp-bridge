@@ -1,6 +1,6 @@
 import { recycle } from '../utils/recycle.js';
 import { NativeStruct } from '../utils/native-struct.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { raise } from '../utils/error.js';
 import { Image } from './image.js';
 import type { Object_ } from './object.js';
@@ -42,7 +42,7 @@ export class Assembly extends NativeStruct {
     }
 
     /** Gets the image of this assembly. */
-    @cached
+    @memoize
     get image(): Image {
         if (nativeAssemblyGetImage.isNull()) {
             // We need to get the System.Reflection.Module of the current assembly;
@@ -71,13 +71,13 @@ export class Assembly extends NativeStruct {
     }
 
     /** Gets the name of this assembly. */
-    @cached
+    @memoize
     get name(): string {
         return this.image.name.replace('.dll', '');
     }
 
     /** Gets the encompassing object of the current assembly. */
-    @cached
+    @memoize
     get object(): Object_ {
         for (const _ of getDomain()
             .object.method<Array<Object_>>('GetAssemblies', 1)

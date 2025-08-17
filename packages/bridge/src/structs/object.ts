@@ -15,7 +15,7 @@ import {
     nativeObjectUnbox,
 } from '../native/index.js';
 import { raise } from '../utils/error.js';
-import { cached } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { BaseObject } from './common/base-object.js';
 import { GCHandle } from './gc-handle.js';
 import type { BoundMethod, MethodReturnType } from './method.js';
@@ -62,18 +62,18 @@ export class Object_<T extends string = string> extends BaseObject<T> {
      *
      * Should be equal to `2 * Process.pointerSize` (see struct definition above).
      */
-    @cached
+    @memoize
     static get headerSize(): number {
         return System.Object.instanceSize;
     }
 
-    @cached
+    @memoize
     get class(): Class<T> {
         // Can be read from the object header as the first pointer (of two)
         return new LazyClass<T>(nativeObjectGetClass(this));
     }
 
-    @cached
+    @memoize
     get type(): Type<T> {
         // TODO: by default fall back on this._type if available
         // Benefit: save a ton of il2cpp calls for figuring out type when it's already known
@@ -86,7 +86,7 @@ export class Object_<T extends string = string> extends BaseObject<T> {
     }
 
     /** Gets the size of the current object. */
-    @cached
+    @memoize
     get size(): number {
         return nativeObjectGetSize(this);
     }

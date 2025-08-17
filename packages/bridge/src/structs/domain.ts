@@ -1,6 +1,6 @@
 import { recycle } from '../utils/recycle.js';
 import { NativeStruct } from '../utils/native-struct.js';
-import { cached, lazy } from '../utils/cache.js';
+import { memoize, lazy } from '../utils/cache.js';
 import { raise } from '../utils/error.js';
 import type { Object_ } from './object.js';
 import { Assembly } from './assembly.js';
@@ -34,7 +34,7 @@ import type { Array } from './array.js';
 @recycle
 export class Domain extends NativeStruct {
     /** Gets the assemblies that have been loaded into the execution context of the application domain. */
-    @cached
+    @memoize
     get assemblies(): Assembly[] {
         let handles = readNativeList(_ => nativeDomainGetAssemblies(this, _));
 
@@ -52,7 +52,7 @@ export class Domain extends NativeStruct {
     }
 
     /** Gets the encompassing object of the application domain. */
-    @cached
+    @memoize
     get object(): Object_ {
         return corlib.class('System.AppDomain').method<Object_>('get_CurrentDomain').invoke();
     }
