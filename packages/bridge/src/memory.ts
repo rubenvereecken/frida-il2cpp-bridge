@@ -162,6 +162,7 @@ export function readIl2Cpp(
 
 function writePrimitive(pointer: NativePointer, value: PrimitiveLike, type: Type): NativePointer {
     if (type.isSame(System.Boolean.type)) {
+        type.name;
     }
 
     if (isPrimitiveJSType(value)) {

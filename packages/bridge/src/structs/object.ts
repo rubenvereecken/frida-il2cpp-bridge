@@ -19,12 +19,12 @@ import { memoize } from '../utils/cache.js';
 import { BaseObject } from './common/base-object.js';
 import { GCHandle } from './gc-handle.js';
 import type { BoundMethod, MethodReturnType } from './method.js';
-import { Method } from './method.js';
 import type { String } from './string.js';
 import type { Type } from './type.js';
 import type { Class } from './class.js';
+import type { Method } from './method.js';
 import type { ValueType } from './value-type.js';
-import { LazyClass, LazyValueType } from './common/lazy.js';
+import { LazyClass, LazyValueType, LazyMethod } from './common/lazy.js';
 
 /**
  * Not to be confused with "passing a parameter by reference", reference types are a C# concept.
@@ -98,7 +98,7 @@ export class Object_<T extends string = string> extends BaseObject<T> {
 
     /** Gets the correct virtual method from the given virtual method. */
     virtualMethod<T extends MethodReturnType>(method: Method): BoundMethod<T> {
-        return new Method<T>(nativeObjectGetVirtualMethod(this, method)).bind(this);
+        return new LazyMethod<T>(nativeObjectGetVirtualMethod(this, method)).bind(this);
     }
 
     /** Unboxes the value type (either a primitive, a struct or an enum) out of this object. */

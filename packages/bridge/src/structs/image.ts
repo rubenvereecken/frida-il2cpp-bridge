@@ -12,8 +12,9 @@ import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
 import type { Array } from './array.js';
-import { Assembly } from './assembly.js';
-import { Class } from './class.js';
+import type { Assembly } from './assembly.js';
+import type { Class } from './class.js';
+import { LazyAssembly, LazyClass } from './common/lazy.js';
 import type { Object_ } from './object.js';
 
 /**
@@ -61,7 +62,7 @@ export class Image extends NativeStruct {
     /** Gets the assembly in which the current image is defined. */
     @memoize
     get assembly(): Assembly {
-        return new Assembly(nativeImageGetAssembly(this));
+        return new LazyAssembly(nativeImageGetAssembly(this));
     }
 
     /** Gets the amount of classes defined in this image. */
@@ -84,7 +85,7 @@ export class Image extends NativeStruct {
             // app startup, hence the `Array.from`.
             const classes = globalThis.Array.from(
                 types,
-                _ => new Class(nativeClassFromSystemType(_))
+                _ => new LazyClass(nativeClassFromSystemType(_))
             );
 
             // <Module> class does not always exist
@@ -98,7 +99,7 @@ export class Image extends NativeStruct {
         } else {
             return globalThis.Array.from(
                 globalThis.Array(this.classCount),
-                (_, i) => new Class(nativeImageGetClass(this, i))
+                (_, i) => new LazyClass(nativeImageGetClass(this, i))
             );
         }
     }
@@ -128,6 +129,6 @@ export class Image extends NativeStruct {
         );
         const className = Memory.allocUtf8String(name.slice(dotIndex + 1));
 
-        return new Class<T>(nativeClassFromName(this, classNamespace, className)).asNullable();
+        return new LazyClass<T>(nativeClassFromName(this, classNamespace, className)).asNullable();
     }
 }
