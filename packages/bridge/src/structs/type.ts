@@ -1,15 +1,15 @@
 import { System } from '../corlib.js';
 import { TypeEnum } from '../enums/type.js';
 import {
-    nativeClassFromSystemType,
-    nativeFree,
-    nativeTypeEquals,
-    nativeTypeGetClass,
-    nativeTypeGetName,
-    nativeTypeGetObject,
-    nativeTypeGetTypeEnum,
-    nativeTypeIsByRef,
-    nativeTypeIsPointer,
+    getNativeClassFromSystemType,
+    getNativeFree,
+    getNativeTypeEquals,
+    getNativeTypeGetClass,
+    getNativeTypeGetName,
+    getNativeTypeGetObject,
+    getNativeTypeGetTypeEnum,
+    getNativeTypeIsByRef,
+    getNativeTypeIsPointer,
 } from '../native/index.js';
 import type { ParameterLike } from '../memory.js';
 import { free, isIl2Cpp } from '../memory.js';
@@ -52,7 +52,7 @@ export class Type<T extends string = string> extends NativeStruct {
     /** Gets the class of this type. */
     @memoize
     get class(): Class<T> {
-        return new Class<T>(nativeTypeGetClass(this));
+        return new Class<T>(getNativeTypeGetClass()(this));
     }
 
     /** */
@@ -141,12 +141,12 @@ export class Type<T extends string = string> extends NativeStruct {
     }
 
     static fromRuntimeType<T extends string>(runtimeType: Object_) {
-        return new Class(nativeClassFromSystemType(runtimeType)).type as Type<T>;
+        return new Class(getNativeClassFromSystemType()(runtimeType)).type as Type<T>;
     }
 
     @memoize
     get _isByRef(): boolean {
-        return !!nativeTypeIsByRef(this);
+        return !!getNativeTypeIsByRef()(this);
     }
 
     isByRef(): this is T extends `${string}&` ? ByRefType<T> : ByRefType<`${string}&`> {
@@ -155,7 +155,7 @@ export class Type<T extends string = string> extends NativeStruct {
 
     @memoize
     get _isPointer(): boolean {
-        return !!nativeTypeIsPointer(this);
+        return !!getNativeTypeIsPointer()(this);
     }
 
     isPointer(): this is T extends `${string}*` ? PointerType<T> : PointerType<`${string}*`> {
@@ -179,7 +179,7 @@ export class Type<T extends string = string> extends NativeStruct {
     /** Gets the name of this type. */
     @memoize
     get name() {
-        return nativeTypeGetName(this).readUtf8String()! as T;
+        return getNativeTypeGetName()(this).readUtf8String()! as T;
     }
 
     /**
@@ -191,12 +191,12 @@ export class Type<T extends string = string> extends NativeStruct {
      * const intType = Il2Cpp.corlib.class("System.Int32").type;
      * const intRuntimeType = intType.runtimeType;
      * const intPtrRuntimeType = intRuntimeType.m.MakePointerType()
-     * const intPtrType = (new Il2Cpp.Class(Il2Cpp.exports.nativeClassFromSystemType(intPtrRuntimeType))).type
+     * const intPtrType = (new Il2Cpp.Class(Il2Cpp.exports.getNativeClassFromSystemType()(intPtrRuntimeType))).type
      * ```
      */
     @memoize
     get runtimeType() {
-        return new Object_<'System.RuntimeType'>(nativeTypeGetObject(this));
+        return new Object_<'System.RuntimeType'>(getNativeTypeGetObject()(this));
     }
 
     /**
@@ -266,16 +266,16 @@ export class Type<T extends string = string> extends NativeStruct {
     /** Gets the type enum of the current type. */
     @memoize
     get typeEnum(): TypeEnum {
-        return nativeTypeGetTypeEnum(this);
+        return getNativeTypeGetTypeEnum()(this);
     }
 
     isSame<U extends string>(other: Type<U>): this is Type<U> {
         // isSame<U extends string>(other: Type<U>): boolean {
-        if (nativeTypeEquals.isNull()) {
+        if (getNativeTypeEquals().isNull()) {
             return !!this.runtimeType.method<Boolean>('Equals').invoke(other.runtimeType);
         }
 
-        return !!nativeTypeEquals(this.handle, other.handle);
+        return !!getNativeTypeEquals()(this.handle, other.handle);
     }
 
     isAssignableFromType(other: Type): boolean {

@@ -1,23 +1,23 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === PROPERTY FUNCTIONS ===
-export const nativePropertyGetFlags = lazy(() =>
+export const getNativePropertyGetFlags = memoize(() =>
     lookup('il2cpp_property_get_flags', 'uint32', ['pointer'])
 );
 
-export const nativePropertyGetGetMethod = lazy(() =>
+export const getNativePropertyGetGetMethod = memoize(() =>
     lookup('il2cpp_property_get_get_method', 'pointer', ['pointer'])
 );
 
-export const nativePropertyGetSetMethod = lazy(() =>
+export const getNativePropertyGetSetMethod = memoize(() =>
     lookup('il2cpp_property_get_set_method', 'pointer', ['pointer'])
 );
 
-export const nativePropertyGetName = lazy(() =>
+export const getNativePropertyGetName = memoize(() =>
     lookup('il2cpp_property_get_name', 'pointer', ['pointer'])
 );
 
-export const nativePropertyGetParent = lazy(() =>
+export const getNativePropertyGetParent = memoize(() =>
     lookup('il2cpp_property_get_parent', 'pointer', ['pointer'])
 );

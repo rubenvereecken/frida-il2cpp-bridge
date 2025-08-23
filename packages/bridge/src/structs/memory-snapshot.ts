@@ -1,8 +1,8 @@
 import {
-    nativeMemorySnapshotCapture,
-    nativeMemorySnapshotFree,
-    nativeMemorySnapshotGetClasses,
-    nativeMemorySnapshotGetObjects,
+    getNativeMemorySnapshotCapture,
+    getNativeMemorySnapshotFree,
+    getNativeMemorySnapshotGetClasses,
+    getNativeMemorySnapshotGetObjects,
 } from '../native/index.js';
 import { memoize } from '../utils/cache.js';
 import { NativeStruct } from '../utils/native-struct.js';
@@ -18,14 +18,14 @@ export class MemorySnapshot extends NativeStruct {
     }
 
     /** Creates a memory snapshot with the given handle. */
-    constructor(handle: NativePointer = nativeMemorySnapshotCapture()) {
+    constructor(handle: NativePointer = getNativeMemorySnapshotCapture()()) {
         super(handle);
     }
 
     /** Gets any initialized class. */
     @memoize
     get classes(): Class[] {
-        return readNativeIterator(_ => nativeMemorySnapshotGetClasses(this, _)).map(
+        return readNativeIterator(_ => getNativeMemorySnapshotGetClasses()(this, _)).map(
             _ => new Class(_)
         );
     }
@@ -34,12 +34,12 @@ export class MemorySnapshot extends NativeStruct {
     @memoize
     get objects(): Object_[] {
         // prettier-ignore
-        return readNativeList(_ => nativeMemorySnapshotGetObjects(this, _)).filter(_ => !_.isNull()).map(_ => new Object_(_));
+        return readNativeList(_ => getNativeMemorySnapshotGetObjects()(this, _)).filter(_ => !_.isNull()).map(_ => new Object_(_));
     }
 
     /** Frees this memory snapshot. */
     free(): void {
-        nativeMemorySnapshotFree(this);
+        getNativeMemorySnapshotFree()(this);
     }
 }
 

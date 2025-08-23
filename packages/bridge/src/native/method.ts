@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === METHOD FUNCTIONS ===
@@ -7,7 +7,7 @@ import { lookup } from './common.js';
  * @param method MethodInfo* - The method to get the return type of
  * @returns Il2CppType* - The return type
  */
-export const nativeMethodGetReturnType = lazy(() =>
+export const getNativeMethodGetReturnType = memoize(() =>
     lookup('il2cpp_method_get_return_type', 'pointer', ['pointer'])
 );
 
@@ -16,7 +16,7 @@ export const nativeMethodGetReturnType = lazy(() =>
  * @param method MethodInfo* - The method to get the declaring class of
  * @returns Il2CppClass* - The declaring class
  */
-export const nativeMethodGetDeclaringClass = lazy(() =>
+export const getNativeMethodGetDeclaringClass = memoize(() =>
     lookup('il2cpp_method_get_declaring_type', 'pointer', ['pointer'])
 );
 
@@ -25,7 +25,7 @@ export const nativeMethodGetDeclaringClass = lazy(() =>
  * @param method MethodInfo* - The method to get the name of
  * @returns const char* - The method name
  */
-export const nativeMethodGetName = lazy(() =>
+export const getNativeMethodGetName = memoize(() =>
     lookup('il2cpp_method_get_name', 'pointer', ['pointer'])
 );
 
@@ -34,7 +34,7 @@ export const nativeMethodGetName = lazy(() =>
  * @param method Il2CppReflectionMethod* - The reflection method
  * @returns MethodInfo* - The method info
  */
-export const nativeMethodGetFromReflection = lazy(() =>
+export const getNativeMethodGetFromReflection = memoize(() =>
     lookup('il2cpp_method_get_from_reflection', 'pointer', ['pointer'])
 );
 
@@ -44,7 +44,7 @@ export const nativeMethodGetFromReflection = lazy(() =>
  * @param refclass Il2CppClass* - The reflection class
  * @returns Il2CppReflectionMethod* - The reflection method object
  */
-export const nativeMethodGetObject = lazy(() =>
+export const getNativeMethodGetObject = memoize(() =>
     lookup('il2cpp_method_get_object', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -53,7 +53,7 @@ export const nativeMethodGetObject = lazy(() =>
  * @param method MethodInfo* - The method to check
  * @returns bool - True if the method is generic
  */
-export const nativeMethodIsGeneric = lazy(() =>
+export const getNativeMethodIsGeneric = memoize(() =>
     lookup('il2cpp_method_is_generic', 'bool', ['pointer'])
 );
 
@@ -62,7 +62,7 @@ export const nativeMethodIsGeneric = lazy(() =>
  * @param method MethodInfo* - The method to check
  * @returns bool - True if the method is inflated
  */
-export const nativeMethodIsInflated = lazy(() =>
+export const getNativeMethodIsInflated = memoize(() =>
     lookup('il2cpp_method_is_inflated', 'bool', ['pointer'])
 );
 
@@ -71,7 +71,7 @@ export const nativeMethodIsInflated = lazy(() =>
  * @param method MethodInfo* - The method to check
  * @returns bool - True if the method is an instance method
  */
-export const nativeMethodIsInstance = lazy(() =>
+export const getNativeMethodIsInstance = memoize(() =>
     lookup('il2cpp_method_is_instance', 'bool', ['pointer'])
 );
 
@@ -80,7 +80,7 @@ export const nativeMethodIsInstance = lazy(() =>
  * @param method MethodInfo* - The method to get parameter count of
  * @returns uint32_t - The number of parameters
  */
-export const nativeMethodGetParameterCount = lazy(() =>
+export const getNativeMethodGetParameterCount = memoize(() =>
     lookup('il2cpp_method_get_param_count', 'uint32', ['pointer'])
 );
 
@@ -90,7 +90,7 @@ export const nativeMethodGetParameterCount = lazy(() =>
  * @param index uint32_t - The parameter index
  * @returns Il2CppType* - The parameter type
  */
-export const nativeMethodGetParameterType = lazy(() =>
+export const getNativeMethodGetParameterType = memoize(() =>
     lookup('il2cpp_method_get_param', 'pointer', ['pointer', 'uint32'])
 );
 
@@ -99,7 +99,7 @@ export const nativeMethodGetParameterType = lazy(() =>
  * @param method MethodInfo* - The method to get the class of
  * @returns Il2CppClass* - The containing class
  */
-export const nativeMethodGetClass = lazy(() =>
+export const getNativeMethodGetClass = memoize(() =>
     lookup('il2cpp_method_get_class', 'pointer', ['pointer'])
 );
 
@@ -109,7 +109,7 @@ export const nativeMethodGetClass = lazy(() =>
  * @param attr_class Il2CppClass* - The attribute class to look for
  * @returns bool - True if the method has the attribute
  */
-export const nativeMethodHasAttribute = lazy(() =>
+export const getNativeMethodHasAttribute = memoize(() =>
     lookup('il2cpp_method_has_attribute', 'bool', ['pointer', 'pointer'])
 );
 
@@ -119,7 +119,7 @@ export const nativeMethodHasAttribute = lazy(() =>
  * @param iflags uint32_t* - Pointer to store implementation flags
  * @returns uint32_t - The method flags
  */
-export const nativeMethodGetFlags = lazy(() =>
+export const getNativeMethodGetFlags = memoize(() =>
     lookup('il2cpp_method_get_flags', 'uint32', ['pointer', 'pointer'])
 );
 
@@ -128,7 +128,7 @@ export const nativeMethodGetFlags = lazy(() =>
  * @param method MethodInfo* - The method to get the token of
  * @returns uint32_t - The method token
  */
-export const nativeMethodGetToken = lazy(() =>
+export const getNativeMethodGetToken = memoize(() =>
     lookup('il2cpp_method_get_token', 'uint32', ['pointer'])
 );
 
@@ -138,6 +138,6 @@ export const nativeMethodGetToken = lazy(() =>
  * @param index uint32_t - The parameter index
  * @returns const char* - The parameter name
  */
-export const nativeMethodGetParameterName = lazy(() =>
+export const getNativeMethodGetParameterName = memoize(() =>
     lookup('il2cpp_method_get_param_name', 'pointer', ['pointer', 'uint32'])
 );

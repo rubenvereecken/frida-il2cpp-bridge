@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === STRING FUNCTIONS ===
@@ -7,7 +7,7 @@ import { lookup } from './common.js';
  * @param str Il2CppString* - The string to get the length of
  * @returns int32_t - The length of the string
  */
-export const nativeStringGetLength = lazy(() =>
+export const getNativeStringGetLength = memoize(() =>
     lookup('il2cpp_string_length', 'int32', ['pointer'])
 );
 
@@ -16,7 +16,7 @@ export const nativeStringGetLength = lazy(() =>
  * @param str Il2CppString* - The string to get characters from
  * @returns Il2CppChar* - Pointer to the string's character data
  */
-export const nativeStringGetChars = lazy(() =>
+export const getNativeStringGetChars = memoize(() =>
     lookup('il2cpp_string_chars', 'pointer', ['pointer'])
 );
 
@@ -25,7 +25,7 @@ export const nativeStringGetChars = lazy(() =>
  * @param str const char* - The C string to convert
  * @returns Il2CppString* - The new IL2CPP string
  */
-export const nativeStringNew = lazy(() => lookup('il2cpp_string_new', 'pointer', ['pointer']));
+export const getNativeStringNew = memoize(() => lookup('il2cpp_string_new', 'pointer', ['pointer']));
 
 /**
  * Creates a new IL2CPP string from a C string with specified length.
@@ -33,7 +33,7 @@ export const nativeStringNew = lazy(() => lookup('il2cpp_string_new', 'pointer',
  * @param length uint32_t - The length of the string
  * @returns Il2CppString* - The new IL2CPP string
  */
-export const nativeStringNewLen = lazy(() =>
+export const getNativeStringNewLen = memoize(() =>
     lookup('il2cpp_string_new_len', 'pointer', ['pointer', 'uint32'])
 );
 
@@ -43,7 +43,7 @@ export const nativeStringNewLen = lazy(() =>
  * @param len int32_t - The length of the string
  * @returns Il2CppString* - The new IL2CPP string
  */
-export const nativeStringNewUtf16 = lazy(() =>
+export const getNativeStringNewUtf16 = memoize(() =>
     lookup('il2cpp_string_new_utf16', 'pointer', ['pointer', 'int32'])
 );
 
@@ -52,7 +52,7 @@ export const nativeStringNewUtf16 = lazy(() =>
  * @param str const char* - The C string to wrap
  * @returns Il2CppString* - The wrapped string
  */
-export const nativeStringNewWrapper = lazy(() =>
+export const getNativeStringNewWrapper = memoize(() =>
     lookup('il2cpp_string_new_wrapper', 'pointer', ['pointer'])
 );
 
@@ -61,7 +61,7 @@ export const nativeStringNewWrapper = lazy(() =>
  * @param str Il2CppString* - The string to intern
  * @returns Il2CppString* - The interned string
  */
-export const nativeStringIntern = lazy(() =>
+export const getNativeStringIntern = memoize(() =>
     lookup('il2cpp_string_intern', 'pointer', ['pointer'])
 );
 
@@ -70,6 +70,6 @@ export const nativeStringIntern = lazy(() =>
  * @param str Il2CppString* - The string to check
  * @returns Il2CppString* - The interned string if found, null otherwise
  */
-export const nativeStringIsInterned = lazy(() =>
+export const getNativeStringIsInterned = memoize(() =>
     lookup('il2cpp_string_is_interned', 'pointer', ['pointer'])
 );

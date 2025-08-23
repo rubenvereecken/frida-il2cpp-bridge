@@ -1,18 +1,18 @@
 import { System } from '../corlib.js';
 import {
-    nativeGcHandleNew,
-    nativeGcHandleNewWeakRef,
-    nativeMonitorEnter,
-    nativeMonitorExit,
-    nativeMonitorPulse,
-    nativeMonitorPulseAll,
-    nativeMonitorTryEnter,
-    nativeMonitorTryWait,
-    nativeMonitorWait,
-    nativeObjectGetClass,
-    nativeObjectGetSize,
-    nativeObjectGetVirtualMethod,
-    nativeObjectUnbox,
+    getNativeGcHandleNew,
+    getNativeGcHandleNewWeakRef,
+    getNativeMonitorEnter,
+    getNativeMonitorExit,
+    getNativeMonitorPulse,
+    getNativeMonitorPulseAll,
+    getNativeMonitorTryEnter,
+    getNativeMonitorTryWait,
+    getNativeMonitorWait,
+    getNativeObjectGetClass,
+    getNativeObjectGetSize,
+    getNativeObjectGetVirtualMethod,
+    getNativeObjectUnbox,
 } from '../native/index.js';
 import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
@@ -70,7 +70,7 @@ export class Object_<T extends string = string> extends BaseObject<T> {
     @memoize
     get class(): Class<T> {
         // Can be read from the object header as the first pointer (of two)
-        return new LazyClass<T>(nativeObjectGetClass(this));
+        return new LazyClass<T>(getNativeObjectGetClass()(this));
     }
 
     @memoize
@@ -88,23 +88,23 @@ export class Object_<T extends string = string> extends BaseObject<T> {
     /** Gets the size of the current object. */
     @memoize
     get size(): number {
-        return nativeObjectGetSize(this);
+        return getNativeObjectGetSize()(this);
     }
 
     /** Creates a reference to this object. */
     ref(pin: boolean): GCHandle {
-        return new GCHandle(nativeGcHandleNew(this, +pin));
+        return new GCHandle(getNativeGcHandleNew()(this, +pin));
     }
 
     /** Gets the correct virtual method from the given virtual method. */
     virtualMethod<T extends MethodReturnType>(method: Method): BoundMethod<T> {
-        return new LazyMethod<T>(nativeObjectGetVirtualMethod(this, method)).bind(this);
+        return new LazyMethod<T>(getNativeObjectGetVirtualMethod()(this, method)).bind(this);
     }
 
     /** Unboxes the value type (either a primitive, a struct or an enum) out of this object. */
     unbox(): ValueType {
         return this.class._isValueType
-            ? new LazyValueType(nativeObjectUnbox(this), this.class.type)
+            ? new LazyValueType(getNativeObjectUnbox()(this), this.class.type)
             : raise(
                   `couldn't unbox instances of ${this.class.type.name} as they are not value types`
               );
@@ -112,7 +112,7 @@ export class Object_<T extends string = string> extends BaseObject<T> {
 
     /** Creates a weak reference to this object. */
     weakRef(trackResurrection: boolean): GCHandle {
-        return new GCHandle(nativeGcHandleNewWeakRef(this, +trackResurrection));
+        return new GCHandle(getNativeGcHandleNewWeakRef()(this, +trackResurrection));
     }
 }
 
@@ -123,36 +123,36 @@ export class Monitor {
 
     /** Acquires an exclusive lock on the current object. */
     enter(): void {
-        return nativeMonitorEnter(this.handle);
+        return getNativeMonitorEnter()(this.handle);
     }
 
     /** Release an exclusive lock on the current object. */
     exit(): void {
-        return nativeMonitorExit(this.handle);
+        return getNativeMonitorExit()(this.handle);
     }
 
     /** Notifies a thread in the waiting queue of a change in the locked object's state. */
     pulse(): void {
-        return nativeMonitorPulse(this.handle);
+        return getNativeMonitorPulse()(this.handle);
     }
 
     /** Notifies all waiting threads of a change in the object's state. */
     pulseAll(): void {
-        return nativeMonitorPulseAll(this.handle);
+        return getNativeMonitorPulseAll()(this.handle);
     }
 
     /** Attempts to acquire an exclusive lock on the current object. */
     tryEnter(timeout: number): boolean {
-        return !!nativeMonitorTryEnter(this.handle, timeout);
+        return !!getNativeMonitorTryEnter()(this.handle, timeout);
     }
 
     /** Releases the lock on an object and attempts to block the current thread until it reacquires the lock. */
     tryWait(timeout: number): boolean {
-        return !!nativeMonitorTryWait(this.handle, timeout);
+        return !!getNativeMonitorTryWait()(this.handle, timeout);
     }
 
     /** Releases the lock on an object and blocks the current thread until it reacquires the lock. */
     wait(): void {
-        return nativeMonitorWait(this.handle);
+        return getNativeMonitorWait()(this.handle);
     }
 }

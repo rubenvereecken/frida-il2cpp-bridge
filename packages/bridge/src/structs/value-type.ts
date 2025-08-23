@@ -1,4 +1,4 @@
-import { nativeValueTypeBox } from '../native/index.js';
+import { getNativeValueTypeBox } from '../native/index.js';
 import type { Class } from './class.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
@@ -27,7 +27,7 @@ export class ValueType<T extends string = string> extends BaseObject<T> {
 
     /** Boxes the current value type in a object. */
     box(): Object_ {
-        return new Object_(nativeValueTypeBox(this.class, this));
+        return new Object_(getNativeValueTypeBox()(this.class, this));
     }
 
     valueToString(): string {

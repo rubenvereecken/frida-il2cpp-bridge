@@ -1,5 +1,5 @@
-import { corlib, System } from '../corlib.js';
-import { nativeArrayGetLength, nativeArrayNew } from '../native/index.js';
+import { getCorlib, System } from '../corlib.js';
+import { getNativeArrayGetLength, getNativeArrayNew } from '../native/index.js';
 import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { readIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
@@ -66,7 +66,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
     /** Gets the Il2CppArray struct size. Should be equal to `Process.pointerSize * 4`. */
     @memoize
     static get headerSize(): number {
-        return corlib.class('System.Array').instanceSize;
+        return getCorlib().class('System.Array').instanceSize;
     }
 
     @memoize
@@ -99,7 +99,7 @@ export class Array<R extends Il2CppValue = Il2CppValue, T extends `${string}[]` 
     /** Gets the total number of elements in all the dimensions of the current array. */
     @memoize
     get length(): number {
-        return nativeArrayGetLength(this);
+        return getNativeArrayGetLength()(this);
     }
 
     /** Gets the element at the specified index of the current array. */
@@ -178,7 +178,7 @@ export function array<R extends Il2CppValue, T extends string>(
     lengthOrElements: number | R[] | BaseObject<T>[]
 ): Array<R, `${T}[]`> {
     const length = typeof lengthOrElements == 'number' ? lengthOrElements : lengthOrElements.length;
-    const array = new Array<R, `${T}[]`>(nativeArrayNew(klass, length));
+    const array = new Array<R, `${T}[]`>(getNativeArrayNew()(klass, length));
 
     if (globalThis.Array.isArray(lengthOrElements)) {
         // TODO: Fix type compatibility between T[] and ArrayLike<T>

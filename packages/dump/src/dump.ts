@@ -1,6 +1,6 @@
-import { getDataPath, getIdentifier, getVersion } from '@frida-il2cpp/bridge';
+import { getCorlib, getDataPath, getIdentifier, getVersion } from '@frida-il2cpp/bridge';
 import { PseudoCsharpGenerator } from './codegen/pseudo-csharp.js';
-import { corlib } from '@frida-il2cpp/bridge';
+import {} from '@frida-il2cpp/bridge';
 import { getDomain } from '@frida-il2cpp/bridge';
 import { Boolean } from '@frida-il2cpp/bridge';
 import { log, raise } from '@frida-il2cpp/bridge/utils';
@@ -106,9 +106,9 @@ export function dumpTree(path?: string, ignoreAlreadyExistingDirectory: boolean 
 }
 
 function directoryExists(path: string): boolean {
-    return corlib.class('System.IO.Directory').method<Boolean>('Exists').invoke(path).read();
+    return getCorlib().class('System.IO.Directory').method<Boolean>('Exists').invoke(path).read();
 }
 
 function createDirectoryRecursively(path: string) {
-    corlib.class('System.IO.Directory').method('CreateDirectory').invoke(path);
+    getCorlib().class('System.IO.Directory').method('CreateDirectory').invoke(path);
 }

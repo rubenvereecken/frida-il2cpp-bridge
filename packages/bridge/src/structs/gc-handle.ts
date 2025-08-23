@@ -1,4 +1,4 @@
-import { nativeGcHandleFree, nativeGcHandleGetTarget } from '../native/index.js';
+import { getNativeGcHandleFree, getNativeGcHandleGetTarget } from '../native/index.js';
 import { Object_ } from './object.js';
 
 export class GCHandle {
@@ -7,11 +7,11 @@ export class GCHandle {
 
     /** Gets the object associated to this handle. */
     get target(): Object_ | null {
-        return new Object_(nativeGcHandleGetTarget(this.handle)).asNullable();
+        return new Object_(getNativeGcHandleGetTarget()(this.handle)).asNullable();
     }
 
     /** Frees this handle. */
     free(): void {
-        return nativeGcHandleFree(this.handle);
+        return getNativeGcHandleFree()(this.handle);
     }
 }

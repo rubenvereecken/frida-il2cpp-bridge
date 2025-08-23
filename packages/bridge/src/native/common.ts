@@ -2,10 +2,11 @@ import { getModule } from '../module.js';
 import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
 import type { $INLINE_FILE } from 'ts-transformer-inline-file';
+import { inform } from '../utils/log.js';
 
 declare const $inline_file: typeof $INLINE_FILE;
 
-export const nativeGetMemorySnapshotExports = memoize(
+export const getNativeGetMemorySnapshotExports = memoize(
     () => new CModule($inline_file('../cmodules/memory-snapshot.c'))
 );
 
@@ -13,10 +14,11 @@ export function lookup<
     R extends NativeFunctionReturnType,
     A extends NativeFunctionArgumentType[] | [],
 >(exportName: string, retType: R, argTypes: A) {
+    inform(`Looking up ${exportName}`);
     const handle: NativePointer | null | undefined =
         (globalThis as any).IL2CPP_EXPORTS?.[exportName]?.() ??
         getModule().findExportByName(exportName) ??
-        nativeGetMemorySnapshotExports()[exportName];
+        getNativeGetMemorySnapshotExports()[exportName];
 
     const target = new NativeFunction(handle ?? NULL, retType, argTypes);
 

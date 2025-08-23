@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === DOMAIN FUNCTIONS ===
@@ -6,7 +6,7 @@ import { lookup } from './common.js';
  * Gets the current application domain.
  * @returns Il2CppDomain* - The current domain
  */
-export const nativeDomainGet = lazy(() => lookup('il2cpp_domain_get', 'pointer', []));
+export const getNativeDomainGet = memoize(() => lookup('il2cpp_domain_get', 'pointer', []));
 
 /**
  * Opens an assembly by name in the specified domain.
@@ -14,7 +14,7 @@ export const nativeDomainGet = lazy(() => lookup('il2cpp_domain_get', 'pointer',
  * @param name const char* - The name of the assembly
  * @returns Il2CppAssembly* - The opened assembly, or null if not found
  */
-export const nativeDomainGetAssemblyFromName = lazy(() =>
+export const getNativeDomainGetAssemblyFromName = memoize(() =>
     lookup('il2cpp_domain_assembly_open', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -24,6 +24,6 @@ export const nativeDomainGetAssemblyFromName = lazy(() =>
  * @param size size_t* - Pointer to store the number of assemblies
  * @returns Il2CppAssembly** - Array of assemblies
  */
-export const nativeDomainGetAssemblies = lazy(() =>
+export const getNativeDomainGetAssemblies = memoize(() =>
     lookup('il2cpp_domain_get_assemblies', 'pointer', ['pointer', 'pointer'])
 );

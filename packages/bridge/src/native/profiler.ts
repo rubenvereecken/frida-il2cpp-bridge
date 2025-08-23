@@ -1,31 +1,31 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === PROFILER FUNCTIONS ===
-export const nativeProfilerInstall = lazy(() =>
+export const getNativeProfilerInstall = memoize(() =>
     lookup('il2cpp_profiler_install', 'void', ['pointer', 'pointer'])
 );
 
-export const nativeProfilerSetEvents = lazy(() =>
+export const getNativeProfilerSetEvents = memoize(() =>
     lookup('il2cpp_profiler_set_events', 'void', ['int'])
 );
 
-export const nativeProfilerInstallEnterLeave = lazy(() =>
+export const getNativeProfilerInstallEnterLeave = memoize(() =>
     lookup('il2cpp_profiler_install_enter_leave', 'void', ['pointer', 'pointer'])
 );
 
-export const nativeProfilerInstallAllocation = lazy(() =>
+export const getNativeProfilerInstallAllocation = memoize(() =>
     lookup('il2cpp_profiler_install_allocation', 'void', ['pointer'])
 );
 
-export const nativeProfilerInstallGc = lazy(() =>
+export const getNativeProfilerInstallGc = memoize(() =>
     lookup('il2cpp_profiler_install_gc', 'void', ['pointer', 'pointer'])
 );
 
-export const nativeProfilerInstallFileio = lazy(() =>
+export const getNativeProfilerInstallFileio = memoize(() =>
     lookup('il2cpp_profiler_install_fileio', 'void', ['pointer'])
 );
 
-export const nativeProfilerInstallThread = lazy(() =>
+export const getNativeProfilerInstallThread = memoize(() =>
     lookup('il2cpp_profiler_install_thread', 'void', ['pointer', 'pointer'])
 );

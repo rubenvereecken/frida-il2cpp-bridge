@@ -1,7 +1,7 @@
 import { memoize } from './utils/cache.js';
 import { raise } from './utils/error.js';
 import { UnityVersion } from './utils/unity-version.js';
-import { nativeResolveInternalCall } from './native/index.js';
+import { getNativeResolveInternalCall } from './native/index.js';
 import { getModule } from './module.js';
 
 /**
@@ -59,7 +59,7 @@ export const getVersion = memoize(() =>
  * **It is possible to override or manually set its value using a global
  * variable:**
  * ```ts
- * (globalThis as any).IL2CPP_UNITY_VERSION = "5.3.5f1";
+ * globalThis.IL2CPP_UNITY_VERSION = "5.3.5f1";
  *
  * Il2Cpp.perform(() => {
  *     // prints 5.3.5f1
@@ -73,10 +73,10 @@ export const getVersion = memoize(() =>
  * (20\d{2}|\d)\.(\d)\.(\d{1,2})(?:[abcfp]|rc){0,2}\d?
  * ```
  */
-export const getUnityVersion = memoize(() => {
+export const getUnityVersionRaw = memoize(() => {
     try {
         const unityVersionValue =
-            (globalThis as any).IL2CPP_UNITY_VERSION ?? unityEngineCall('get_unityVersion');
+            globalThis.IL2CPP_UNITY_VERSION ?? unityEngineCall('get_unityVersion');
 
         if (unityVersionValue != null) {
             return unityVersionValue;
@@ -93,7 +93,7 @@ export const getUnityVersion = memoize(() => {
             while (address.readU8() != 0) {
                 address = address.sub(1);
             }
-            const match = UnityVersion.find(address.add(1).readCString());
+            const match = UnityVersion.find(address.add(1).readCString())?.versionString;
 
             if (match != undefined) {
                 return match;
@@ -104,19 +104,21 @@ export const getUnityVersion = memoize(() => {
     raise("couldn't determine the Unity version, please specify it manually");
 });
 
-export const isUnityVersionIsBelow201830 = () =>
-    new UnityVersion(getUnityVersion()).lt(new UnityVersion('2018.3.0'));
+export function getUnityVersion() {
+    return new UnityVersion(getUnityVersionRaw());
+}
 
-export const isUnityVersionIsBelow202120 = () =>
-    new UnityVersion(getUnityVersion()).lt(new UnityVersion('2021.2.0'));
+export const isUnityVersionIsBelow201830 = () => getUnityVersion().lt(new UnityVersion('2018.3.0'));
 
-function unityEngineCall(method: string): string | null {
-    const handle = nativeResolveInternalCall(
+export const isUnityVersionIsBelow202120 = () => getUnityVersion().lt(new UnityVersion('2021.2.0'));
+
+export function unityEngineCall(method: string): string | null {
+    const handle = getNativeResolveInternalCall()(
         Memory.allocUtf8String('UnityEngine.Application::' + method)
     );
-    const nativeFunction = new NativeFunction(handle, 'pointer', []);
+    const getNativeFunction = new NativeFunction(handle, 'pointer', []);
 
-    if (nativeFunction.isNull()) {
+    if (getNativeFunction.isNull()) {
         return null;
     }
 

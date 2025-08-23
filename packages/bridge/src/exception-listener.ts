@@ -1,4 +1,4 @@
-import { nativeThreadGetCurrent } from './native/index.js';
+import { getNativeThreadGetCurrent } from './native/index.js';
 import { getModule } from './module.js';
 import { Object_ } from './structs/object.js';
 import { inform } from './utils/log.js';
@@ -30,10 +30,10 @@ import { inform } from './utils/log.js';
 export function installExceptionListener(
     targetThread: 'current' | 'all' = 'current'
 ): InvocationListener {
-    const currentThread = nativeThreadGetCurrent();
+    const currentThread = getNativeThreadGetCurrent()();
 
     return Interceptor.attach(getModule().getExportByName('__cxa_throw'), function (args) {
-        if (targetThread == 'current' && !nativeThreadGetCurrent().equals(currentThread)) {
+        if (targetThread == 'current' && !getNativeThreadGetCurrent()().equals(currentThread)) {
             return;
         }
 

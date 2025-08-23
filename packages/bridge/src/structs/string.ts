@@ -1,4 +1,8 @@
-import { nativeStringGetChars, nativeStringGetLength, nativeStringNew } from '../native/index.js';
+import {
+    getNativeStringGetChars,
+    getNativeStringGetLength,
+    getNativeStringNew,
+} from '../native/index.js';
 import { memoize } from '../utils/cache.js';
 import { Object_ } from './object.js';
 import { ParameterValue } from './parameter.js';
@@ -28,12 +32,12 @@ export class String extends Object_<'System.String'> {
 
     /** Gets the content of this string. */
     get content(): string {
-        return nativeStringGetChars(this).readUtf16String(this.length)!;
+        return getNativeStringGetChars()(this).readUtf16String(this.length)!;
     }
 
     /** @unsafe Sets the content of this string - it may write out of bounds! */
     set content(value: string | null) {
-        nativeStringGetChars(this).writeUtf16String(value ?? '');
+        getNativeStringGetChars()(this).writeUtf16String(value ?? '');
         this.handle.add(String.lengthOffset).writeS32(value?.length ?? 0);
     }
 
@@ -58,11 +62,11 @@ export class String extends Object_<'System.String'> {
 
     /** Gets the length of this string. */
     get length(): number {
-        return nativeStringGetLength(this);
+        return getNativeStringGetLength()(this);
     }
 
     static from(content: string | null | undefined): String {
-        return new String(nativeStringNew(Memory.allocUtf8String(content ?? '')));
+        return new String(getNativeStringNew()(Memory.allocUtf8String(content ?? '')));
     }
 }
 

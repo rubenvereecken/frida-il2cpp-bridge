@@ -1,10 +1,9 @@
 import type { TypeEnum } from './enums/type.js';
-import { nativeGetCorlib } from './native/index.js';
+import { getNativeGetCorlib } from './native/index.js';
 import { LazyImage } from './structs/common/lazy.js';
-import { memoize, lazy } from './utils/cache.js';
+import { memoize } from './utils/cache.js';
 
-export const corlib = lazy(() => new LazyImage(nativeGetCorlib()));
-export const getCorlib = () => corlib;
+export const getCorlib = memoize(() => new LazyImage(getNativeGetCorlib()()));
 
 /**
  * Utility class for accessing System types from corlib.
@@ -16,7 +15,7 @@ export class System {
 
     @memoize
     static get Object() {
-        const c = corlib.class('System.Object');
+        const c = getCorlib().class('System.Object');
         return c as typeof c & {
             typeEnum: TypeEnum.OBJECT;
         };
@@ -26,7 +25,7 @@ export class System {
 
     @memoize
     static get Void() {
-        const c = corlib.class('System.Void');
+        const c = getCorlib().class('System.Void');
         return c as typeof c & {
             typeEnum: TypeEnum.VOID;
         };
@@ -34,7 +33,7 @@ export class System {
 
     @memoize
     static get Boolean() {
-        const c = corlib.class('System.Boolean');
+        const c = getCorlib().class('System.Boolean');
         return c as typeof c & {
             typeEnum: TypeEnum.BOOLEAN;
         };
@@ -42,7 +41,7 @@ export class System {
 
     @memoize
     static get SByte() {
-        const c = corlib.class('System.SByte');
+        const c = getCorlib().class('System.SByte');
         return c as typeof c & {
             typeEnum: TypeEnum.SIGNED_BYTE;
         };
@@ -50,7 +49,7 @@ export class System {
 
     @memoize
     static get Byte() {
-        const c = corlib.class('System.Byte');
+        const c = getCorlib().class('System.Byte');
         return c as typeof c & {
             typeEnum: TypeEnum.UNSIGNED_BYTE;
         };
@@ -58,7 +57,7 @@ export class System {
 
     @memoize
     static get Char() {
-        const c = corlib.class('System.Char');
+        const c = getCorlib().class('System.Char');
         return c as typeof c & {
             typeEnum: TypeEnum.CHAR;
         };
@@ -66,7 +65,7 @@ export class System {
 
     @memoize
     static get Int16() {
-        const c = corlib.class('System.Int16');
+        const c = getCorlib().class('System.Int16');
         return c as typeof c & {
             typeEnum: TypeEnum.SHORT;
         };
@@ -74,7 +73,7 @@ export class System {
 
     @memoize
     static get UInt16() {
-        const c = corlib.class('System.UInt16');
+        const c = getCorlib().class('System.UInt16');
         return c as typeof c & {
             typeEnum: TypeEnum.UNSIGNED_SHORT;
         };
@@ -82,7 +81,7 @@ export class System {
 
     @memoize
     static get Int32() {
-        const c = corlib.class('System.Int32');
+        const c = getCorlib().class('System.Int32');
         return c as typeof c & {
             typeEnum: TypeEnum.INT;
         };
@@ -90,7 +89,7 @@ export class System {
 
     @memoize
     static get UInt32() {
-        const c = corlib.class('System.UInt32');
+        const c = getCorlib().class('System.UInt32');
         return c as typeof c & {
             typeEnum: TypeEnum.UNSIGNED_INT;
         };
@@ -98,7 +97,7 @@ export class System {
 
     @memoize
     static get Int64() {
-        const c = corlib.class('System.Int64');
+        const c = getCorlib().class('System.Int64');
         return c as typeof c & {
             typeEnum: TypeEnum.LONG;
         };
@@ -106,7 +105,7 @@ export class System {
 
     @memoize
     static get UInt64() {
-        const c = corlib.class('System.UInt64');
+        const c = getCorlib().class('System.UInt64');
         return c as typeof c & {
             typeEnum: TypeEnum.UNSIGNED_LONG;
         };
@@ -114,7 +113,7 @@ export class System {
 
     @memoize
     static get Single() {
-        const c = corlib.class('System.Single');
+        const c = getCorlib().class('System.Single');
         return c as typeof c & {
             typeEnum: TypeEnum.FLOAT;
         };
@@ -122,7 +121,7 @@ export class System {
 
     @memoize
     static get Double() {
-        const c = corlib.class('System.Double');
+        const c = getCorlib().class('System.Double');
         return c as typeof c & {
             typeEnum: TypeEnum.DOUBLE;
         };
@@ -130,7 +129,7 @@ export class System {
 
     @memoize
     static get IntPtr() {
-        const c = corlib.class('System.IntPtr');
+        const c = getCorlib().class('System.IntPtr');
         return c as typeof c & {
             typeEnum: TypeEnum.SIGNED_NATIVE_POINTER;
         };
@@ -138,7 +137,7 @@ export class System {
 
     @memoize
     static get UIntPtr() {
-        const c = corlib.class('System.UIntPtr');
+        const c = getCorlib().class('System.UIntPtr');
         return c as typeof c & {
             typeEnum: TypeEnum.UNSIGNED_NATIVE_POINTER;
         };
@@ -146,7 +145,7 @@ export class System {
 
     @memoize
     static get String() {
-        const c = corlib.class('System.String');
+        const c = getCorlib().class('System.String');
         return c as typeof c & {
             typeEnum: TypeEnum.STRING;
         };

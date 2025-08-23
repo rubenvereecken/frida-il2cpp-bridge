@@ -5,7 +5,7 @@ import { raise } from '../utils/error.js';
 import { Image } from './image.js';
 import type { Object_ } from './object.js';
 import { string } from './string.js';
-import { nativeAssemblyGetImage } from '../native/index.js';
+import { getNativeAssemblyGetImage } from '../native/index.js';
 import type { IntPtr } from './primitive.js';
 import { getDomain } from './domain.js';
 import type { Array } from './array.js';
@@ -44,7 +44,7 @@ export class Assembly extends NativeStruct {
     /** Gets the image of this assembly. */
     @memoize
     get image(): Image {
-        if (nativeAssemblyGetImage.isNull()) {
+        if (getNativeAssemblyGetImage().isNull()) {
             // We need to get the System.Reflection.Module of the current assembly;
             // System.Reflection.Assembly::GetModulesInternal, for some reason,
             // throws a NullReferenceExceptionin Unity 5.3.8f1, so we must rely on
@@ -67,7 +67,7 @@ export class Assembly extends NativeStruct {
             return new Image(runtimeModule.field<IntPtr>('_impl').value.read());
         }
 
-        return new Image(nativeAssemblyGetImage(this));
+        return new Image(getNativeAssemblyGetImage()(this));
     }
 
     /** Gets the name of this assembly. */

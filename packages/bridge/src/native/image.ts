@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === IMAGE FUNCTIONS ===
@@ -7,7 +7,7 @@ import { lookup } from './common.js';
  * @param image Il2CppImage* - The image to get the assembly from
  * @returns Il2CppAssembly* - The assembly containing the image
  */
-export const nativeImageGetAssembly = lazy(() =>
+export const getNativeImageGetAssembly = memoize(() =>
     lookup('il2cpp_image_get_assembly', 'pointer', ['pointer'])
 );
 
@@ -16,7 +16,7 @@ export const nativeImageGetAssembly = lazy(() =>
  * @param image Il2CppImage* - The image to get the name of
  * @returns const char* - The name of the image
  */
-export const nativeImageGetName = lazy(() =>
+export const getNativeImageGetName = memoize(() =>
     lookup('il2cpp_image_get_name', 'pointer', ['pointer'])
 );
 
@@ -25,7 +25,7 @@ export const nativeImageGetName = lazy(() =>
  * @param image Il2CppImage* - The image to get the filename of
  * @returns const char* - The filename of the image
  */
-export const nativeImageGetFilename = lazy(() =>
+export const getNativeImageGetFilename = memoize(() =>
     lookup('il2cpp_image_get_filename', 'pointer', ['pointer'])
 );
 
@@ -34,7 +34,7 @@ export const nativeImageGetFilename = lazy(() =>
  * @param image Il2CppImage* - The image to get the entry point from
  * @returns Il2CppMethod* - The entry point method
  */
-export const nativeImageGetEntryPoint = lazy(() =>
+export const getNativeImageGetEntryPoint = memoize(() =>
     lookup('il2cpp_image_get_entry_point', 'pointer', ['pointer'])
 );
 
@@ -43,7 +43,7 @@ export const nativeImageGetEntryPoint = lazy(() =>
  * @param image Il2CppImage* - The image to get the class count from
  * @returns size_t - The number of classes in the image
  */
-export const nativeImageGetClassCount = lazy(() =>
+export const getNativeImageGetClassCount = memoize(() =>
     lookup('il2cpp_image_get_class_count', 'size_t', ['pointer'])
 );
 
@@ -53,6 +53,6 @@ export const nativeImageGetClassCount = lazy(() =>
  * @param index size_t - The index of the class to retrieve
  * @returns Il2CppClass* - The class at the specified index
  */
-export const nativeImageGetClass = lazy(() =>
+export const getNativeImageGetClass = memoize(() =>
     lookup('il2cpp_image_get_class', 'pointer', ['pointer', 'size_t'])
 );

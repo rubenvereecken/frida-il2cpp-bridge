@@ -6,42 +6,42 @@ import { NativeStruct } from '../utils/native-struct.js';
 import { recycle } from '../utils/recycle.js';
 import { Image } from './image.js';
 import {
-    nativeArrayGetClass,
-    nativeClassForEach,
-    nativeClassFromSystemType,
-    nativeClassGetArrayElementSize,
-    nativeClassGetAssemblyName,
-    nativeClassGetBaseType,
-    nativeClassGetDeclaringType,
-    nativeClassGetElementClass,
-    nativeClassGetFieldFromName,
-    nativeClassGetFields,
-    nativeClassGetFlags,
-    nativeClassGetImage,
-    nativeClassGetInstanceSize,
-    nativeClassGetInterfaces,
-    nativeClassGetMethodFromName,
-    nativeClassGetMethods,
-    nativeClassGetName,
-    nativeClassGetNamespace,
-    nativeClassGetNestedClasses,
-    nativeClassGetParent,
-    nativeClassGetStaticFieldData,
-    nativeClassGetType,
-    nativeClassGetValueTypeSize,
-    nativeClassHasReferences,
-    nativeClassInitialize,
-    nativeClassIsAbstract,
-    nativeClassIsAssignableFrom,
-    nativeClassIsBlittable,
-    nativeClassIsEnum,
-    nativeClassIsGeneric,
-    nativeClassIsInflated,
-    nativeClassIsInterface,
-    nativeClassIsSubclassOf,
-    nativeClassIsValueType,
-    nativeObjectInitializeException,
-    nativeObjectNew,
+    getNativeArrayGetClass,
+    getNativeClassForEach,
+    getNativeClassFromSystemType,
+    getNativeClassGetArrayElementSize,
+    getNativeClassGetAssemblyName,
+    getNativeClassGetBaseType,
+    getNativeClassGetDeclaringType,
+    getNativeClassGetElementClass,
+    getNativeClassGetFieldFromName,
+    getNativeClassGetFields,
+    getNativeClassGetFlags,
+    getNativeClassGetImage,
+    getNativeClassGetInstanceSize,
+    getNativeClassGetInterfaces,
+    getNativeClassGetMethodFromName,
+    getNativeClassGetMethods,
+    getNativeClassGetName,
+    getNativeClassGetNamespace,
+    getNativeClassGetNestedClasses,
+    getNativeClassGetParent,
+    getNativeClassGetStaticFieldData,
+    getNativeClassGetType,
+    getNativeClassGetValueTypeSize,
+    getNativeClassHasReferences,
+    getNativeClassInitialize,
+    getNativeClassIsAbstract,
+    getNativeClassIsAssignableFrom,
+    getNativeClassIsBlittable,
+    getNativeClassIsEnum,
+    getNativeClassIsGeneric,
+    getNativeClassIsInflated,
+    getNativeClassIsInterface,
+    getNativeClassIsSubclassOf,
+    getNativeClassIsValueType,
+    getNativeObjectInitializeException,
+    getNativeObjectNew,
 } from '../native/index.js';
 import { Type } from './type.js';
 import { Field } from './field.js';
@@ -57,7 +57,7 @@ import { DynamicMethodsLookup } from './common/dynamic-methods.js';
 import type { DynamicFields } from './common/dynamic-fields.js';
 import { DynamicFieldsLookup } from './common/dynamic-fields.js';
 import type { StripArraySuffix } from '../utils/type-helpers.js';
-import { corlib, System } from '../corlib.js';
+import { getCorlib, System } from '../corlib.js';
 
 /**
  * TODO: document byval_arg (the usual type) vs this_arg (for functions maybe?)
@@ -229,25 +229,25 @@ export class Class<T extends string = string> extends NativeStruct {
      * ```
      */
     makeArrayClass(this: Class<T>) {
-        return new Class<`T[]`>(nativeArrayGetClass(this, 1)) as ArrayClass<`T[]`>;
+        return new Class<`T[]`>(getNativeArrayGetClass()(this, 1)) as ArrayClass<`T[]`>;
     }
 
     /** Gets the size of the object encompassed by the current array class. */
     @memoize
     getElementSize(): number {
-        return nativeClassGetArrayElementSize(this);
+        return getNativeClassGetArrayElementSize()(this);
     }
 
     /** Gets the name of the assembly in which the current class is defined. */
     @memoize
     get assemblyName(): string {
-        return nativeClassGetAssemblyName(this).readUtf8String()!.replace('.dll', '');
+        return getNativeClassGetAssemblyName()(this).readUtf8String()!.replace('.dll', '');
     }
 
     /** Gets the class that declares the current nested class. */
     @memoize
     get declaringClass(): Class | null {
-        return new Class(nativeClassGetDeclaringType(this)).asNullable();
+        return new Class(getNativeClassGetDeclaringType()(this)).asNullable();
     }
 
     /** Declaring classes hierarchy, from inner to outer most */
@@ -264,7 +264,7 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Gets the encompassed type of this array, reference, pointer or enum type. */
     @memoize
     get baseType(): Type | null {
-        return new Type(nativeClassGetBaseType(this)).asNullable();
+        return new Type(getNativeClassGetBaseType()(this)).asNullable();
     }
 
     /**
@@ -277,18 +277,18 @@ export class Class<T extends string = string> extends NativeStruct {
      */
     @memoize
     get elementClass(): Class | null {
-        return new Class(nativeClassGetElementClass(this)).asNullable();
+        return new Class(getNativeClassGetElementClass()(this)).asNullable();
     }
 
     /** Gets the fields of the current class. */
     @memoize
     get fields(): Field[] {
-        return readNativeIterator(_ => nativeClassGetFields(this, _)).map(_ => new Field(_));
+        return readNativeIterator(_ => getNativeClassGetFields()(this, _)).map(_ => new Field(_));
     }
 
     @memoize
     get flags() {
-        const flags = nativeClassGetFlags(this);
+        const flags = getNativeClassGetFlags()(this);
         return {
             isInterface: !!(flags & TypeAttributeFlags.INTERFACE),
             isAbstract: !!(flags & TypeAttributeFlags.ABSTRACT),
@@ -311,13 +311,13 @@ export class Class<T extends string = string> extends NativeStruct {
         }
 
         const types = this.type.runtimeType.method<Array<Object_>>('GetGenericArguments').invoke();
-        return globalThis.Array.from(types).map(_ => new Class(nativeClassFromSystemType(_)));
+        return globalThis.Array.from(types).map(_ => new Class(getNativeClassFromSystemType()(_)));
     }
 
     /** Determines whether the GC has tracking references to the current class instances. */
     @memoize
     get hasReferences(): boolean {
-        return !!nativeClassHasReferences(this);
+        return !!getNativeClassHasReferences()(this);
     }
 
     /** Determines whether the current class has a valid static constructor. */
@@ -330,48 +330,48 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Gets the image in which the current class is defined. */
     @memoize
     get image(): Image {
-        return new Image(nativeClassGetImage(this));
+        return new Image(getNativeClassGetImage()(this));
     }
 
     /** Gets the size of the instance of the current class. */
     @memoize
     get instanceSize(): number {
-        return nativeClassGetInstanceSize(this);
+        return getNativeClassGetInstanceSize()(this);
     }
 
     /** Determines whether the current class is abstract. */
     @memoize
     get isAbstract(): boolean {
-        return !!nativeClassIsAbstract(this);
+        return !!getNativeClassIsAbstract()(this);
     }
 
     /** Determines whether the current class is blittable. */
     @memoize
     get isBlittable(): boolean {
-        return !!nativeClassIsBlittable(this);
+        return !!getNativeClassIsBlittable()(this);
     }
 
     @memoize
     get _isEnum(): boolean {
-        return !!nativeClassIsEnum(this);
+        return !!getNativeClassIsEnum()(this);
     }
 
     /** Determines whether the current class is a generic one. */
     @memoize
     get isGeneric(): boolean {
-        return !!nativeClassIsGeneric(this);
+        return !!getNativeClassIsGeneric()(this);
     }
 
     /** Determines whether the current class is inflated. */
     @memoize
     get isInflated(): boolean {
-        return !!nativeClassIsInflated(this);
+        return !!getNativeClassIsInflated()(this);
     }
 
     /** Determines whether the current class is an interface. */
     @memoize
     get isInterface(): boolean {
-        return !!nativeClassIsInterface(this);
+        return !!getNativeClassIsInterface()(this);
     }
 
     /** Determines whether the current class is a struct. */
@@ -382,7 +382,7 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Determines whether the current class is a value type. */
     @memoize
     get _isValueType(): boolean {
-        return !!nativeClassIsValueType(this);
+        return !!getNativeClassIsValueType()(this);
     }
 
     isValueType(): this is ValueTypeClass<T> {
@@ -392,37 +392,41 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Gets the interfaces implemented or inherited by the current class. */
     @memoize
     get interfaces(): Class[] {
-        return readNativeIterator(_ => nativeClassGetInterfaces(this, _)).map(_ => new Class(_));
+        return readNativeIterator(_ => getNativeClassGetInterfaces()(this, _)).map(
+            _ => new Class(_)
+        );
     }
 
     /** Gets the methods implemented by the current class. */
     @memoize
     get methods(): Method[] {
-        return readNativeIterator(_ => nativeClassGetMethods(this, _)).map(_ => new Method(_));
+        return readNativeIterator(_ => getNativeClassGetMethods()(this, _)).map(_ => new Method(_));
     }
 
     /** Gets the name of the current class. */
     @memoize
     get name() {
-        return nativeClassGetName(this).readUtf8String()!;
+        return getNativeClassGetName()(this).readUtf8String()!;
     }
 
     /** Gets the namespace of the current class. */
     @memoize
     get namespace(): string {
-        return nativeClassGetNamespace(this).readUtf8String()!;
+        return getNativeClassGetNamespace()(this).readUtf8String()!;
     }
 
     /** Gets the classes nested inside the current class. */
     @memoize
     get nestedClasses(): Class[] {
-        return readNativeIterator(_ => nativeClassGetNestedClasses(this, _)).map(_ => new Class(_));
+        return readNativeIterator(_ => getNativeClassGetNestedClasses()(this, _)).map(
+            _ => new Class(_)
+        );
     }
 
     /** Gets the class from which the current class directly inherits. */
     @memoize
     get parent(): Class | null {
-        return new Class(nativeClassGetParent(this)).asNullable();
+        return new Class(getNativeClassGetParent()(this)).asNullable();
     }
 
     /** Gets the rank (number of dimensions) of the current array class. */
@@ -446,25 +450,25 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Gets a pointer to the static fields of the current class. */
     @memoize
     get staticFieldsData(): NativePointer {
-        return nativeClassGetStaticFieldData(this);
+        return getNativeClassGetStaticFieldData()(this);
     }
 
     /** Gets the size of the instance - as a value type - of the current class. */
     @memoize
     get valueTypeSize(): number {
-        return nativeClassGetValueTypeSize(this, NULL);
+        return getNativeClassGetValueTypeSize()(this, NULL);
     }
 
     /** Gets the type of the current class. */
     @memoize
     get type(): Type<T> {
         // TODO: important – derived type should have same typeEnum
-        return new Type<T>(nativeClassGetType(this));
+        return new Type<T>(getNativeClassGetType()(this));
     }
 
     /** Allocates a new object of the current class. */
     alloc(): Object_ {
-        return new Object_(nativeObjectNew(this));
+        return new Object_(getNativeObjectNew()(this));
     }
 
     /** Gets the field identified by the given name. */
@@ -488,28 +492,28 @@ export class Class<T extends string = string> extends NativeStruct {
         }
 
         const types = classes.map(_ => _.type.runtimeType);
-        const typeArray = array(corlib.class('System.RuntimeType'), types);
+        const typeArray = array(getCorlib().class('System.RuntimeType'), types);
 
         const inflatedType = this.type.runtimeType
             .method<Object_>('MakeGenericType', 1)
             .invoke(typeArray);
-        return new Class(nativeClassFromSystemType(inflatedType));
+        return new Class(getNativeClassFromSystemType()(inflatedType));
     }
 
     /** Calls the static constructor of the current class. */
     initialize(): Class {
-        nativeClassInitialize(this);
+        getNativeClassInitialize()(this);
         return this;
     }
 
     /** Determines whether an instance of `other` class can be assigned to a variable of the current type. */
     isAssignableFrom(other: Class): boolean {
-        return !!nativeClassIsAssignableFrom(this, other);
+        return !!getNativeClassIsAssignableFrom()(this, other);
     }
 
     /** Determines whether the current class derives from `other` class. */
     isSubclassOf(other: Class, checkInterfaces: boolean): boolean {
-        return !!nativeClassIsSubclassOf(this, other, +checkInterfaces);
+        return !!getNativeClassIsSubclassOf()(this, other, +checkInterfaces);
     }
 
     /** Gets the method identified by the given name and parameter count. */
@@ -555,7 +559,7 @@ export class Class<T extends string = string> extends NativeStruct {
 
         const exceptionArray = Memory.alloc(Process.pointerSize);
 
-        nativeObjectInitializeException(object, exceptionArray);
+        getNativeObjectInitializeException()(object, exceptionArray);
 
         const exception = exceptionArray.readPointer();
 
@@ -582,7 +586,7 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Gets the field with the given name. */
     tryField<T extends Il2CppValue>(name: string): Field<T> | null {
         return new Field<T>(
-            nativeClassGetFieldFromName(this, Memory.allocUtf8String(name))
+            getNativeClassGetFieldFromName()(this, Memory.allocUtf8String(name))
         ).asNullable();
     }
 
@@ -592,7 +596,7 @@ export class Class<T extends string = string> extends NativeStruct {
         parameterCount: number = -1
     ): Method<T> | null {
         return new Method<T>(
-            nativeClassGetMethodFromName(this, Memory.allocUtf8String(name), parameterCount)
+            getNativeClassGetMethodFromName()(this, Memory.allocUtf8String(name), parameterCount)
         ).asNullable();
     }
 
@@ -643,7 +647,7 @@ export class Class<T extends string = string> extends NativeStruct {
             'pointer',
             'pointer',
         ]);
-        return nativeClassForEach(callback, NULL);
+        return getNativeClassForEach()(callback, NULL);
     }
 
     /**

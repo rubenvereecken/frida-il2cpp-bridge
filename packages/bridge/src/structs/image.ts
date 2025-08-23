@@ -1,11 +1,11 @@
 import { isUnityVersionIsBelow201830 } from '../application.js';
 import {
-    nativeClassFromName,
-    nativeClassFromSystemType,
-    nativeImageGetAssembly,
-    nativeImageGetClass,
-    nativeImageGetClassCount,
-    nativeImageGetName,
+    getNativeClassFromName,
+    getNativeClassFromSystemType,
+    getNativeImageGetAssembly,
+    getNativeImageGetClass,
+    getNativeImageGetClassCount,
+    getNativeImageGetName,
 } from '../native/index.js';
 import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
@@ -62,7 +62,7 @@ export class Image extends NativeStruct {
     /** Gets the assembly in which the current image is defined. */
     @memoize
     get assembly(): Assembly {
-        return new LazyAssembly(nativeImageGetAssembly(this));
+        return new LazyAssembly(getNativeImageGetAssembly()(this));
     }
 
     /** Gets the amount of classes defined in this image. */
@@ -71,7 +71,7 @@ export class Image extends NativeStruct {
         if (isUnityVersionIsBelow201830()) {
             return this.classes.length;
         } else {
-            return nativeImageGetClassCount(this).toNumber();
+            return getNativeImageGetClassCount()(this).toNumber();
         }
     }
 
@@ -85,7 +85,7 @@ export class Image extends NativeStruct {
             // app startup, hence the `Array.from`.
             const classes = globalThis.Array.from(
                 types,
-                _ => new LazyClass(nativeClassFromSystemType(_))
+                _ => new LazyClass(getNativeClassFromSystemType()(_))
             );
 
             // <Module> class does not always exist
@@ -99,7 +99,7 @@ export class Image extends NativeStruct {
         } else {
             return globalThis.Array.from(
                 globalThis.Array(this.classCount),
-                (_, i) => new LazyClass(nativeImageGetClass(this, i))
+                (_, i) => new LazyClass(getNativeImageGetClass()(this, i))
             );
         }
     }
@@ -107,7 +107,7 @@ export class Image extends NativeStruct {
     /** Gets the name of this image. */
     @memoize
     get name(): string {
-        return nativeImageGetName(this).readUtf8String()!;
+        return getNativeImageGetName()(this).readUtf8String()!;
     }
 
     /**
@@ -129,6 +129,8 @@ export class Image extends NativeStruct {
         );
         const className = Memory.allocUtf8String(name.slice(dotIndex + 1));
 
-        return new LazyClass<T>(nativeClassFromName(this, classNamespace, className)).asNullable();
+        return new LazyClass<T>(
+            getNativeClassFromName()(this, classNamespace, className)
+        ).asNullable();
     }
 }

@@ -2,18 +2,17 @@ import { NativeStruct } from '../utils/native-struct.js';
 import { raise } from '../utils/error.js';
 import type { Int32, IntPtr, UInt64, Void } from './primitive.js';
 import { memoize } from '../utils/cache.js';
-import { getter } from '../utils/getter.js';
 import { Object_ } from './object.js';
 import {
-    nativeDomainGet,
-    nativeThreadDetach,
-    nativeThreadGetAttachedThreads,
-    nativeThreadGetCurrent,
-    nativeThreadIsVm,
+    getNativeDomainGet,
+    getNativeThreadDetach,
+    getNativeThreadGetAttachedThreads,
+    getNativeThreadGetCurrent,
+    getNativeThreadIsVm,
 } from '../native/index.js';
 import type { Class } from './class.js';
 import { readNativeList } from '../utils/read-native-list.js';
-import { corlib } from '../corlib.js';
+import { getCorlib } from '../corlib.js';
 import { delegate } from './delegate.js';
 
 export class Thread extends NativeStruct {
@@ -51,7 +50,7 @@ export class Thread extends NativeStruct {
     /** Determines whether the current thread is the garbage collector finalizer one. */
     @memoize
     get isFinalizer(): boolean {
-        return !nativeThreadIsVm(this);
+        return !getNativeThreadIsVm()(this);
     }
 
     /** Gets the managed id of the current thread. */
@@ -83,7 +82,7 @@ export class Thread extends NativeStruct {
         const synchronizationContext =
             executionContext.tryField<Object_>('_syncContext')?.value ??
             executionContext.tryMethod<Object_>('get_SynchronizationContext')?.invoke() ??
-            this.tryLocalValue(corlib.class('System.Threading.SynchronizationContext'));
+            this.tryLocalValue(getCorlib().class('System.Threading.SynchronizationContext'));
 
         if (synchronizationContext == null || synchronizationContext.isNull()) {
             if (this.handle.equals(getMainThread().handle)) {
@@ -102,7 +101,7 @@ export class Thread extends NativeStruct {
 
     /** Detaches the thread from the application domain. */
     detach(): void {
-        return nativeThreadDetach(this);
+        return getNativeThreadDetach()(this);
     }
 
     /** Schedules a callback on the current thread. */
@@ -110,12 +109,15 @@ export class Thread extends NativeStruct {
         const Post = this.synchronizationContext.method('Post');
 
         return new Promise(resolve => {
-            const delegate_ = delegate(corlib.class('System.Threading.SendOrPostCallback'), () => {
-                const result = block();
-                setImmediate(() => resolve(result));
-                // TODO sort void typing
-                return undefined as any as Void;
-            });
+            const delegate_ = delegate(
+                getCorlib().class('System.Threading.SendOrPostCallback'),
+                () => {
+                    const result = block();
+                    setImmediate(() => resolve(result));
+                    // TODO sort void typing
+                    return undefined as any as Void;
+                }
+            );
 
             // This is to replace pending scheduled callbacks when the script is about to get unlaoded.
             // If we skip this cleanup, Frida's native callbacks will point to invalid memory, making
@@ -133,7 +135,7 @@ export class Thread extends NativeStruct {
             // survives the script reloading, is much simpler, honestly.
             Script.bindWeak(globalThis, () => {
                 delegate_.field('method_ptr').value = delegate_.field('invoke_impl').value =
-                    nativeDomainGet;
+                    getNativeDomainGet();
             });
 
             Post.invoke(delegate_, NULL);
@@ -155,11 +157,11 @@ export class Thread extends NativeStruct {
 }
 
 export const getAttachedThreads = memoize(() => {
-    return readNativeList(nativeThreadGetAttachedThreads).map(_ => new Thread(_));
+    return readNativeList(getNativeThreadGetAttachedThreads).map(_ => new Thread(_));
 });
 
 export const getCurrentThread = memoize(() => {
-    return new Thread(nativeThreadGetCurrent()).asNullable();
+    return new Thread(getNativeThreadGetCurrent()()).asNullable();
 });
 
 export const getMainThread = memoize(() => {

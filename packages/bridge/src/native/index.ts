@@ -32,7 +32,7 @@
 
 // Export all IL2CPP native API functions organized by category
 // Following the original API definition order
-// All functions are prefixed with 'native' for clarity (e.g., nativeInitialize, nativeShutdown)
+// All functions are prefixed with 'native' for clarity (e.g., getNativeInitialize, getNativeShutdown)
 
 export * from './initialization.js';
 export * from './memory.js';

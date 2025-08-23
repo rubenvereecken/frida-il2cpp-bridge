@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === ARRAY FUNCTIONS ===
@@ -8,7 +8,7 @@ import { lookup } from './common.js';
  * @param rank uint32_t - The rank (number of dimensions) of the array
  * @returns Il2CppClass* - The array class
  */
-export const nativeArrayGetClass = lazy(() =>
+export const getNativeArrayGetClass = memoize(() =>
     lookup('il2cpp_array_class_get', 'pointer', ['pointer', 'uint32'])
 );
 
@@ -17,7 +17,7 @@ export const nativeArrayGetClass = lazy(() =>
  * @param array Il2CppArray* - The array object
  * @returns uint32_t - The number of elements in the array
  */
-export const nativeArrayGetLength = lazy(() =>
+export const getNativeArrayGetLength = memoize(() =>
     lookup('il2cpp_array_length', 'uint32', ['pointer'])
 );
 
@@ -26,7 +26,7 @@ export const nativeArrayGetLength = lazy(() =>
  * @param array Il2CppArray* - The array object
  * @returns uint32_t - The total size in bytes of the array data
  */
-export const nativeArrayGetByteLength = lazy(() =>
+export const getNativeArrayGetByteLength = memoize(() =>
     lookup('il2cpp_array_get_byte_length', 'uint32', ['pointer'])
 );
 
@@ -36,7 +36,7 @@ export const nativeArrayGetByteLength = lazy(() =>
  * @param length uint32_t - The number of elements in the array
  * @returns Il2CppArray* - The newly created array object
  */
-export const nativeArrayNew = lazy(() =>
+export const getNativeArrayNew = memoize(() =>
     lookup('il2cpp_array_new', 'pointer', ['pointer', 'uint32'])
 );
 
@@ -46,7 +46,7 @@ export const nativeArrayNew = lazy(() =>
  * @param length uint32_t - The number of elements in the array
  * @returns Il2CppArray* - The newly created array object
  */
-export const nativeArrayNewSpecific = lazy(() =>
+export const getNativeArrayNewSpecific = memoize(() =>
     lookup('il2cpp_array_new_specific', 'pointer', ['pointer', 'uint32'])
 );
 
@@ -57,7 +57,7 @@ export const nativeArrayNewSpecific = lazy(() =>
  * @param lower_bounds int32_t* - Array of lower bounds for each dimension (can be NULL)
  * @returns Il2CppArray* - The newly created multi-dimensional array
  */
-export const nativeArrayNewFull = lazy(() =>
+export const getNativeArrayNewFull = memoize(() =>
     lookup('il2cpp_array_new_full', 'pointer', ['pointer', 'pointer', 'pointer'])
 );
 
@@ -68,7 +68,7 @@ export const nativeArrayNewFull = lazy(() =>
  * @param bounded bool - Whether the array has non-zero lower bounds
  * @returns Il2CppClass* - The bounded array class
  */
-export const nativeBoundedArrayClassGet = lazy(() =>
+export const getNativeBoundedArrayClassGet = memoize(() =>
     lookup('il2cpp_bounded_array_class_get', 'pointer', ['pointer', 'uint32', 'bool'])
 );
 
@@ -77,6 +77,6 @@ export const nativeBoundedArrayClassGet = lazy(() =>
  * @param array_class Il2CppClass* - The array class
  * @returns int - The size in bytes of each array element
  */
-export const nativeArrayElementSize = lazy(() =>
+export const getNativeArrayElementSize = memoize(() =>
     lookup('il2cpp_array_element_size', 'int', ['pointer'])
 );

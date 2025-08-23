@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === FIELD FUNCTIONS ===
@@ -7,14 +7,16 @@ import { lookup } from './common.js';
  * @param field FieldInfo* - The field to get flags from
  * @returns int - The field flags
  */
-export const nativeFieldGetFlags = lazy(() => lookup('il2cpp_field_get_flags', 'int', ['pointer']));
+export const getNativeFieldGetFlags = memoize(() =>
+    lookup('il2cpp_field_get_flags', 'int', ['pointer'])
+);
 
 /**
  * Gets the name of a field.
  * @param field FieldInfo* - The field to get the name of
  * @returns const char* - The field name
  */
-export const nativeFieldGetName = lazy(() =>
+export const getNativeFieldGetName = memoize(() =>
     lookup('il2cpp_field_get_name', 'pointer', ['pointer'])
 );
 
@@ -23,7 +25,7 @@ export const nativeFieldGetName = lazy(() =>
  * @param field FieldInfo* - The field to get the parent class of
  * @returns Il2CppClass* - The parent class
  */
-export const nativeFieldGetClass = lazy(() =>
+export const getNativeFieldGetClass = memoize(() =>
     lookup('il2cpp_field_get_parent', 'pointer', ['pointer'])
 );
 
@@ -32,7 +34,7 @@ export const nativeFieldGetClass = lazy(() =>
  * @param field FieldInfo* - The field to get the offset of
  * @returns size_t - The field offset in bytes
  */
-export const nativeFieldGetOffset = lazy(() =>
+export const getNativeFieldGetOffset = memoize(() =>
     lookup('il2cpp_field_get_offset', 'size_t', ['pointer'])
 );
 
@@ -41,7 +43,7 @@ export const nativeFieldGetOffset = lazy(() =>
  * @param field FieldInfo* - The field to get the type of
  * @returns Il2CppType* - The field type
  */
-export const nativeFieldGetType = lazy(() =>
+export const getNativeFieldGetType = memoize(() =>
     lookup('il2cpp_field_get_type', 'pointer', ['pointer'])
 );
 
@@ -51,7 +53,7 @@ export const nativeFieldGetType = lazy(() =>
  * @param field FieldInfo* - The field to get the value from
  * @param value void* - Buffer to store the field value
  */
-export const nativeFieldGetValue = lazy(() =>
+export const getNativeFieldGetValue = memoize(() =>
     lookup('il2cpp_field_get_value', 'void', ['pointer', 'pointer', 'pointer'])
 );
 
@@ -61,7 +63,7 @@ export const nativeFieldGetValue = lazy(() =>
  * @param obj Il2CppObject* - The object instance
  * @returns Il2CppObject* - The boxed field value
  */
-export const nativeFieldGetValueObject = lazy(() =>
+export const getNativeFieldGetValueObject = memoize(() =>
     lookup('il2cpp_field_get_value_object', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -71,7 +73,7 @@ export const nativeFieldGetValueObject = lazy(() =>
  * @param attr_class Il2CppClass* - The attribute class to look for
  * @returns bool - True if the field has the attribute
  */
-export const nativeFieldHasAttribute = lazy(() =>
+export const getNativeFieldHasAttribute = memoize(() =>
     lookup('il2cpp_field_has_attribute', 'bool', ['pointer', 'pointer'])
 );
 
@@ -81,7 +83,7 @@ export const nativeFieldHasAttribute = lazy(() =>
  * @param field FieldInfo* - The field to set the value of
  * @param value void* - Pointer to the value to set
  */
-export const nativeFieldSetValue = lazy(() =>
+export const getNativeFieldSetValue = memoize(() =>
     lookup('il2cpp_field_set_value', 'void', ['pointer', 'pointer', 'pointer'])
 );
 
@@ -90,7 +92,7 @@ export const nativeFieldSetValue = lazy(() =>
  * @param field FieldInfo* - The static field to get the value from
  * @param value void* - Buffer to store the field value
  */
-export const nativeFieldGetStaticValue = lazy(() =>
+export const getNativeFieldGetStaticValue = memoize(() =>
     lookup('il2cpp_field_static_get_value', 'void', ['pointer', 'pointer'])
 );
 
@@ -99,7 +101,7 @@ export const nativeFieldGetStaticValue = lazy(() =>
  * @param field FieldInfo* - The static field to set the value of
  * @param value void* - Pointer to the value to set
  */
-export const nativeFieldSetStaticValue = lazy(() =>
+export const getNativeFieldSetStaticValue = memoize(() =>
     lookup('il2cpp_field_static_set_value', 'void', ['pointer', 'pointer'])
 );
 
@@ -109,7 +111,7 @@ export const nativeFieldSetStaticValue = lazy(() =>
  * @param field FieldInfo* - The field to set the value of
  * @param value Il2CppObject* - The boxed value to set
  */
-export const nativeFieldSetValueObject = lazy(() =>
+export const getNativeFieldSetValueObject = memoize(() =>
     lookup('il2cpp_field_set_value_object', 'void', ['pointer', 'pointer', 'pointer'])
 );
 
@@ -118,6 +120,6 @@ export const nativeFieldSetValueObject = lazy(() =>
  * @param field FieldInfo* - The field to check
  * @returns bool - True if the field is literal
  */
-export const nativeFieldIsLiteral = lazy(() =>
+export const getNativeFieldIsLiteral = memoize(() =>
     lookup('il2cpp_field_is_literal', 'bool', ['pointer'])
 );

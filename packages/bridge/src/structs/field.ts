@@ -1,13 +1,13 @@
-import { corlib } from '../corlib.js';
+import { getCorlib } from '../corlib.js';
 import { FieldAttributeFlags } from '../enums/field-attribute.js';
 import {
-    nativeFieldGetClass,
-    nativeFieldGetFlags,
-    nativeFieldGetName,
-    nativeFieldGetOffset,
-    nativeFieldGetStaticValue,
-    nativeFieldGetType,
-    nativeFieldSetStaticValue,
+    getNativeFieldGetClass,
+    getNativeFieldGetFlags,
+    getNativeFieldGetName,
+    getNativeFieldGetOffset,
+    getNativeFieldGetStaticValue,
+    getNativeFieldGetType,
+    getNativeFieldSetStaticValue,
 } from '../native/index.js';
 import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { readIl2Cpp, write } from '../memory.js';
@@ -43,13 +43,13 @@ export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
     /** Gets the class in which this field is defined. */
     @memoize
     get class(): Class {
-        return new Class(nativeFieldGetClass(this));
+        return new Class(getNativeFieldGetClass()(this));
     }
 
     /** Gets the flags of the current field. */
     @memoize
     get flags(): number {
-        return nativeFieldGetFlags(this);
+        return getNativeFieldGetFlags()(this);
     }
 
     /** Determines whether this field value is known at compile time. */
@@ -67,7 +67,9 @@ export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
     /** Determines whether this field is thread static. */
     @memoize
     get isThreadStatic(): boolean {
-        const offset = corlib.class('System.AppDomain').field('type_resolve_in_progress').offset;
+        const offset = getCorlib()
+            .class('System.AppDomain')
+            .field('type_resolve_in_progress').offset;
 
         return this.offset == offset;
     }
@@ -94,19 +96,19 @@ export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
     /** Gets the name of this field. */
     @memoize
     get name(): string {
-        return nativeFieldGetName(this).readUtf8String()!;
+        return getNativeFieldGetName()(this).readUtf8String()!;
     }
 
     /** Gets the offset of this field, calculated as the difference with its owner virtual address. */
     @memoize
     get offset(): number {
-        return nativeFieldGetOffset(this).toNumber();
+        return getNativeFieldGetOffset()(this).toNumber();
     }
 
     /** Gets the type of this field. */
     @memoize
     get type(): Type {
-        return new Type(nativeFieldGetType(this));
+        return new Type(getNativeFieldGetType()(this));
     }
 
     /** Gets the value of this field. */
@@ -120,7 +122,7 @@ export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
         // In case of value types, allocate how much is needed to fit all fields
         // Otherwise, valueTypeSize == Process.pointerSize
         const handle = Memory.alloc(this.type.class.valueTypeSize);
-        nativeFieldGetStaticValue(this.handle, handle);
+        getNativeFieldGetStaticValue()(this.handle, handle);
 
         return readIl2Cpp(handle, this.type) as T;
     }
@@ -148,7 +150,7 @@ export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
                     ? value
                     : write(Memory.alloc(this.type.class.valueTypeSize), value, this.type);
 
-        nativeFieldSetStaticValue(this.handle, handle);
+        getNativeFieldSetStaticValue()(this.handle, handle);
     }
 
     /** Derive a BoundField for access to this field's value for `instance`. */

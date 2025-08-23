@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === CLASS FUNCTIONS ===
@@ -7,7 +7,7 @@ import { lookup } from './common.js';
  * @param func Il2CppClassForEachFunc - Callback function to call for each class
  * @param user_data void* - User data to pass to the callback
  */
-export const nativeClassForEach = lazy(() =>
+export const getNativeClassForEach = memoize(() =>
     lookup('il2cpp_class_for_each', 'void', ['pointer', 'pointer'])
 );
 
@@ -16,7 +16,7 @@ export const nativeClassForEach = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the base type of
  * @returns Il2CppType* - The base type of the enum, or null if not an enum
  */
-export const nativeClassGetBaseType = lazy(() =>
+export const getNativeClassGetBaseType = memoize(() =>
     lookup('il2cpp_class_enum_basetype', 'pointer', ['pointer'])
 );
 
@@ -25,7 +25,7 @@ export const nativeClassGetBaseType = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is generic
  */
-export const nativeClassIsGeneric = lazy(() =>
+export const getNativeClassIsGeneric = memoize(() =>
     lookup('il2cpp_class_is_generic', 'bool', ['pointer'])
 );
 
@@ -34,7 +34,7 @@ export const nativeClassIsGeneric = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is inflated
  */
-export const nativeClassIsInflated = lazy(() =>
+export const getNativeClassIsInflated = memoize(() =>
     lookup('il2cpp_class_is_inflated', 'bool', ['pointer'])
 );
 
@@ -44,7 +44,7 @@ export const nativeClassIsInflated = lazy(() =>
  * @param oklass Il2CppClass* - The source Il2CppClass to check assignability from
  * @returns bool - True if oklass is assignable to klass
  */
-export const nativeClassIsAssignableFrom = lazy(() =>
+export const getNativeClassIsAssignableFrom = memoize(() =>
     lookup('il2cpp_class_is_assignable_from', 'bool', ['pointer', 'pointer'])
 );
 
@@ -55,7 +55,7 @@ export const nativeClassIsAssignableFrom = lazy(() =>
  * @param check_interfaces bool - Whether to check interfaces as well
  * @returns bool - True if klass is a subclass of klassc
  */
-export const nativeClassIsSubclassOf = lazy(() =>
+export const getNativeClassIsSubclassOf = memoize(() =>
     lookup('il2cpp_class_is_subclass_of', 'bool', ['pointer', 'pointer', 'bool'])
 );
 
@@ -65,7 +65,7 @@ export const nativeClassIsSubclassOf = lazy(() =>
  * @param klassc Il2CppClass* - The potential parent Il2CppClass
  * @returns bool - True if klassc is a parent of klass
  */
-export const nativeClassHasParent = lazy(() =>
+export const getNativeClassHasParent = memoize(() =>
     lookup('il2cpp_class_has_parent', 'bool', ['pointer', 'pointer'])
 );
 
@@ -74,7 +74,7 @@ export const nativeClassHasParent = lazy(() =>
  * @param type Il2CppType* - The Il2CppType to convert
  * @returns Il2CppClass* - The class corresponding to the type
  */
-export const nativeClassFromIl2CppType = lazy(() =>
+export const getNativeClassFromIl2CppType = memoize(() =>
     lookup('il2cpp_class_from_il2cpp_type', 'pointer', ['pointer'])
 );
 
@@ -85,7 +85,7 @@ export const nativeClassFromIl2CppType = lazy(() =>
  * @param name const char* - The name of the class
  * @returns Il2CppClass* - The found class, or null if not found
  */
-export const nativeClassFromName = lazy(() =>
+export const getNativeClassFromName = memoize(() =>
     lookup('il2cpp_class_from_name', 'pointer', ['pointer', 'pointer', 'pointer'])
 );
 
@@ -94,7 +94,7 @@ export const nativeClassFromName = lazy(() =>
  * @param type Il2CppReflectionType* - The Il2CppReflectionType to convert
  * @returns Il2CppClass* - The class corresponding to the reflection type
  */
-export const nativeClassFromSystemType = lazy(() =>
+export const getNativeClassFromSystemType = memoize(() =>
     lookup('il2cpp_class_from_system_type', 'pointer', ['pointer'])
 );
 
@@ -103,7 +103,7 @@ export const nativeClassFromSystemType = lazy(() =>
  * @param type Il2CppType* - The Il2CppType to convert
  * @returns Il2CppClass* - The class corresponding to the type
  */
-export const nativeClassFromType = lazy(() =>
+export const getNativeClassFromType = memoize(() =>
     lookup('il2cpp_class_from_type', 'pointer', ['pointer'])
 );
 
@@ -112,7 +112,7 @@ export const nativeClassFromType = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the element class of
  * @returns Il2CppClass* - The element class, or null if not applicable
  */
-export const nativeClassGetElementClass = lazy(() =>
+export const getNativeClassGetElementClass = memoize(() =>
     lookup('il2cpp_class_get_element_class', 'pointer', ['pointer'])
 );
 
@@ -123,7 +123,7 @@ export const nativeClassGetElementClass = lazy(() =>
  * @param iter void** - Iterator for the events (in/out parameter)
  * @returns EventInfo* - The next event, or null when iteration is complete
  */
-export const nativeClassGetEvents = lazy(() =>
+export const getNativeClassGetEvents = memoize(() =>
     lookup('il2cpp_class_get_events', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -133,7 +133,7 @@ export const nativeClassGetEvents = lazy(() =>
  * @param iter void** - Iterator for the fields (in/out parameter)
  * @returns FieldInfo* - The next field, or null when iteration is complete
  */
-export const nativeClassGetFields = lazy(() =>
+export const getNativeClassGetFields = memoize(() =>
     lookup('il2cpp_class_get_fields', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -143,7 +143,7 @@ export const nativeClassGetFields = lazy(() =>
  * @param iter void** - Iterator for the nested classes (in/out parameter)
  * @returns Il2CppClass* - The next nested class, or null when iteration is complete
  */
-export const nativeClassGetNestedClasses = lazy(() =>
+export const getNativeClassGetNestedClasses = memoize(() =>
     lookup('il2cpp_class_get_nested_types', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -153,7 +153,7 @@ export const nativeClassGetNestedClasses = lazy(() =>
  * @param iter void** - Iterator for the interfaces (in/out parameter)
  * @returns Il2CppClass* - The next interface, or null when iteration is complete
  */
-export const nativeClassGetInterfaces = lazy(() =>
+export const getNativeClassGetInterfaces = memoize(() =>
     lookup('il2cpp_class_get_interfaces', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -164,7 +164,7 @@ export const nativeClassGetInterfaces = lazy(() =>
  * @param iter void** - Iterator for the properties (in/out parameter)
  * @returns PropertyInfo* - The next property, or null when iteration is complete
  */
-export const nativeClassGetProperties = lazy(() =>
+export const getNativeClassGetProperties = memoize(() =>
     lookup('il2cpp_class_get_properties', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -175,7 +175,7 @@ export const nativeClassGetProperties = lazy(() =>
  * @param name const char* - The name of the property
  * @returns PropertyInfo* - The property, or null if not found
  */
-export const nativeClassGetPropertyFromName = lazy(() =>
+export const getNativeClassGetPropertyFromName = memoize(() =>
     lookup('il2cpp_class_get_property_from_name', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -185,7 +185,7 @@ export const nativeClassGetPropertyFromName = lazy(() =>
  * @param name const char* - The name of the field
  * @returns FieldInfo* - The field, or null if not found
  */
-export const nativeClassGetFieldFromName = lazy(() =>
+export const getNativeClassGetFieldFromName = memoize(() =>
     lookup('il2cpp_class_get_field_from_name', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -195,7 +195,7 @@ export const nativeClassGetFieldFromName = lazy(() =>
  * @param iter void** - Iterator for the methods (in/out parameter)
  * @returns MethodInfo* - The next method, or null when iteration is complete
  */
-export const nativeClassGetMethods = lazy(() =>
+export const getNativeClassGetMethods = memoize(() =>
     lookup('il2cpp_class_get_methods', 'pointer', ['pointer', 'pointer'])
 );
 
@@ -206,7 +206,7 @@ export const nativeClassGetMethods = lazy(() =>
  * @param argsCount int - The number of parameters (-1 for any)
  * @returns MethodInfo* - The method, or null if not found
  */
-export const nativeClassGetMethodFromName = lazy(() =>
+export const getNativeClassGetMethodFromName = memoize(() =>
     lookup('il2cpp_class_get_method_from_name', 'pointer', ['pointer', 'pointer', 'int'])
 );
 
@@ -215,7 +215,7 @@ export const nativeClassGetMethodFromName = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the name of
  * @returns const char* - The name of the class
  */
-export const nativeClassGetName = lazy(() =>
+export const getNativeClassGetName = memoize(() =>
     lookup('il2cpp_class_get_name', 'pointer', ['pointer'])
 );
 
@@ -224,7 +224,7 @@ export const nativeClassGetName = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the namespace of
  * @returns const char* - The namespace of the class
  */
-export const nativeClassGetNamespace = lazy(() =>
+export const getNativeClassGetNamespace = memoize(() =>
     lookup('il2cpp_class_get_namespace', 'pointer', ['pointer'])
 );
 
@@ -233,7 +233,7 @@ export const nativeClassGetNamespace = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the parent of
  * @returns Il2CppClass* - The parent class, or null if no parent
  */
-export const nativeClassGetParent = lazy(() =>
+export const getNativeClassGetParent = memoize(() =>
     lookup('il2cpp_class_get_parent', 'pointer', ['pointer'])
 );
 
@@ -242,7 +242,7 @@ export const nativeClassGetParent = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the declaring type of
  * @returns Il2CppClass* - The declaring class, or null if not nested
  */
-export const nativeClassGetDeclaringType = lazy(() =>
+export const getNativeClassGetDeclaringType = memoize(() =>
     lookup('il2cpp_class_get_declaring_type', 'pointer', ['pointer'])
 );
 
@@ -251,7 +251,7 @@ export const nativeClassGetDeclaringType = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the instance size of
  * @returns int32_t - The instance size in bytes
  */
-export const nativeClassGetInstanceSize = lazy(() =>
+export const getNativeClassGetInstanceSize = memoize(() =>
     lookup('il2cpp_class_instance_size', 'int32', ['pointer'])
 );
 
@@ -261,7 +261,7 @@ export const nativeClassGetInstanceSize = lazy(() =>
  * @param enumKlass Il2CppClass* - The Il2CppClass to count fields in
  * @returns size_t - The number of fields
  */
-export const nativeClassGetNumFields = lazy(() =>
+export const getNativeClassGetNumFields = memoize(() =>
     lookup('il2cpp_class_num_fields', 'size_t', ['pointer'])
 );
 
@@ -270,7 +270,7 @@ export const nativeClassGetNumFields = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is a value type
  */
-export const nativeClassIsValueType = lazy(() =>
+export const getNativeClassIsValueType = memoize(() =>
     lookup('il2cpp_class_is_valuetype', 'bool', ['pointer'])
 );
 
@@ -280,7 +280,7 @@ export const nativeClassIsValueType = lazy(() =>
  * @param align uint32_t* - Pointer to store alignment information (can be null)
  * @returns int32_t - The value type size in bytes
  */
-export const nativeClassGetValueTypeSize = lazy(() =>
+export const getNativeClassGetValueTypeSize = memoize(() =>
     lookup('il2cpp_class_value_size', 'int32', ['pointer', 'pointer'])
 );
 
@@ -289,7 +289,7 @@ export const nativeClassGetValueTypeSize = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is blittable
  */
-export const nativeClassIsBlittable = lazy(() =>
+export const getNativeClassIsBlittable = memoize(() =>
     lookup('il2cpp_class_is_blittable', 'bool', ['pointer'])
 );
 
@@ -298,14 +298,16 @@ export const nativeClassIsBlittable = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get flags from
  * @returns int - The implementation flags
  */
-export const nativeClassGetFlags = lazy(() => lookup('il2cpp_class_get_flags', 'int', ['pointer']));
+export const getNativeClassGetFlags = memoize(() =>
+    lookup('il2cpp_class_get_flags', 'int', ['pointer'])
+);
 
 /**
  * Determines whether the current class is abstract.
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is abstract
  */
-export const nativeClassIsAbstract = lazy(() =>
+export const getNativeClassIsAbstract = memoize(() =>
     lookup('il2cpp_class_is_abstract', 'bool', ['pointer'])
 );
 
@@ -314,7 +316,7 @@ export const nativeClassIsAbstract = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is an interface
  */
-export const nativeClassIsInterface = lazy(() =>
+export const getNativeClassIsInterface = memoize(() =>
     lookup('il2cpp_class_is_interface', 'bool', ['pointer'])
 );
 
@@ -323,7 +325,7 @@ export const nativeClassIsInterface = lazy(() =>
  * @param klass Il2CppClass* - The array Il2CppClass to get element size of
  * @returns int - The element size in bytes
  */
-export const nativeClassGetArrayElementSize = lazy(() =>
+export const getNativeClassGetArrayElementSize = memoize(() =>
     lookup('il2cpp_class_array_element_size', 'int', ['pointer'])
 );
 
@@ -332,7 +334,7 @@ export const nativeClassGetArrayElementSize = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the type of
  * @returns Il2CppType* - The type corresponding to the class
  */
-export const nativeClassGetType = lazy(() =>
+export const getNativeClassGetType = memoize(() =>
     lookup('il2cpp_class_get_type', 'pointer', ['pointer'])
 );
 
@@ -342,7 +344,7 @@ export const nativeClassGetType = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the type token of
  * @returns uint32_t - The type token
  */
-export const nativeClassGetTypeToken = lazy(() =>
+export const getNativeClassGetTypeToken = memoize(() =>
     lookup('il2cpp_class_get_type_token', 'uint32', ['pointer'])
 );
 
@@ -353,7 +355,7 @@ export const nativeClassGetTypeToken = lazy(() =>
  * @param attr_class Il2CppClass* - The attribute class to look for
  * @returns bool - True if the class has the attribute
  */
-export const nativeClassHasAttribute = lazy(() =>
+export const getNativeClassHasAttribute = memoize(() =>
     lookup('il2cpp_class_has_attribute', 'bool', ['pointer', 'pointer'])
 );
 
@@ -362,7 +364,7 @@ export const nativeClassHasAttribute = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class has references tracked by GC
  */
-export const nativeClassHasReferences = lazy(() =>
+export const getNativeClassHasReferences = memoize(() =>
     lookup('il2cpp_class_has_references', 'bool', ['pointer'])
 );
 
@@ -371,14 +373,14 @@ export const nativeClassHasReferences = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is an enum
  */
-export const nativeClassIsEnum = lazy(() => lookup('il2cpp_class_is_enum', 'bool', ['pointer']));
+export const getNativeClassIsEnum = memoize(() => lookup('il2cpp_class_is_enum', 'bool', ['pointer']));
 
 /**
  * Gets the image in which the current class is defined.
  * @param klass Il2CppClass* - The Il2CppClass to get the image of
  * @returns Il2CppImage* - The image containing the class
  */
-export const nativeClassGetImage = lazy(() =>
+export const getNativeClassGetImage = memoize(() =>
     lookup('il2cpp_class_get_image', 'pointer', ['pointer'])
 );
 
@@ -387,7 +389,7 @@ export const nativeClassGetImage = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the assembly name of
  * @returns const char* - The assembly name
  */
-export const nativeClassGetAssemblyName = lazy(() =>
+export const getNativeClassGetAssemblyName = memoize(() =>
     lookup('il2cpp_class_get_assemblyname', 'pointer', ['pointer'])
 );
 
@@ -397,7 +399,9 @@ export const nativeClassGetAssemblyName = lazy(() =>
  * @param klass Il2CppClass* - The array Il2CppClass to get the rank of
  * @returns int - The number of dimensions
  */
-export const nativeClassGetRank = lazy(() => lookup('il2cpp_class_get_rank', 'int', ['pointer']));
+export const getNativeClassGetRank = memoize(() =>
+    lookup('il2cpp_class_get_rank', 'int', ['pointer'])
+);
 
 // TODO
 /**
@@ -405,7 +409,7 @@ export const nativeClassGetRank = lazy(() => lookup('il2cpp_class_get_rank', 'in
  * @param klass Il2CppClass* - The Il2CppClass to get the data size of
  * @returns uint32_t - The data size in bytes
  */
-export const nativeClassGetDataSize = lazy(() =>
+export const getNativeClassGetDataSize = memoize(() =>
     lookup('il2cpp_class_get_data_size', 'uint32', ['pointer'])
 );
 
@@ -414,7 +418,7 @@ export const nativeClassGetDataSize = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get static field data from
  * @returns void* - Pointer to the static fields data
  */
-export const nativeClassGetStaticFieldData = lazy(() =>
+export const getNativeClassGetStaticFieldData = memoize(() =>
     lookup('il2cpp_class_get_static_field_data', 'pointer', ['pointer'])
 );
 
@@ -424,7 +428,7 @@ export const nativeClassGetStaticFieldData = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get bitmap size of
  * @returns size_t - The bitmap size
  */
-export const nativeClassGetBitmapSize = lazy(() =>
+export const getNativeClassGetBitmapSize = memoize(() =>
     lookup('il2cpp_class_get_bitmap_size', 'size_t', ['pointer'])
 );
 
@@ -434,7 +438,7 @@ export const nativeClassGetBitmapSize = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get bitmap of
  * @param bitmap size_t* - Pointer to store the bitmap
  */
-export const nativeClassGetBitmap = lazy(() =>
+export const getNativeClassGetBitmap = memoize(() =>
     lookup('il2cpp_class_get_bitmap', 'void', ['pointer', 'pointer'])
 );
 
@@ -444,7 +448,7 @@ export const nativeClassGetBitmap = lazy(() =>
  * @param klass Il2CppClass* - The Il2CppClass to set user data for
  * @param userdata void* - The user data to set
  */
-export const nativeClassSetUserdata = lazy(() =>
+export const getNativeClassSetUserdata = memoize(() =>
     lookup('il2cpp_class_set_userdata', 'void', ['pointer', 'pointer'])
 );
 
@@ -453,7 +457,7 @@ export const nativeClassSetUserdata = lazy(() =>
  * Gets the offset for user data in the class structure.
  * @returns int - The user data offset
  */
-export const nativeClassGetUserdataOffset = lazy(() =>
+export const getNativeClassGetUserdataOffset = memoize(() =>
     lookup('il2cpp_class_get_userdata_offset', 'int', [])
 );
 
@@ -461,6 +465,6 @@ export const nativeClassGetUserdataOffset = lazy(() =>
  * Initializes the static constructor of the specified class.
  * @param klass Il2CppClass* - The class to initialize
  */
-export const nativeClassInitialize = lazy(() =>
+export const getNativeClassInitialize = memoize(() =>
     lookup('il2cpp_runtime_class_init', 'void', ['pointer'])
 );

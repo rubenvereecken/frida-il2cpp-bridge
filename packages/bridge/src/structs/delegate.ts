@@ -1,4 +1,4 @@
-import { corlib } from '../corlib.js';
+import { getCorlib } from '../corlib.js';
 import type { ParameterLike } from '../memory.js';
 import { raise } from '../utils/error.js';
 import type { Class } from './class.js';
@@ -10,8 +10,8 @@ export function delegate<P extends ParameterLike[], R extends MethodReturnType>(
     klass: Class,
     block: (...args: P) => R
 ): Object_ {
-    const SystemDelegate = corlib.class('System.Delegate');
-    const SystemMulticastDelegate = corlib.class('System.MulticastDelegate');
+    const SystemDelegate = getCorlib().class('System.Delegate');
+    const SystemMulticastDelegate = getCorlib().class('System.MulticastDelegate');
     if (!SystemDelegate.isAssignableFrom(klass)) {
         raise(`cannot create a delegate for ${klass.type.name} as it's a non-delegate class`);
     }

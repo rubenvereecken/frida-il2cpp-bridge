@@ -14,12 +14,12 @@ import {
 import type { StringLike } from './structs/string.js';
 import { isJsString, isStringLike, String } from './structs/string.js';
 import { ValueType } from './structs/value-type.js';
-import { nativeAlloc, nativeFree } from './native/index.js';
+import { getNativeAlloc, getNativeFree } from './native/index.js';
 import type { Type, WrappedPrimitiveType } from './structs/type.js';
 import { TypeEnum } from './enums/type.js';
 import { warn } from './utils/log.js';
 import { raise } from './utils/error.js';
-import { corlib, System } from './corlib.js';
+import { getCorlib, System } from './corlib.js';
 import type { MethodReturnType } from './structs/method.js';
 import { BaseObject } from './structs/common/base-object.js';
 
@@ -92,7 +92,7 @@ type maps = [
  * The allocated memory should be freed manually.
  */
 export function alloc(size: number | globalThis.UInt64 = Process.pointerSize): NativePointer {
-    return nativeAlloc(size);
+    return getNativeAlloc()(size);
 }
 
 /**
@@ -108,7 +108,7 @@ export function alloc(size: number | globalThis.UInt64 = Process.pointerSize): N
  * ```
  */
 export function free(pointer: NativePointerValue): void {
-    return nativeFree(pointer);
+    return getNativeFree()(pointer);
 }
 
 /**
@@ -365,7 +365,7 @@ export function toIl2Cpp(value: ParameterLike, type?: Type): Il2CppValue {
  * Guess the best Il2Cpp type for a given JS or Il2Cpp value.
  */
 export function guessType(value: ParameterLike): Type {
-    const t = (kls: string) => corlib.class(kls).type;
+    const t = (kls: string) => getCorlib().class(kls).type;
 
     if (value === undefined) return System.Void.type;
     if (typeof value === 'boolean') return System.Boolean.type;

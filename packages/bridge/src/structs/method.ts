@@ -1,21 +1,20 @@
 import { isUnityVersionIsBelow201830 } from '../application.js';
-import { corlib } from '../corlib.js';
 import { MethodAttributeFlags } from '../enums/method-attribute.js';
 import { MethodImplementationAttributeFlags } from '../enums/method-implementation-attribute.js';
 import {
-    nativeClassFromSystemType,
-    nativeMethodGetClass,
-    nativeMethodGetDeclaringClass,
-    nativeMethodGetFlags,
-    nativeMethodGetName,
-    nativeMethodGetObject,
-    nativeMethodGetParameterCount,
-    nativeMethodGetParameterName,
-    nativeMethodGetParameterType,
-    nativeMethodGetReturnType,
-    nativeMethodIsGeneric,
-    nativeMethodIsInflated,
-    nativeMethodIsInstance,
+    getNativeClassFromSystemType,
+    getNativeMethodGetClass,
+    getNativeMethodGetDeclaringClass,
+    getNativeMethodGetFlags,
+    getNativeMethodGetName,
+    getNativeMethodGetObject,
+    getNativeMethodGetParameterCount,
+    getNativeMethodGetParameterName,
+    getNativeMethodGetParameterType,
+    getNativeMethodGetReturnType,
+    getNativeMethodIsGeneric,
+    getNativeMethodIsInflated,
+    getNativeMethodIsInstance,
 } from '../native/index.js';
 import type { Il2CppValue, ParameterLike } from '../memory.js';
 import { fridaToIl2Cpp, toFrida } from '../memory.js';
@@ -33,6 +32,7 @@ import { Parameter } from './parameter.js';
 import type { IntPtr } from './primitive.js';
 import { Type } from './type.js';
 import { ValueType } from './value-type.js';
+import { getCorlib } from '../corlib.js';
 
 type ImplementationCallback<T extends MethodReturnType> = (
     this: Class | Object_ | ValueType,
@@ -70,13 +70,13 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     /** Gets the class in which this method is defined. */
     @memoize
     get class(): Class {
-        return new Class(nativeMethodGetClass(this));
+        return new Class(getNativeMethodGetClass()(this));
     }
 
     // TODO: difference with `class`?
     @memoize
     get declaringClass(): Class {
-        return new Class(nativeMethodGetDeclaringClass(this));
+        return new Class(getNativeMethodGetDeclaringClass()(this));
     }
 
     @memoize
@@ -92,14 +92,14 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     /** Gets the flags of the current method. */
     @memoize
     get flagsRaw(): number {
-        return nativeMethodGetFlags(this, NULL);
+        return getNativeMethodGetFlags()(this, NULL);
     }
 
     /** Gets the implementation flags of the current method. */
     @memoize
     get implementationFlags(): number {
         const implementationFlagsPointer = Memory.alloc(Process.pointerSize);
-        nativeMethodGetFlags(this, implementationFlagsPointer);
+        getNativeMethodGetFlags()(this, implementationFlagsPointer);
 
         return implementationFlagsPointer.readU32();
     }
@@ -132,7 +132,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
         }
 
         const types = this.object.method<Array<Object_>>('GetGenericArguments').invoke();
-        return globalThis.Array.from(types).map(_ => new Class(nativeClassFromSystemType(_)));
+        return globalThis.Array.from(types).map(_ => new Class(getNativeClassFromSystemType()(_)));
     }
 
     /** Determines whether this method is external. */
@@ -144,20 +144,20 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     /** Determines whether this method is generic. */
     @memoize
     get isGeneric(): boolean {
-        return !!nativeMethodIsGeneric(this);
+        return !!getNativeMethodIsGeneric()(this);
     }
 
     /** Determines whether this method is inflated (generic with a concrete type parameter). */
     @memoize
     get isInflated(): boolean {
-        return !!nativeMethodIsInflated(this);
+        return !!getNativeMethodIsInflated()(this);
     }
 
     /** Determines whether this method is static. */
     @memoize
     get isStatic(): boolean {
         // Note: can also check using Static flag
-        return !nativeMethodIsInstance(this);
+        return !getNativeMethodIsInstance()(this);
     }
 
     /** Determines whether this method is synchronized. */
@@ -189,7 +189,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     /** Gets the name of this method. */
     @memoize
     get name(): string {
-        return nativeMethodGetName(this).readUtf8String()!;
+        return getNativeMethodGetName()(this).readUtf8String()!;
     }
 
     /** @internal */
@@ -205,21 +205,21 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     /** Gets the encompassing object of the current method. */
     @memoize
     get object(): Object_ {
-        return new Object_(nativeMethodGetObject(this, NULL));
+        return new Object_(getNativeMethodGetObject()(this, NULL));
     }
 
     /** Gets the amount of parameters of this method. */
     @memoize
     get parameterCount(): number {
-        return nativeMethodGetParameterCount(this);
+        return getNativeMethodGetParameterCount()(this);
     }
 
     /** Gets the parameters of this method. */
     @memoize
     get parameters(): Parameter[] {
         return globalThis.Array.from(globalThis.Array(this.parameterCount), (_, i) => {
-            const parameterName = nativeMethodGetParameterName(this, i).readUtf8String()!;
-            const parameterType = nativeMethodGetParameterType(this, i);
+            const parameterName = getNativeMethodGetParameterName()(this, i).readUtf8String()!;
+            const parameterType = getNativeMethodGetParameterType()(this, i);
             return new Parameter(parameterName, i, new Type(parameterType));
         });
     }
@@ -233,12 +233,12 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
     /** Gets the return type of this method. */
     @memoize
     get returnType(): Type {
-        return new Type(nativeMethodGetReturnType(this));
+        return new Type(getNativeMethodGetReturnType()(this));
     }
 
     @memoize
     static get virtualAddressOffset(): number {
-        const FilterTypeName = corlib
+        const FilterTypeName = getCorlib()
             .class('System.Reflection.Module')
             .initialize()
             .field<Object_>('FilterTypeName').value;
@@ -317,7 +317,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
         }
 
         const types = classes.map(_ => _.type.runtimeType);
-        const typeArray = array(corlib.class('System.RuntimeType'), types);
+        const typeArray = array(getCorlib().class('System.RuntimeType'), types);
 
         const inflatedMethodObject = this.object
             .method<Object_>('MakeGenericMethod', 1)
@@ -593,7 +593,7 @@ export class BoundMethod<T extends MethodReturnType = MethodReturnType> extends 
 }
 
 let maybeObjectHeaderSize = (): number => {
-    const struct = corlib.class('System.RuntimeTypeHandle').initialize().alloc();
+    const struct = getCorlib().class('System.RuntimeTypeHandle').initialize().alloc();
     struct.method('.ctor').invokeRaw(struct, ptr(0xdeadbeef));
 
     // Here we check where the sentinel value is

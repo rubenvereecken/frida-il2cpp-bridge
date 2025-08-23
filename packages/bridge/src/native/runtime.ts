@@ -1,4 +1,4 @@
-import { lazy } from '../utils/cache.js';
+import { memoize } from '../utils/cache.js';
 import { lookup } from './common.js';
 
 // === VM RUNTIME INFO FUNCTIONS ===
@@ -6,13 +6,15 @@ import { lookup } from './common.js';
  * Gets the size of the object header.
  * @returns uint32_t - The object header size in bytes
  */
-export const nativeObjectHeaderSize = lazy(() => lookup('il2cpp_object_header_size', 'uint32', []));
+export const getNativeObjectHeaderSize = memoize(() =>
+    lookup('il2cpp_object_header_size', 'uint32', [])
+);
 
 /**
  * Gets the size of the array object header.
  * @returns uint32_t - The array object header size in bytes
  */
-export const nativeArrayObjectHeaderSize = lazy(() =>
+export const getNativeArrayObjectHeaderSize = memoize(() =>
     lookup('il2cpp_array_object_header_size', 'uint32', [])
 );
 
@@ -20,7 +22,7 @@ export const nativeArrayObjectHeaderSize = lazy(() =>
  * Gets the offset of the array length field in the array object header.
  * @returns uint32_t - The offset of the length field
  */
-export const nativeOffsetOfArrayLengthInArrayObjectHeader = lazy(() =>
+export const getNativeOffsetOfArrayLengthInArrayObjectHeader = memoize(() =>
     lookup('il2cpp_offset_of_array_length_in_array_object_header', 'uint32', [])
 );
 
@@ -28,7 +30,7 @@ export const nativeOffsetOfArrayLengthInArrayObjectHeader = lazy(() =>
  * Gets the offset of the array bounds field in the array object header.
  * @returns uint32_t - The offset of the bounds field
  */
-export const nativeOffsetOfArrayBoundsInArrayObjectHeader = lazy(() =>
+export const getNativeOffsetOfArrayBoundsInArrayObjectHeader = memoize(() =>
     lookup('il2cpp_offset_of_array_bounds_in_array_object_header', 'uint32', [])
 );
 
@@ -36,7 +38,7 @@ export const nativeOffsetOfArrayBoundsInArrayObjectHeader = lazy(() =>
  * Gets the allocation granularity used by the runtime.
  * @returns uint32_t - The allocation granularity in bytes
  */
-export const nativeAllocationGranularity = lazy(() =>
+export const getNativeAllocationGranularity = memoize(() =>
     lookup('il2cpp_allocation_granularity', 'uint32', [])
 );
 
@@ -49,7 +51,7 @@ export const nativeAllocationGranularity = lazy(() =>
  * @param exc Il2CppException** - Output parameter for exceptions
  * @returns Il2CppObject* - The return value of the method
  */
-export const nativeRuntimeInvoke = lazy(() =>
+export const getNativeRuntimeInvoke = memoize(() =>
     lookup('il2cpp_runtime_invoke', 'pointer', ['pointer', 'pointer', 'pointer', 'pointer'])
 );
 
@@ -62,7 +64,7 @@ export const nativeRuntimeInvoke = lazy(() =>
  * @param exc Il2CppException** - Output parameter for exceptions
  * @returns Il2CppObject* - The return value of the method
  */
-export const nativeRuntimeInvokeConvertArgs = lazy(() =>
+export const getNativeRuntimeInvokeConvertArgs = memoize(() =>
     lookup('il2cpp_runtime_invoke_convert_args', 'pointer', [
         'pointer',
         'pointer',
@@ -76,6 +78,6 @@ export const nativeRuntimeInvokeConvertArgs = lazy(() =>
  * Sets the unhandled exception policy for the runtime.
  * @param policy int - The exception policy to set
  */
-export const nativeRuntimeUnhandledExceptionPolicySet = lazy(() =>
+export const getNativeRuntimeUnhandledExceptionPolicySet = memoize(() =>
     lookup('il2cpp_runtime_unhandled_exception_policy_set', 'void', ['int'])
 );
