@@ -43,6 +43,7 @@ export const getNativeClassIsInflated = memoize(() =>
  * @param klass Il2CppClass* - The target Il2CppClass
  * @param oklass Il2CppClass* - The source Il2CppClass to check assignability from
  * @returns bool - True if oklass is assignable to klass
+ * @see mono_class_is_assignable_from - Mono API equivalent
  */
 export const getNativeClassIsAssignableFrom = memoize(() =>
     lookup('il2cpp_class_is_assignable_from', 'bool', ['pointer', 'pointer'])
@@ -73,6 +74,7 @@ export const getNativeClassHasParent = memoize(() =>
  * Gets the class corresponding to the given Il2CppType.
  * @param type Il2CppType* - The Il2CppType to convert
  * @returns Il2CppClass* - The class corresponding to the type
+ * @see mono_class_from_mono_type - Mono API equivalent
  */
 export const getNativeClassFromIl2CppType = memoize(() =>
     lookup('il2cpp_class_from_il2cpp_type', 'pointer', ['pointer'])
@@ -132,6 +134,7 @@ export const getNativeClassGetEvents = memoize(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get fields from
  * @param iter void** - Iterator for the fields (in/out parameter)
  * @returns FieldInfo* - The next field, or null when iteration is complete
+ * @see mono_class_get_fields - Mono API equivalent
  */
 export const getNativeClassGetFields = memoize(() =>
     lookup('il2cpp_class_get_fields', 'pointer', ['pointer', 'pointer'])
@@ -157,12 +160,12 @@ export const getNativeClassGetInterfaces = memoize(() =>
     lookup('il2cpp_class_get_interfaces', 'pointer', ['pointer', 'pointer'])
 );
 
-// TODO
 /**
  * Gets the properties of the current class.
  * @param klass Il2CppClass* - The Il2CppClass to get properties from
  * @param iter void** - Iterator for the properties (in/out parameter)
  * @returns PropertyInfo* - The next property, or null when iteration is complete
+ * @see mono_class_get_properties - Mono API equivalent
  */
 export const getNativeClassGetProperties = memoize(() =>
     lookup('il2cpp_class_get_properties', 'pointer', ['pointer', 'pointer'])
@@ -184,6 +187,7 @@ export const getNativeClassGetPropertyFromName = memoize(() =>
  * @param klass Il2CppClass* - The Il2CppClass to search in
  * @param name const char* - The name of the field
  * @returns FieldInfo* - The field, or null if not found
+ * @see mono_class_get_field_from_name - Mono API equivalent
  */
 export const getNativeClassGetFieldFromName = memoize(() =>
     lookup('il2cpp_class_get_field_from_name', 'pointer', ['pointer', 'pointer'])
@@ -194,6 +198,7 @@ export const getNativeClassGetFieldFromName = memoize(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get methods from
  * @param iter void** - Iterator for the methods (in/out parameter)
  * @returns MethodInfo* - The next method, or null when iteration is complete
+ * @see mono_class_get_methods - Mono API equivalent
  */
 export const getNativeClassGetMethods = memoize(() =>
     lookup('il2cpp_class_get_methods', 'pointer', ['pointer', 'pointer'])
@@ -250,6 +255,7 @@ export const getNativeClassGetDeclaringType = memoize(() =>
  * Gets the actual size of the instance of the current class.
  * @param klass Il2CppClass* - The Il2CppClass to get the instance size of
  * @returns int32_t - The instance size in bytes
+ * @see mono_class_instance_size - Mono API equivalent
  */
 export const getNativeClassGetInstanceSize = memoize(() =>
     lookup('il2cpp_class_instance_size', 'int32', ['pointer'])
@@ -260,6 +266,7 @@ export const getNativeClassGetInstanceSize = memoize(() =>
  * Gets the number of fields in the current class.
  * @param enumKlass Il2CppClass* - The Il2CppClass to count fields in
  * @returns size_t - The number of fields
+ * @see mono_class_num_fields - Mono API equivalent
  */
 export const getNativeClassGetNumFields = memoize(() =>
     lookup('il2cpp_class_num_fields', 'size_t', ['pointer'])
@@ -279,6 +286,7 @@ export const getNativeClassIsValueType = memoize(() =>
  * @param klass Il2CppClass* - The Il2CppClass to get the value type size of
  * @param align uint32_t* - Pointer to store alignment information (can be null)
  * @returns int32_t - The value type size in bytes
+ * @see mono_class_value_size - Mono API equivalent
  */
 export const getNativeClassGetValueTypeSize = memoize(() =>
     lookup('il2cpp_class_value_size', 'int32', ['pointer', 'pointer'])
@@ -330,12 +338,21 @@ export const getNativeClassGetArrayElementSize = memoize(() =>
 );
 
 /**
- * Gets the type of the current class.
+ * Gets the by-value type of the current class. Corresponds to `byval_arg`.
  * @param klass Il2CppClass* - The Il2CppClass to get the type of
  * @returns Il2CppType* - The type corresponding to the class
  */
 export const getNativeClassGetType = memoize(() =>
     lookup('il2cpp_class_get_type', 'pointer', ['pointer'])
+);
+
+/**
+ * Gets the by-ref type of the current class. Corresponds to `this_arg`.
+ * @param klass Il2CppClass* - The Il2CppClass to get the type of
+ * @returns Il2CppType* - The type corresponding to the class
+ */
+export const getNativeClassGetByRefType = memoize(() =>
+    lookup('mono_class_get_byref_type', 'pointer', ['pointer'])
 );
 
 // TODO
@@ -373,7 +390,9 @@ export const getNativeClassHasReferences = memoize(() =>
  * @param klass Il2CppClass* - The Il2CppClass to check
  * @returns bool - True if the class is an enum
  */
-export const getNativeClassIsEnum = memoize(() => lookup('il2cpp_class_is_enum', 'bool', ['pointer']));
+export const getNativeClassIsEnum = memoize(() =>
+    lookup('il2cpp_class_is_enum', 'bool', ['pointer'])
+);
 
 /**
  * Gets the image in which the current class is defined.
@@ -468,3 +487,127 @@ export const getNativeClassGetUserdataOffset = memoize(() =>
 export const getNativeClassInitialize = memoize(() =>
     lookup('il2cpp_runtime_class_init', 'void', ['pointer'])
 );
+
+// === MONO-SPECIFIC CLASS FUNCTIONS ===
+
+/**
+ * Gets the number of methods in the specified class (Mono API).
+ * Note: No direct IL2CPP equivalent - this is Mono-specific.
+ * @param klass Il2CppClass* - The Il2CppClass to count methods in
+ * @returns int - The number of methods
+ */
+export const getNativeClassGetNumMethods = memoize(() =>
+    lookup('mono_class_num_methods', 'int', ['pointer'])
+);
+
+/**
+ * Gets the number of properties in the specified class (Mono API).
+ * Note: No direct IL2CPP equivalent - this is Mono-specific.
+ * @param klass Il2CppClass* - The Il2CppClass to count properties in
+ * @returns int - The number of properties
+ */
+export const getNativeClassGetNumProperties = memoize(() =>
+    lookup('mono_class_num_properties', 'int', ['pointer'])
+);
+
+/**
+ * Sets up the vtable for the specified class (Mono API).
+ * Note: Initializes the class vtable - Mono-specific functionality.
+ * @param klass Il2CppClass* - The Il2CppClass to setup vtable for
+ */
+// export const getNativeClassSetupVTable = memoize(() =>
+//     lookup('mono_class_setup_vtable', 'void', ['pointer'])
+// );
+
+/**
+ * Sets up the methods for the specified class (Mono API).
+ * Note: Initializes class methods - Mono-specific functionality.
+ * @param klass Il2CppClass* - The Il2CppClass to setup methods for
+ */
+export const getNativeClassSetupMethods = memoize(() =>
+    lookup('mono_class_setup_methods', 'void', ['pointer'])
+);
+
+/**
+ * Checks if a field is special static (Mono API).
+ * Note: Mono concept for special static fields (thread-static, context-static, etc).
+ * @param field Il2CppClassField* - The field to check
+ * @returns mono_bool - True if the field is special static
+ */
+export const getNativeClassFieldIsSpecialStatic = memoize(() =>
+    lookup('mono_class_field_is_special_static', 'bool', ['pointer'])
+);
+
+/**
+ * Gets the generic context of the specified class (Mono API).
+ * Note: Returns generic context for generic classes - Mono-specific.
+ * @param klass Il2CppClass* - The Il2CppClass to get context from
+ * @returns MonoGenericContext* - The generic context or null
+ */
+export const getNativeClassGetGenericContext = memoize(() =>
+    lookup('mono_class_get_context', 'pointer', ['pointer'])
+);
+
+/**
+ * Inflates a generic method with full parameters (Mono API).
+ * Note: Mono-specific generic method inflation with additional parameters.
+ * @param method MethodInfo* - The generic method to inflate
+ * @param klass_hint Il2CppClass* - Optional class hint for inflation
+ * @param context MonoGenericContext* - The generic context to use
+ * @param error MonoError* - Error output parameter
+ * @returns MethodInfo* - The inflated method or null if error
+ */
+export const getNativeClassInflateGenericMethodFull = memoize(() =>
+    lookup('mono_class_inflate_generic_method_full_checked', 'pointer', [
+        'pointer',
+        'pointer',
+        'pointer',
+        'pointer',
+    ])
+);
+
+/**
+ * Inflates a generic method (Mono API).
+ * Note: Mono-specific generic method inflation.
+ * @param method MethodInfo* - The generic method to inflate
+ * @param context MonoGenericContext* - The generic context to use
+ * @param error MonoError* - Error output parameter
+ * @returns MethodInfo* - The inflated method or null if error
+ */
+export const getNativeClassInflateGenericMethod = memoize(() =>
+    lookup('mono_class_inflate_generic_method_checked', 'pointer', [
+        'pointer',
+        'pointer',
+        'pointer',
+    ])
+);
+
+/**
+ * Checks if a class is nullable (Mono API).
+ * Note: Mono concept for nullable types.
+ * @param klass Il2CppClass* - The class to check
+ * @returns mono_bool - True if the class is nullable
+ */
+export const getNativeClassIsNullable = memoize(() =>
+    lookup('mono_class_is_nullable', 'bool', ['pointer'])
+);
+
+/**
+ * Gets the generic container of the specified class (Mono API).
+ * Note: Returns generic container for generic class definitions.
+ * @param klass Il2CppClass* - The Il2CppClass to get container from
+ * @returns MonoGenericContainer* - The generic container or null
+ */
+export const getNativeClassGetGenericContainer = memoize(() =>
+    lookup('mono_class_get_generic_container', 'pointer', ['pointer'])
+);
+
+/**
+ * Sets up the interfaces for the specified class (Mono API).
+ * Note: Initializes class interfaces - Mono-specific functionality.
+ * @param klass Il2CppClass* - The Il2CppClass to setup interfaces for
+ * @param error MonoError* - Error output parameter
+ */
+// export const getNativeClassSetupInterfaces = memoize(() =>
+//     lookup('mono_class_setup_interfaces', 'void', ['pointer', 'pointer'])
+// );

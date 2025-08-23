@@ -24,6 +24,7 @@ export const getNativeImageGetName = memoize(() =>
  * Gets the filename of the specified image.
  * @param image Il2CppImage* - The image to get the filename of
  * @returns const char* - The filename of the image
+ * @see il2cpp_mono_image_get_filename - Mono API equivalent
  */
 export const getNativeImageGetFilename = memoize(() =>
     lookup('il2cpp_image_get_filename', 'pointer', ['pointer'])
@@ -33,6 +34,7 @@ export const getNativeImageGetFilename = memoize(() =>
  * Gets the entry point method of the specified image.
  * @param image Il2CppImage* - The image to get the entry point from
  * @returns Il2CppMethod* - The entry point method
+ * @see il2cpp_mono_image_get_entry_point - Mono API equivalent
  */
 export const getNativeImageGetEntryPoint = memoize(() =>
     lookup('il2cpp_image_get_entry_point', 'pointer', ['pointer'])
@@ -55,4 +57,26 @@ export const getNativeImageGetClassCount = memoize(() =>
  */
 export const getNativeImageGetClass = memoize(() =>
     lookup('il2cpp_image_get_class', 'pointer', ['pointer', 'size_t'])
+);
+
+// === MONO-SPECIFIC IMAGE FUNCTIONS ===
+
+/**
+ * Gets the GUID of the specified image (Mono API).
+ * Note: IL2CPP doesn't have image GUIDs, returns hardcoded value.
+ * @param image Il2CppImage* - The image to get the GUID from
+ * @returns const char* - Hardcoded GUID "00000000-0000-0000-0000-000000000000"
+ */
+export const getNativeImageGetGuid = memoize(() =>
+    lookup('mono_image_get_guid', 'pointer', ['pointer'])
+);
+
+/**
+ * Checks if the specified image is dynamic (Mono API).
+ * Note: IL2CPP images are never dynamic, always returns false.
+ * @param image Il2CppImage* - The image to check
+ * @returns mono_bool - Always false for IL2CPP
+ */
+export const getNativeImageIsDynamic = memoize(() =>
+    lookup('mono_image_is_dynamic', 'bool', ['pointer'])
 );

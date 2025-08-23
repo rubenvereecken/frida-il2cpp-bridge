@@ -12,6 +12,7 @@ import {
     getNativeClassGetArrayElementSize,
     getNativeClassGetAssemblyName,
     getNativeClassGetBaseType,
+    getNativeClassGetByRefType,
     getNativeClassGetDeclaringType,
     getNativeClassGetElementClass,
     getNativeClassGetFieldFromName,
@@ -172,6 +173,14 @@ export class Class<T extends string = string> extends NativeStruct {
 
     toString() {
         return `${this.image.assembly.name}::${this.fullName}`;
+    }
+
+    get type() {
+        return new Type<T>(getNativeClassGetType()(this));
+    }
+
+    get byRefType() {
+        return new Type(getNativeClassGetByRefType()(this));
     }
 
     get typeEnum(): TypeEnum {
@@ -457,13 +466,6 @@ export class Class<T extends string = string> extends NativeStruct {
     @memoize
     get valueTypeSize(): number {
         return getNativeClassGetValueTypeSize()(this, NULL);
-    }
-
-    /** Gets the type of the current class. */
-    @memoize
-    get type(): Type<T> {
-        // TODO: important – derived type should have same typeEnum
-        return new Type<T>(getNativeClassGetType()(this));
     }
 
     /** Allocates a new object of the current class. */
