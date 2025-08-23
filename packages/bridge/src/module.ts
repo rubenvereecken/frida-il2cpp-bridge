@@ -50,24 +50,24 @@ export async function initializeIl2cpp(blocking = false): Promise<boolean> {
               (await forModule(...getExpectedModuleNames())))
             : await forModule(...getExpectedModuleNames());
 
-    inform(getNativeGetCorlib()().toString());
-
     // At this point, the IL2CPP native library has been loaded, but we
     // cannot interact with IL2CPP until `il2cpp_init` is done.
     // It looks like `il2cpp_get_corlib` returns NULL only when the
     // initialization is not completed yet.
     if (getNativeGetCorlib()().isNull()) {
-        // (globalThis as any).console.log(getNativeInitialize.toString());
         return await new Promise<boolean>(resolve => {
-            if (blocking) raise(`TODO: support initializeIl2cpp(blocking: true) again`);
-            resolve(true);
-            // TODO fix this: really do need to wait for il2cpp_init to finish
-            // const interceptor = Interceptor.attach(getNativeInitialize, {
-            //     onLeave() {
-            //         interceptor.detach();
-            //         blocking ? resolve(true) : setImmediate(() => resolve(false));
-            //     },
-            // });
+            // Wait for il2cpp_init to finish
+            // TODO: do we need to wait for il2cpp_init_utf16?
+            const interceptor = Interceptor.attach(getNativeInitialize(), {
+                onLeave() {
+                    interceptor.detach();
+                    if (blocking) {
+                        resolve(true);
+                    } else {
+                        setImmediate(() => resolve(false));
+                    }
+                },
+            });
         });
     }
 

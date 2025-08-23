@@ -14,7 +14,7 @@ export function lookup<
     R extends NativeFunctionReturnType,
     A extends NativeFunctionArgumentType[] | [],
 >(exportName: string, retType: R, argTypes: A) {
-    inform(`Looking up ${exportName}`);
+    // inform(`Looking up ${exportName}`);
     const handle: NativePointer | null | undefined =
         (globalThis as any).IL2CPP_EXPORTS?.[exportName]?.() ??
         getModule().findExportByName(exportName) ??
