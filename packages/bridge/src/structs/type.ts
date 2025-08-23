@@ -1,8 +1,6 @@
 import { System } from '../corlib.js';
 import { TypeEnum } from '../enums/type.js';
 import {
-    getNativeClassFromSystemType,
-    getNativeFree,
     getNativeTypeEquals,
     getNativeTypeGetClass,
     getNativeTypeGetName,
@@ -29,6 +27,33 @@ import type { Boolean, WrappedPrimitive } from './primitive.js';
 import { isPrimitiveLike } from './primitive.js';
 import { isStringLike } from './string.js';
 
+/**
+ * Represents a type in Il2Cpp.
+ *
+ * ```c
+ * typedef struct Il2CppType
+ * {
+ *    union
+ *    {
+ *       // We have this dummy field first because pre C99 compilers (MSVC) can only initializer the first value in a union.
+ *        void* dummy;
+ *        TypeDefinitionIndex __klassIndex; // for VALUETYPE and CLASS at startup
+ *        Il2CppMetadataTypeHandle typeHandle; // for VALUETYPE and CLASS at runtime
+ *        const Il2CppType *type;   // for PTR and SZARRAY
+ *        Il2CppArrayType *array; // for ARRAY
+ *        //MonoMethodSignature *method;
+ *        GenericParameterIndex __genericParameterIndex; // for VAR and MVAR at startup
+ *        Il2CppMetadataGenericParameterHandle genericParameterHandle; // for VAR and MVAR at runtime
+ *        Il2CppGenericClass *generic_class; // for GENERICINST
+ *    } data;
+ *    unsigned int attrs    : 16; // param attributes or field flags
+ *    Il2CppTypeEnum type     : 8;
+ *    unsigned int num_mods : 6;  // max 64 modifiers follow at the end
+ *    unsigned int byref    : 1;
+ *    unsigned int pinned   : 1;  // valid when included in a local var signature
+ *    //MonoCustomMod modifiers [MONO_ZERO_LEN_ARRAY]; // this may grow
+ * } Il2CppType;
+ */
 @recycle
 export class Type<T extends string = string> extends NativeStruct {
     constructor(handle: NativePointerValue) {
@@ -55,7 +80,6 @@ export class Type<T extends string = string> extends NativeStruct {
         return new Class<T>(getNativeTypeGetClass()(this));
     }
 
-    /** */
     @memoize
     get fridaAlias(): NativeCallbackArgumentType {
         function getValueTypeFields(type: Type): NativeCallbackArgumentType {
@@ -141,7 +165,9 @@ export class Type<T extends string = string> extends NativeStruct {
     }
 
     static fromRuntimeType<T extends string>(runtimeType: Object_) {
-        return new Class(getNativeClassFromSystemType()(runtimeType)).type as Type<T>;
+        // `getNativeClassFromSystemType` loses information like by-ref
+        // return new Class(getNativeClassFromSystemType()(runtimeType)).type as Type<T>;
+        return new Type<T>(runtimeType.handle.add(Object_.headerSize).readPointer());
     }
 
     @memoize
@@ -184,7 +210,15 @@ export class Type<T extends string = string> extends NativeStruct {
 
     /**
      * Gets the corresponding `System.RuntimeType` of the current type.
-     * Implemented in il2cpp as Il2CppReflectionType.
+     * Implemented in Il2Cpp as `Il2CppReflectionType`.
+     *
+     * ```c
+     * typedef struct Il2CppReflectionType {
+     * {
+     *     Il2CppObject object;
+     *     const Il2CppType *type;
+     * } Il2CppReflectionType;
+     * ```
      *
      * @example
      * ```ts
@@ -285,7 +319,6 @@ export class Type<T extends string = string> extends NativeStruct {
     }
 
     /**
-     *
      * Note: reason I do this in two steps and don't just wrap first, is because I don't allow
      * upcasting/type coercion between wrapped types right now.
      * So looking at the raw types gives a bit more leeway for scenarios like:
