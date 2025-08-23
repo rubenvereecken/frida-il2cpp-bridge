@@ -33,6 +33,33 @@ declare global {
      * - "6000.1.0f1"
      */
     var IL2CPP_UNITY_VERSION: string | undefined;
+
+    /**
+     * Optional IL2CPP module name override that library users can set.
+     *
+     * When set, this value will be used instead of the default platform-specific
+     * module names when locating the IL2CPP native library.
+     *
+     * @example
+     * ```typescript
+     * // Override the module name before using the library
+     * globalThis.IL2CPP_MODULE_NAME = "CustomModule.dll";
+     *
+     * Il2Cpp.perform(() => {
+     *   // The library will now look for "CustomModule.dll" instead of
+     *   // the default platform-specific names
+     * });
+     * ```
+     *
+     * @remarks
+     * Default module names by platform:
+     * - Android: `libil2cpp.so`
+     * - Linux: `GameAssembly.so`
+     * - Windows: `GameAssembly.dll`
+     * - iOS: `UnityFramework`
+     * - macOS: `GameAssembly.dylib`
+     */
+    var IL2CPP_MODULE_NAME: string | undefined;
 }
 
 export {};

@@ -3,7 +3,6 @@ import { getApiLevel } from './utils/android.js';
 import { raise } from './utils/error.js';
 import { memoize } from './utils/cache.js';
 import { forModule } from './utils/native-wait.js';
-import { inform } from './utils/log.js';
 
 let initializedModule: Module | undefined;
 
@@ -75,8 +74,8 @@ export async function initializeIl2cpp(blocking = false): Promise<boolean> {
 }
 
 function getExpectedModuleNames(): string[] {
-    if ((globalThis as any).IL2CPP_MODULE_NAME) {
-        return [(globalThis as any).IL2CPP_MODULE_NAME];
+    if (globalThis.IL2CPP_MODULE_NAME) {
+        return [globalThis.IL2CPP_MODULE_NAME];
     }
 
     switch (Process.platform) {
