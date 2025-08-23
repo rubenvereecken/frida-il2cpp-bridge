@@ -14,6 +14,7 @@ import type { Class } from './class.js';
 import { readNativeList } from '../utils/read-native-list.js';
 import { getCorlib } from '../corlib.js';
 import { delegate } from './delegate.js';
+import { findOffset } from '../utils/scan.js';
 
 export class Thread extends NativeStruct {
     /** Gets the native id of the current thread. */
@@ -28,9 +29,13 @@ export class Thread extends NativeStruct {
             const currentThreadId = Process.getCurrentThreadId();
             const currentPosixThread = ptr(get.apply(getCurrentThread()!));
 
-            // prettier-ignore
-            const offset = currentPosixThread.offsetOf(_ => _.readS32() == currentThreadId, 1024) ??
-                    raise(`couldn't find the offset for determining the kernel id of a posix thread`);
+            const offset =
+                findOffset(
+                    currentPosixThread,
+                    address => address.readS32() == currentThreadId,
+                    1024
+                ) ??
+                raise(`couldn't find the offset for determining the kernel id of a posix thread`);
 
             const _get = get;
             get = function (this: Thread) {

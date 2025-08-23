@@ -33,6 +33,7 @@ import type { IntPtr } from './primitive.js';
 import { Type } from './type.js';
 import { ValueType } from './value-type.js';
 import { getCorlib } from '../corlib.js';
+import { findPointerOffset } from '../utils/scan.js';
 
 type ImplementationCallback<T extends MethodReturnType> = (
     this: Class | Object_ | ValueType,
@@ -245,9 +246,9 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
         const FilterTypeNameMethodPointer = FilterTypeName.field<IntPtr>('method_ptr').value.read();
         const FilterTypeNameMethod = FilterTypeName.field<IntPtr>('method').value.read();
 
-        // prettier-ignore
-        const offset = FilterTypeNameMethod.offsetOf(_ => _.readPointer().equals(FilterTypeNameMethodPointer))
-                ?? raise("couldn't find the virtual address offset in the native method struct");
+        const offset =
+            findPointerOffset(FilterTypeNameMethod, FilterTypeNameMethodPointer) ??
+            raise("couldn't find the virtual address offset in the native method struct");
 
         return offset;
     }
