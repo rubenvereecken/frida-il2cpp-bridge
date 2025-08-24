@@ -2,28 +2,29 @@ UNITY_CHANGESET := 4bf1ec4b23c9
 
 include ../common.mk
 
+# Choose platform-specific overrides
+ifeq ($(OS), Linux)
+    PLATFORM_MAKEFILE := linux.mk
+else ifeq ($(OS), Darwin)
+    PLATFORM_MAKEFILE := macos.mk
+else
+    $(error "Unsupported OS: $(OS)")
+endif
+
+include $(PLATFORM_MAKEFILE)
+
+# The profile differs per OS but is supplied by platform mk
+MSCORLIB := $(MONOBL_DIR)/lib/mono/$(DOTNET_PROFILE)/mscorlib.dll
+
 UNITY_LINKER := $(MAYBE_STRACE) $(IL2CPP_DIR)/build/deploy/UnityLinker
 IL2CPP := $(MAYBE_STRACE) $(IL2CPP_DIR)/build/deploy/il2cpp
 
-MSCORLIB := $(MONOBL_DIR)/lib/mono/unityaot-linux/mscorlib.dll
-
-ASSEMBLY_TARGET_CMD = $(IL2CPP) \
-	--compile-cpp \
-	--libil2cpp-static \
-	--configuration=Release \
-	--platform=Linux \
-	--architecture=x64 \
-	--dotnetprofile=unityaot-linux \
-	--cachedirectory="$(@D)/.." \
-	--generatedcppdir="$(<D)" \
-	--baselib-directory="$(EDITOR_DIR)/Data/PlaybackEngines/LinuxStandaloneSupport/Variations/linux64_player_nondevelopment_il2cpp/" \
-	--outputpath="$@"
-
+# Common commands that do not change across OS (dotnetprofile provided)
 CPP_TARGET_CMD = $(IL2CPP) \
 	--convert-to-cpp \
 	--emit-null-checks \
 	--enable-array-bounds-check \
-	--dotnetprofile=unityaot-linux \
+	--dotnetprofile=$(DOTNET_PROFILE) \
 	--copy-level=None \
 	--directory="$(<D)" \
 	--generatedcppdir="$(@D)"
@@ -35,7 +36,7 @@ LINKED_DLL_TARGET_CMD = $(UNITY_LINKER) \
 	--strip-security \
 	--rule-set=aggressive \
 	--dotnetruntime=il2cpp \
-	--dotnetprofile=unityaot-linux \
+	--dotnetprofile=$(DOTNET_PROFILE) \
 	--descriptor-directory="$(LINKER_DESCRIPTORS_DIR)" \
 	--include-assembly="$<,$(MSCORLIB)" \
 	--out="$(@D)"

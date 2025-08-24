@@ -15,7 +15,9 @@ for (const unityVersion of unityVersions) {
 
     if (!(await fs.lstat(buildPath)).isDirectory()) continue;
 
-    const host = await frida.spawn([path.join(root, "build", "host"), path.join(buildPath, "out")]);
+    const spawnCmd = [path.join(root, "build", "host"), path.join(buildPath, "out")];
+    console.log(spawnCmd);
+    const host = await frida.spawn(spawnCmd);
     const session = await frida.attach(host);
 
     const script = await session.createScript(`${src}\nconst $EXPECTED_UNITY_VERSION = "${unityVersion}";`);

@@ -1,5 +1,16 @@
 include ../common.mk
 
+# Choose platform-specific file for legacy 5.3 build
+ifeq ($(OS), Linux)
+    PLATFORM_MAKEFILE := linux.mk
+else ifeq ($(OS), Darwin)
+    PLATFORM_MAKEFILE := macos.mk
+else
+    $(error "Unsupported OS: $(OS)")
+endif
+
+include $(PLATFORM_MAKEFILE)
+
 UNITY_LINKER := $(MONO) $(EDITOR_DIR)/Data/Tools/UnusedBytecodeStripper.exe
 IL2CPP := $(MONO) $(IL2CPP_DIR)/build/il2cpp.exe
 
@@ -11,8 +22,8 @@ ASSEMBLY_TARGET_CMD = $(IL2CPP) \
 	--compile-cpp \
 	--libil2cpp-static \
 	--configuration=Release \
-	--platform=Linux \
-	--architecture=x64 \
+	--platform=$(PLATFORM) \
+	--architecture=$(ARCH) \
 	--dotnetprofile=net20 \
 	--cachedirectory="$(@D)/.." \
 	--generatedcppdir="$(<D)" \

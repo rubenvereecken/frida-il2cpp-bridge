@@ -8,9 +8,22 @@ UNITY_VERSION := $(shell basename $(THIS_DIR))
 BUILD_DIR = $(ROOT_DIR)/build/$(UNITY_VERSION)
 EDITOR_DIR = $(THIS_DIR)/Editor
 
-MONO_DIR = $(EDITOR_DIR)/Data/Mono
-MONOBL_DIR = $(EDITOR_DIR)/Data/MonoBleedingEdge
-IL2CPP_DIR = $(EDITOR_DIR)/Data/il2cpp
+# Platform detection and per-OS overrides
+OS := $(shell uname)
+ARCH := $(shell uname -m)
+
+ifeq ($(OS), Linux)
+    PLATFORM_MAKEFILE := common-linux.mk
+else ifeq ($(OS), Darwin)
+    PLATFORM_MAKEFILE := common-macos.mk
+else ifeq ($(OS), Windows_NT)
+    $(error "Windows is not supported yet")
+else
+    $(error "Unknown OS: $(OS)")
+endif
+
+# Pull in platform-specific path/layout definitions (MONO_DIR, IL2CPP_DIR, …)
+include ../$(PLATFORM_MAKEFILE)
 
 MONO := $(MAYBE_STRACE) $(MONOBL_DIR)/bin/mono
 MCS := $(MONO) $(MONOBL_DIR)/lib/mono/4.5/mcs.exe
@@ -23,7 +36,7 @@ else
 GENERATED_CPP_FILENAME := Bulk_%_0
 endif
 
-ASSEMBLY_TARGET := $(BUILD_DIR)/out/%.so
+ASSEMBLY_TARGET = $(BUILD_DIR)/out/%.$(DYNAMIC_LIB_EXT)
 CPP_TARGET := $(BUILD_DIR)/cpp/$(GENERATED_CPP_FILENAME).cpp
 LINKED_DLL_TARGET := $(BUILD_DIR)/linked/%.dll
 DLL_TARGET := $(BUILD_DIR)/dll/%.dll
@@ -54,28 +67,8 @@ $(DLL_TARGET): $(CS_SRC) $(EDITOR_DIR) $(BUILD_DIR)
 $(BUILD_DIR):
 	@ mkdir -p "$@"
 
-ifdef UNITY_CHANGESET
-$(EDITOR_DIR):
-	@ $(ECHO) downloading editor...
-	@ $(CURL) https://netstorage.unity3d.com/unity/$(UNITY_CHANGESET)/LinuxEditorInstaller/Unity.tar.xz -O
-
-	@ $(ECHO) extracting editor...
-	@ tar -xf Unity.tar.xz
-	@ touch -m Editor
-
-	@ rm Unity.tar.xz
-
-ifeq "$(call VER_GTE,$(UNITY_VERSION),2019.4.0f1)" "YES"
-	@ $(ECHO) downloading editor support...
-	@ $(CURL) https://download.unity3d.com/download_unity/$(UNITY_CHANGESET)/LinuxEditorTargetInstaller/UnitySetup-Linux-IL2CPP-Support-for-Editor-$(UNITY_VERSION).tar.xz -o Support.tar.xz
-
-	@ $(ECHO) extracting editor support...
-	@ tar -xf Support.tar.xz
-	@ touch -m Editor
-	
-	@ rm Support.tar.xz
-endif
-endif
+# The platform-specific makefile provides the $(EDITOR_DIR) recipe if
+# needed, so the old Linux-only block above has been removed.
 
 DLL_TARGET_CMD ?= $(MCS) \
 	-target:library \
@@ -86,7 +79,7 @@ DLL_TARGET_CMD ?= $(MCS) \
 	"$<"
 
 .PHONY: assembly
-assembly: $(BUILD_DIR)/out/GameAssembly.so
+assembly: $(BUILD_DIR)/out/GameAssembly.$(DYNAMIC_LIB_EXT)
 
 # USED_FILE_LIST := $(BUILD_DIR)/filelist.txt
 # .PHONY: minimalize
