@@ -374,7 +374,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
                 case 'expected number':
                 case 'expected array with fields':
                     raise(
-                        `couldn't invoke method ${this.name} using incorrect parameter types (${e.message})`
+                        `couldn't invoke method ${this.name} using incorrect parameter types (${e.message}; got ${parameters.map(p => p).join(', ')})`
                     );
             }
 

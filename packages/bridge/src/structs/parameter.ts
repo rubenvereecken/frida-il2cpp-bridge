@@ -1,5 +1,4 @@
 import type { Il2CppValue } from '../memory';
-import type { ByRef } from './by-ref';
 import type { ArrayLike } from './array';
 import type { PrimitiveLike } from './primitive';
 import type { StringLike } from './string';
@@ -27,7 +26,7 @@ export class Parameter {
     }
 }
 
-export type ParameterValue = PrimitiveLike | StringLike | ArrayLike | Il2CppValue | ByRef;
+export type ParameterValue = PrimitiveLike | StringLike | ArrayLike | Il2CppValue;
 
 export type TypedValue = {
     type: Type;

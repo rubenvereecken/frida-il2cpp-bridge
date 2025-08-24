@@ -91,6 +91,11 @@ export class Type<T extends string = string> extends NativeStruct {
                 : instanceFields.map(_ => _.type.fridaAlias);
         }
 
+        // By-ref types can be edited in-place, so we need to pass a pointer to the memory location
+        if (this.isByRef()) {
+            return 'pointer';
+        }
+
         switch (this._typeEnum) {
             // Note: Since Frida 17, primitives can no longer be passed as pointers
             case TypeEnum.VOID:

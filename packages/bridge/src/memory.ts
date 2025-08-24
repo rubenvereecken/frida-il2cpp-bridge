@@ -1,6 +1,5 @@
 import type { ArrayLike } from './structs/array.js';
 import { array, Array, isArrayLike, isJsArray, isWrappedArray } from './structs/array.js';
-import { ByRef } from './structs/by-ref.js';
 import { NullReference } from './structs/null-reference.js';
 import { Object_ } from './structs/object.js';
 import { Pointer } from './structs/pointer.js';
@@ -17,7 +16,7 @@ import { UnboxedValueType } from './structs/value-type.js';
 import { getNativeAlloc, getNativeFree } from './native/index.js';
 import type { Type, WrappedPrimitiveType } from './structs/type.js';
 import { TypeEnum } from './enums/type.js';
-import { warn } from './utils/log.js';
+import { inform, warn } from './utils/log.js';
 import { raise } from './utils/error.js';
 import { getCorlib, System } from './corlib.js';
 import type { MethodReturnType } from './structs/method.js';
@@ -28,7 +27,6 @@ export type Il2CppValue =
     | Primitive
     | String
     // TODO do we want by-ref here? Or is that a parameter-only thing?
-    | ByRef
     | Pointer
     | UnboxedValueType
     | Object_
@@ -66,7 +64,6 @@ export function isIl2Cpp(type: unknown): type is Il2CppValue {
     return (
         type instanceof Primitive ||
         type instanceof String ||
-        type instanceof ByRef ||
         type instanceof Pointer ||
         type instanceof UnboxedValueType ||
         type instanceof Object_ ||
@@ -335,10 +332,6 @@ export function fridaToIl2Cpp(
             `Expected a pointer for type ${type.name}, got ${value?.constructor?.name} (${value})`
         );
 
-    if (type.isByRef()) {
-        return new ByRef(value, type);
-    }
-
     switch (type._typeEnum) {
         case TypeEnum.POINTER:
             return new Pointer(value, type.class.baseType! as Type<`${string}*`>);
@@ -518,35 +511,23 @@ export function toFrida(
     if (type.name === 'System.Void') return undefined;
 
     if (type.isByRef()) {
-        // ✔️ Assign T& to T& (probably rare, because who has a T& lying around?)
-        if (value instanceof ByRef) return value;
-
         // ✔️ Assign T to T& (both value and reference types)
-        // Note: this only works for primitives right now because I write them to a memory location first
         if (
             type.isAssignableFromValue(value) &&
             (value instanceof UnboxedValueType || value instanceof Object_)
         )
-            return value.handle;
+            return value;
 
-        // TODO: if there are any useful use cases, gracefully create a reference
-        // For example, decided not to create a reference on the fly, because there's no way to use it afterwards
         raise(
             `Got ${value} (type: ${value?.constructor?.name ?? typeof value}) for ${type.name}, expected ${type.getElementType().name}`
         );
     }
 
-    // For now, just wrap all JS primitives in a wee pointer
-    // TODO this is a memory leak! Best let Frida handle this,
-    // but then I have to change the method signature on the fly – now it's pointers all the way
+    // Note: Since Frida 17, primitives can no longer be passed as pointers
     if (isPrimitiveJSType(value)) {
         // Frida only supports booleans passed as numbers
         if (typeof value === 'boolean') return +value;
         return value;
-        // Note: Since Frida 17, primitives can no longer be passed as pointers
-        // const pointer = Memory.alloc(type.class.valueTypeSize);
-        // Il2Cpp.write(pointer, value, type);
-        // return pointer;
     }
 
     if (isWrappedPrimitive(value) && type.isPrimitive()) {

@@ -1,7 +1,6 @@
 // Re-export all structs
 export * from './array.js';
 export * from './assembly.js';
-export * from './by-ref.js';
 export * from './class.js';
 export * from './delegate.js';
 export * from './domain.js';
