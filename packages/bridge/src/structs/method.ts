@@ -31,17 +31,21 @@ import type { ParameterValue } from './parameter.js';
 import { Parameter } from './parameter.js';
 import type { IntPtr } from './primitive.js';
 import { Type } from './type.js';
-import { ValueType } from './value-type.js';
+import { UnboxedValueType } from './value-type.js';
 import { getCorlib } from '../corlib.js';
 import { findPointerOffset } from '../utils/scan.js';
+import { inform } from '../utils/log.js';
 
 type ImplementationCallback<T extends MethodReturnType> = (
-    this: Class | Object_ | ValueType,
+    this: Class | Object_ | UnboxedValueType,
     ...parameters: ParameterValue[]
 ) => T;
-type OnEnterCallback = (this: Class | Object_ | ValueType, ...parameters: ParameterValue[]) => void;
+type OnEnterCallback = (
+    this: Class | Object_ | UnboxedValueType,
+    ...parameters: ParameterValue[]
+) => void;
 type OnLeaveCallback<T extends MethodReturnType> = (
-    this: Class | Object_ | ValueType,
+    this: Class | Object_ | UnboxedValueType,
     retval: T
 ) => T | void;
 
@@ -261,7 +265,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
         // offset to get the virtual address of a method when the script
         // is reloaded. A workaround consists in manually re-invoking the
         // static constructor.
-        // TODO necessary still? Note: shouldn't run it here – that's an infinite loop
+        // TODO necessary still?
         // Il2Cpp.corlib.class('System.Reflection.Module').method('.cctor').invoke();
         return this.handle.add(Method.virtualAddressOffset).readPointer();
     }
@@ -349,7 +353,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
 
         try {
             const returnValue = this.nativeFunction(...allocatedParameters);
-            // inform(`returnValue: ${returnValue} (${this.returnType})`);
+            inform(`returnValue: ${returnValue} (${this.returnType})`);
             // inform(`    -> ${fromFridaValue(returnValue, this.returnType)}`);
             return fridaToIl2Cpp(returnValue, this.returnType) as T;
         } catch (e: any) {
@@ -463,7 +467,7 @@ export class Method<T extends MethodReturnType = MethodReturnType> extends Nativ
                 const thisObject = this.isStatic
                     ? this.class
                     : this.class._isValueType
-                      ? new ValueType(
+                      ? new UnboxedValueType(
                             (args[0] as NativePointer).add(
                                 Object_.headerSize - maybeObjectHeaderSize()
                             ),
@@ -547,18 +551,16 @@ export class BoundMethod<T extends MethodReturnType = MethodReturnType> extends 
     }
 
     get instanceHandle() {
-        // In Unity 5.3.5f1 and >= 2021.2.0f1, value types
-        // methods may assume their `this` parameter is a
-        // pointer to raw data (that is how value types are
-        // layed out in memory) instead of a pointer to an
-        // object (that is object header + raw data).
-        // In any case, they also don't use whatever there
-        // is in the object header, so we can safely "skip"
-        // the object header by adding the object header
-        // size to the object (a boxed value type) handle.
-        if (this.instance instanceof ValueType && this.class._isValueType) {
+        // TODO: support older versions of Unity
+        // Note: unlike fields, value type methods expect unboxed value types
+        const headerSize = this.instance.class.isValueType() ? 0 : 0;
+
+        return this.instance.handle.sub(headerSize);
+
+        // TODO: improve is value type check
+        if (this.instance instanceof UnboxedValueType && this.class._isValueType) {
             return this.instance.handle.add(maybeObjectHeaderSize() - Object_.headerSize);
-        } else if (this.instance instanceof ValueType && !this.class._isValueType) {
+        } else if (this.instance instanceof UnboxedValueType && !this.class._isValueType) {
             // TODO look into this – pretty sure unboxed methods are a thing
             raise(
                 `cannot invoke method ${this.class.type.name}::${this.name} against a value type, you must box it first`
@@ -593,7 +595,7 @@ export class BoundMethod<T extends MethodReturnType = MethodReturnType> extends 
     }
 }
 
-let maybeObjectHeaderSize = (): number => {
+const maybeObjectHeaderSize = memoize(() => {
     const struct = getCorlib().class('System.RuntimeTypeHandle').initialize().alloc();
     struct.method('.ctor').invokeRaw(struct, ptr(0xdeadbeef));
 
@@ -604,8 +606,9 @@ let maybeObjectHeaderSize = (): number => {
     const offset = struct.field<IntPtr>('value').value.read().equals(ptr(0xdeadbeef))
         ? 0
         : Object_.headerSize;
-    return (maybeObjectHeaderSize = () => offset)();
-};
+
+    return offset;
+});
 
 // Different from Il2Cpp.Parameter.Value: excludes JS primitives, strings, and ByRef
 export type MethodReturnType = Il2CppValue;

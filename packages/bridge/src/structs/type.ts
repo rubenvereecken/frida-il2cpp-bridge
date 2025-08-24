@@ -20,7 +20,7 @@ import type {
     StripPointerSuffix,
 } from '../utils/type-helpers.js';
 import { isArrayLike } from './array.js';
-import type { ArrayClass, ByRefClass, PointerClass } from './class.js';
+import type { ArrayClass, PointerClass } from './class.js';
 import { Class } from './class.js';
 import { Object_ } from './object.js';
 import type { Boolean, WrappedPrimitive } from './primitive.js';
@@ -82,18 +82,16 @@ export class Type<T extends string = string> extends NativeStruct {
 
     @memoize
     get fridaAlias(): NativeCallbackArgumentType {
+        // Frida parses value types as an array of field values (no way to get a pointer to memory back instead)
         function getValueTypeFields(type: Type): NativeCallbackArgumentType {
             const instanceFields = type.class.fields.filter(_ => !_.isStatic);
+            // TODO: test 0 instance fields case
             return instanceFields.length == 0
                 ? ['char']
                 : instanceFields.map(_ => _.type.fridaAlias);
         }
 
-        if (this.isByRef()) {
-            return 'pointer';
-        }
-
-        switch (this.typeEnum) {
+        switch (this._typeEnum) {
             // Note: Since Frida 17, primitives can no longer be passed as pointers
             case TypeEnum.VOID:
                 return 'void';
@@ -172,6 +170,7 @@ export class Type<T extends string = string> extends NativeStruct {
 
     @memoize
     get _isByRef(): boolean {
+        // `TypeEnum.BY_REF` is unreliable – see `System.Boolean.method('TryParse').parameters[1].type`
         return !!getNativeTypeIsByRef()(this);
     }
 
@@ -190,7 +189,9 @@ export class Type<T extends string = string> extends NativeStruct {
 
     @memoize
     get _isArray(): boolean {
-        return this.typeEnum === TypeEnum.ARRAY || this.typeEnum == TypeEnum.MULTIDIMENSIONAL_ARRAY;
+        return (
+            this._typeEnum === TypeEnum.ARRAY || this._typeEnum == TypeEnum.MULTIDIMENSIONAL_ARRAY
+        );
     }
 
     isArray(): this is T extends `${string}[]` ? ArrayType<T> : ArrayType<`${string}[]`> {
@@ -299,8 +300,16 @@ export class Type<T extends string = string> extends NativeStruct {
 
     /** Gets the type enum of the current type. */
     @memoize
-    get typeEnum(): TypeEnum {
+    get _typeEnum(): TypeEnum {
         return getNativeTypeGetTypeEnum()(this);
+    }
+
+    getTypeEnum(this: this & { readonly typeEnum: TypeEnum }): this['_typeEnum'];
+    // Otherwise, fall back to the general enum:
+    getTypeEnum(this: this): TypeEnum;
+
+    getTypeEnum(this: Type<T>) {
+        return this._typeEnum;
     }
 
     isSame<U extends string>(other: Type<U>): this is Type<U> {
@@ -379,7 +388,8 @@ export type PointerType<T extends `${string}*`> = Type<T> & {
 
 export type ByRefType<T extends `${string}&`> = Type<T> & {
     _isByRef: true;
-    class: ByRefClass<T>;
+    // No such thing as a by-ref class, so strip the suffix
+    class: Class<StripByRefSuffix<T>>;
 };
 
 export type ArrayType<T extends `${string}[]`> = Type<T> & {

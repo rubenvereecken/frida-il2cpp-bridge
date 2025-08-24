@@ -2,7 +2,7 @@ import { Image } from '@frida-il2cpp/bridge';
 import { Class } from '@frida-il2cpp/bridge';
 import { Field } from '@frida-il2cpp/bridge';
 import { readIl2Cpp } from '@frida-il2cpp/bridge';
-import { ValueType } from '@frida-il2cpp/bridge';
+import { UnboxedValueType } from '@frida-il2cpp/bridge';
 import { Method } from '@frida-il2cpp/bridge';
 import { Parameter } from '@frida-il2cpp/bridge';
 
@@ -31,7 +31,7 @@ ${field.isThreadStatic ? `[ThreadStatic] ` : ``}\
 ${field.isStatic ? `static ` : ``}\
 ${field.type.name} \
 ${field.name}\
-${field.isLiteral ? ` = ${field.type.class._isEnum ? readIl2Cpp((field.value as ValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
+${field.isLiteral ? ` = ${field.type.class._isEnum ? readIl2Cpp((field.value as UnboxedValueType).handle, field.type.class.baseType!) : field.value}` : ``};\
 ${field.isThreadStatic || field.isLiteral ? `` : ` // 0x${field.offset.toString(16)}`}`;
     }
 

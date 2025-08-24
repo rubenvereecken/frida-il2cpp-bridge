@@ -13,6 +13,7 @@ import {
     getNativeObjectGetSize,
     getNativeObjectGetVirtualMethod,
     getNativeObjectUnbox,
+    getNativeValueTypeBox,
 } from '../native/index.js';
 import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
@@ -23,8 +24,8 @@ import type { String } from './string.js';
 import type { Type } from './type.js';
 import type { Class } from './class.js';
 import type { Method } from './method.js';
-import type { ValueType } from './value-type.js';
-import { LazyClass, LazyValueType, LazyMethod } from './common/lazy.js';
+import type { UnboxedValueType } from './value-type.js';
+import { LazyClass, LazyUnboxedValueType, LazyMethod } from './common/lazy.js';
 
 /**
  * Not to be confused with "passing a parameter by reference", reference types are a C# concept.
@@ -73,6 +74,10 @@ export class Object_<T extends string = string> extends BaseObject<T> {
         return new LazyClass<T>(getNativeObjectGetClass()(this));
     }
 
+    get klass() {
+        return this.class;
+    }
+
     @memoize
     get type(): Type<T> {
         // TODO: by default fall back on this._type if available
@@ -102,12 +107,17 @@ export class Object_<T extends string = string> extends BaseObject<T> {
     }
 
     /** Unboxes the value type (either a primitive, a struct or an enum) out of this object. */
-    unbox(): ValueType {
+    unbox(): UnboxedValueType {
         return this.class._isValueType
-            ? new LazyValueType(getNativeObjectUnbox()(this), this.class.type)
+            ? new LazyUnboxedValueType(getNativeObjectUnbox()(this), this.class.type)
             : raise(
                   `couldn't unbox instances of ${this.class.type.name} as they are not value types`
               );
+    }
+
+    // TODO sort this
+    box(): Object_ {
+        return new Object_(getNativeValueTypeBox()(this.class, this));
     }
 
     /** Creates a weak reference to this object. */

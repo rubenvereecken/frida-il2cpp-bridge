@@ -13,7 +13,7 @@ import {
 } from './structs/primitive.js';
 import type { StringLike } from './structs/string.js';
 import { isJsString, isStringLike, String } from './structs/string.js';
-import { ValueType } from './structs/value-type.js';
+import { UnboxedValueType } from './structs/value-type.js';
 import { getNativeAlloc, getNativeFree } from './native/index.js';
 import type { Type, WrappedPrimitiveType } from './structs/type.js';
 import { TypeEnum } from './enums/type.js';
@@ -30,7 +30,7 @@ export type Il2CppValue =
     // TODO do we want by-ref here? Or is that a parameter-only thing?
     | ByRef
     | Pointer
-    | ValueType
+    | UnboxedValueType
     | Object_
     | Array
     | NullReference
@@ -68,7 +68,7 @@ export function isIl2Cpp(type: unknown): type is Il2CppValue {
         type instanceof String ||
         type instanceof ByRef ||
         type instanceof Pointer ||
-        type instanceof ValueType ||
+        type instanceof UnboxedValueType ||
         type instanceof Object_ ||
         type instanceof Array
     );
@@ -134,29 +134,28 @@ export function readIl2Cpp(
     if (dereferenced.isNull()) raise(`Did not expect a null pointer for ${type.name}`);
 
     // TODO use type guards
-    if (!type._isByRef)
-        switch (type.typeEnum) {
-            case TypeEnum.STRING:
-                return new String(dereferenced);
-            case TypeEnum.POINTER:
-                return new Pointer(dereferenced, type.class.baseType! as Type<`${string}*`>);
-            case TypeEnum.VALUE_TYPE:
-                // Never needs dereferencing
-                return new ValueType(dereferenced, type);
-            case TypeEnum.OBJECT:
-            case TypeEnum.REFERENCE_TYPE:
-                return new Object_(dereferenced);
-            case TypeEnum.GENERIC_INSTANCE:
-                return type.class._isValueType
-                    ? new ValueType(dereferenced, type)
-                    : new Object_(dereferenced);
-            case TypeEnum.ARRAY:
-            case TypeEnum.MULTIDIMENSIONAL_ARRAY:
-                return new Array(dereferenced);
-        }
+    switch (type._typeEnum) {
+        case TypeEnum.STRING:
+            return new String(dereferenced);
+        case TypeEnum.POINTER:
+            return new Pointer(dereferenced, type.class.type as Type<`${string}*`>);
+        case TypeEnum.VALUE_TYPE:
+            // Never needs dereferencing
+            return new UnboxedValueType(dereferenced, type);
+        case TypeEnum.OBJECT:
+        case TypeEnum.REFERENCE_TYPE:
+            return new Object_(dereferenced);
+        case TypeEnum.GENERIC_INSTANCE:
+            return type.class._isValueType
+                ? new UnboxedValueType(dereferenced, type)
+                : new Object_(dereferenced);
+        case TypeEnum.ARRAY:
+        case TypeEnum.MULTIDIMENSIONAL_ARRAY:
+            return new Array(dereferenced);
+    }
 
     raise(
-        `couldn't read the value from ${pointer} (->${dereferenced}) using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
+        `couldn't read the value from ${pointer} (->${dereferenced}) using an unhandled or unknown type "${type.name}" (${type._typeEnum}), please file an issue`
     );
 }
 
@@ -189,7 +188,7 @@ function writePrimitive(pointer: NativePointer, value: PrimitiveLike, type: Type
         if (type.isSame(System.UIntPtr.type))
             return pointer.writePointer(coerceJSPrimitive(value, type));
         raise(
-            `couldn't write primitive value ${value} to ${pointer} using an unhandled or unknown type "${type.name}" (${type.typeEnum}), please file an issue`
+            `couldn't write primitive value ${value} to ${pointer} using an unhandled or unknown type "${type.name}" (${type._typeEnum}), please file an issue`
         );
     } else {
         // It's already a ValueType, so just copy over the correct number of bytes
@@ -214,7 +213,7 @@ export function write(pointer: NativePointer, value: ParameterLike, type: Type):
         );
     }
 
-    switch (type.typeEnum) {
+    switch (type._typeEnum) {
         case TypeEnum.POINTER:
         case TypeEnum.ARRAY:
         case TypeEnum.MULTIDIMENSIONAL_ARRAY:
@@ -224,25 +223,38 @@ export function write(pointer: NativePointer, value: ParameterLike, type: Type):
         case TypeEnum.OBJECT:
         case TypeEnum.REFERENCE_TYPE:
         case TypeEnum.GENERIC_INSTANCE:
-            return value instanceof ValueType
+            return value instanceof UnboxedValueType
                 ? (Memory.copy(pointer, value, type.class.valueTypeSize), pointer)
                 : pointer.writePointer(value);
     }
 
     raise(
-        `couldn't write value ${value} to ${pointer} using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+        `couldn't write value ${value} to ${pointer} using an unhandled or unknown type ${type.name} (${type._typeEnum}), please file an issue`
     );
 }
 
-export function fridaToIl2Cpp(value: NativeCallbackArgumentValue, type: Type): Il2CppValue;
+export function fridaToIl2Cpp(
+    value: NativeCallbackArgumentValue,
+    type: Type,
+    handle?: NativePointer
+): Il2CppValue;
 
-export function fridaToIl2Cpp(value: NativeFunctionReturnValue, type: Type): Il2CppValue;
+export function fridaToIl2Cpp(
+    value: NativeFunctionReturnValue,
+    type: Type,
+    handle?: NativePointer
+): Il2CppValue;
 
-export function fridaToIl2Cpp(value: NativeFunctionArgumentValue, type: Type): Il2CppValue;
+export function fridaToIl2Cpp(
+    value: NativeFunctionArgumentValue,
+    type: Type,
+    handle?: NativePointer
+): Il2CppValue;
 
 export function fridaToIl2Cpp(
     value: NativeCallbackArgumentValue | NativeFunctionReturnValue | NativeFunctionArgumentValue,
-    type: Type
+    type: Type,
+    handle?: NativePointer
 ): ParameterLike | MethodReturnType {
     // Note: it's now impossible for arrays to be returned by Frida
     // TODO might be interesting to have this reading logic elsewhere?
@@ -268,7 +280,7 @@ export function fridaToIl2Cpp(
     // }
 
     if (type.isPrimitive()) {
-        const handle = Memory.alloc(type.class.valueTypeSize);
+        handle ??= Memory.alloc(type.class.valueTypeSize);
         // TODO double check use case
         if (value === undefined) {
             warn(`Got undefined for ${type.name}, returning unallocated pointer`);
@@ -281,6 +293,42 @@ export function fridaToIl2Cpp(
         return new Primitive(handle, type);
     }
 
+    // Frida returns value types as an array of field values -> need to write back to memory ourselves
+    if (type.class.isValueType()) {
+        if (!globalThis.Array.isArray(value)) {
+            raise(`Expected an array for value type ${type.name}, got ${typeof value} (${value})`);
+        }
+
+        handle ??= Memory.alloc(type.class.valueTypeSize);
+
+        // TODO combine with `getValueTypeFields` from `type.ts`
+        const fieldTypes = type.class.fields.filter(f => !f.isStatic).map(f => f.type);
+
+        if (fieldTypes.length !== value.length) {
+            raise(
+                `Expected ${fieldTypes.length} fields for value type ${type.name}, got ${value.length} (${value})`
+            );
+        }
+
+        let offset = 0;
+
+        for (let i = 0; i < fieldTypes.length; i++) {
+            const fieldType = fieldTypes[i];
+            const fieldValue = value[i];
+            const fieldHandle = handle.add(offset);
+
+            // TODO: make sure this works for value types containing pointers and reference types – definitely needs tests
+            // TODO: consolidate functionality between `fridaToIl2Cpp` and `write`: the former allocates, the latter simply writes
+            // TODO handle typing edge case
+            /** @ts-ignore */
+            fridaToIl2Cpp(fieldValue, fieldType, fieldHandle);
+
+            offset += fieldType.class.valueTypeSize;
+        }
+
+        return new UnboxedValueType(handle, type);
+    }
+
     if (value === undefined) raise(`Expected a value, got undefined for ${type.name}`);
     if (!(value instanceof NativePointer))
         raise(
@@ -291,14 +339,14 @@ export function fridaToIl2Cpp(
         return new ByRef(value, type);
     }
 
-    switch (type.typeEnum) {
+    switch (type._typeEnum) {
         case TypeEnum.POINTER:
             return new Pointer(value, type.class.baseType! as Type<`${string}*`>);
         case TypeEnum.STRING:
             return new String(value);
         case TypeEnum.VALUE_TYPE:
             // TODO test this
-            return new ValueType(value, type);
+            return new UnboxedValueType(value, type);
         case TypeEnum.REFERENCE_TYPE:
         case TypeEnum.GENERIC_INSTANCE:
         case TypeEnum.OBJECT:
@@ -308,7 +356,7 @@ export function fridaToIl2Cpp(
             return new Array(value);
         default:
             raise(
-                `couldn't convert value ${value} to an Il2Cpp type using an unhandled or unknown type ${type.name} (${type.typeEnum}), please file an issue`
+                `couldn't convert value ${value} to an Il2Cpp type using an unhandled or unknown type ${type.name} (${type._typeEnum}), please file an issue`
             );
     }
     // TODO test enums
@@ -477,7 +525,7 @@ export function toFrida(
         // Note: this only works for primitives right now because I write them to a memory location first
         if (
             type.isAssignableFromValue(value) &&
-            (value instanceof ValueType || value instanceof Object_)
+            (value instanceof UnboxedValueType || value instanceof Object_)
         )
             return value.handle;
 
@@ -514,13 +562,13 @@ export function toFrida(
         return String.from(value);
     }
 
-    if (value instanceof ValueType && value.type.class._isEnum) {
+    if (value instanceof UnboxedValueType && value.type.class._isEnum) {
         // return value.field<number | Int64 | UInt64>('value__').value;
         // TODO does this work? We used to unwrap the enum value first
         return value;
     }
 
-    if (value instanceof ValueType) {
+    if (value instanceof UnboxedValueType) {
         // const _ = value.type.class.fields
         //     .filter(_ => !_.isStatic)
         //     .map(_ => toFridaValue(_.bind(value).value));

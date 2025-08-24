@@ -5,7 +5,7 @@ import { Object_ } from './object.js';
 import type { String } from './string.js';
 import type { Type } from './type.js';
 
-export class ValueType<T extends string = string> extends BaseObject<T> {
+export class UnboxedValueType<T extends string = string> extends BaseObject<T> {
     // Re-declare as non-nullable because ValueTypes don't have a header with type info
     declare readonly _type: Type<T>;
 

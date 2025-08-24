@@ -3,7 +3,7 @@ import type { ParameterLike } from '../memory.js';
 import { isIl2Cpp, write } from '../memory.js';
 import { raise } from '../utils/error.js';
 import { Type } from './type.js';
-import { ValueType } from './value-type.js';
+import { UnboxedValueType } from './value-type.js';
 
 // TODO combine in some way with the new corlib.ts -> System.Void etc?
 export type PrimitiveClassName =
@@ -23,7 +23,9 @@ export type PrimitiveClassName =
     | 'System.IntPtr'
     | 'System.UIntPtr';
 
-export class Primitive<T extends PrimitiveClassName = PrimitiveClassName> extends ValueType<T> {
+export class Primitive<
+    T extends PrimitiveClassName = PrimitiveClassName,
+> extends UnboxedValueType<T> {
     get constructorName() {
         return 'Il2Cpp.Primitive';
     }
@@ -52,7 +54,7 @@ export class Primitive<T extends PrimitiveClassName = PrimitiveClassName> extend
     read(this: WrappedPrimitive): PrimitiveJSType;
     read(this: WrappedPrimitive): PrimitiveJSType {
         const pointer = this.handle;
-        switch (this.type.typeEnum) {
+        switch (this.type._typeEnum) {
             // case 0:
             //     raise(
             //         `Failed to read type enum from ${this.type.name} (except if you really wanted 0, ie "IL2CPP_TYPE_END")`

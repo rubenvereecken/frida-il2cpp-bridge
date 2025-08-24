@@ -2,7 +2,6 @@ import { getModule } from '../module.js';
 import { raise } from '../utils/error.js';
 import { memoize } from '../utils/cache.js';
 import type { $INLINE_FILE } from 'ts-transformer-inline-file';
-import { inform } from '../utils/log.js';
 
 declare const $inline_file: typeof $INLINE_FILE;
 

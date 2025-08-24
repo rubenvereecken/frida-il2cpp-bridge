@@ -9,7 +9,7 @@ import { Object_ } from './object.js';
 import { Pointer } from './pointer.js';
 import { String } from './string.js';
 import type { ByRefType, Type } from './type.js';
-import { ValueType } from './value-type.js';
+import { UnboxedValueType } from './value-type.js';
 
 /**
  * As in, "pass parameter by reference". Not to be confused with C#'s `ReferenceType`
@@ -83,7 +83,7 @@ export function reference(value: ParameterLike, type?: Type): ByRef {
         case 'boolean':
             return new ByRef(handle.writeS8(+value), System.Boolean.type.makeByRefType());
         case 'number':
-            switch (type?.typeEnum) {
+            switch (type?._typeEnum) {
                 case TypeEnum.UNSIGNED_BYTE:
                     return new ByRef(handle.writeU8(value), type.makeByRefType());
                 case TypeEnum.SIGNED_BYTE:
@@ -107,14 +107,14 @@ export function reference(value: ParameterLike, type?: Type): ByRef {
                     return new ByRef(handle.writeDouble(value), type.makeByRefType());
             }
         case 'object':
-            if (value instanceof ValueType || value instanceof Pointer) {
+            if (value instanceof UnboxedValueType || value instanceof Pointer) {
                 return new ByRef(value.handle, value.type.makeByRefType());
             } else if (value instanceof String || value instanceof Array) {
                 return new ByRef(handle.writePointer(value), value.class.type.makeByRefType());
             } else if (value instanceof Object_) {
                 return new ByRef(handle.writePointer(value), value.class.type.makeByRefType());
             } else if (value instanceof NativePointer) {
-                switch (type?.typeEnum) {
+                switch (type?._typeEnum) {
                     case TypeEnum.UNSIGNED_NATIVE_POINTER:
                     case TypeEnum.SIGNED_NATIVE_POINTER:
                         return new ByRef(handle.writePointer(value), type.makeByRefType());

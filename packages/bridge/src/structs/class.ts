@@ -184,25 +184,13 @@ export class Class<T extends string = string> extends NativeStruct {
     }
 
     get typeEnum(): TypeEnum {
-        return this.type.typeEnum;
-    }
-
-    getTypeEnum(this: this & { readonly typeEnum: TypeEnum }): this['typeEnum'];
-    // Otherwise, fall back to the general enum:
-    getTypeEnum(this: this): TypeEnum;
-
-    getTypeEnum(this: Class<T>): number {
-        return this.typeEnum;
-    }
-
-    isByRef(): this is ByRefClass<T> {
-        return this.getTypeEnum() === TypeEnum.BY_REF;
+        return this.type._typeEnum;
     }
 
     isArray(): this is ArrayClass<T> {
         return (
-            this.getTypeEnum() === TypeEnum.ARRAY ||
-            this.getTypeEnum() === TypeEnum.MULTIDIMENSIONAL_ARRAY
+            this.type.getTypeEnum() === TypeEnum.ARRAY ||
+            this.type.getTypeEnum() === TypeEnum.MULTIDIMENSIONAL_ARRAY
         );
     }
 
@@ -465,6 +453,10 @@ export class Class<T extends string = string> extends NativeStruct {
     /** Gets the size of the instance - as a value type - of the current class. */
     @memoize
     get valueTypeSize(): number {
+        // il2cpp_class_value_size returns `-8` for pointer types, so we need to handle it separately
+        if (this.type.isPointer()) {
+            return Process.pointerSize;
+        }
         return getNativeClassGetValueTypeSize()(this, NULL);
     }
 
@@ -575,6 +567,8 @@ export class Class<T extends string = string> extends NativeStruct {
     /**
      * Finds the best fit constructor given the parameter types.
      * Doesn't cover constructors with default parameters – all parameters must be provided.
+     *
+     * In case of value types, returns unboxed value type.
      */
     new(...parameters: ParameterLike[]): Object_ {
         if (parameters.length == 0) return this.defaultNew();
@@ -699,12 +693,6 @@ export type EnumClass<T extends string = string> = Class<T> & {
 export type PointerClass<T> = T extends `${string}*`
     ? Class<T> & {
           typeEnum: TypeEnum.POINTER;
-      }
-    : never;
-
-export type ByRefClass<T> = T extends `${string}&`
-    ? Class<T> & {
-          typeEnum: TypeEnum.BY_REF;
       }
     : never;
 

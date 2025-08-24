@@ -18,13 +18,13 @@ let _Class: Awaited<typeof import('../class.js')>['Class'] | undefined;
 
 export const LazyClass = lazyRequired(() => _Class);
 
-let _ValueType: Awaited<typeof import('../value-type.js')>['ValueType'] | undefined;
+let _UnboxedValueType: Awaited<typeof import('../value-type.js')>['UnboxedValueType'] | undefined;
 (async () => {
-    const { ValueType } = await import('../value-type.js');
-    _ValueType = ValueType;
+    const { UnboxedValueType } = await import('../value-type.js');
+    _UnboxedValueType = UnboxedValueType;
 })();
 
-export const LazyValueType = lazyRequired(() => _ValueType);
+export const LazyUnboxedValueType = lazyRequired(() => _UnboxedValueType);
 
 let _Object: Awaited<typeof import('../object.js')>['Object_'] | undefined;
 (async () => {

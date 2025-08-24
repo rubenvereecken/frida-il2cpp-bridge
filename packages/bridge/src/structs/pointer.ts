@@ -1,6 +1,7 @@
 // TODO should pointer subclass ObjectLike? Should it support fields, methods, etc?
 
 import { memoize } from '../utils/cache.js';
+import type { PointerClass } from './class.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import type { Type } from './type.js';
@@ -24,7 +25,7 @@ export class Pointer<T extends `${string}*` = `${string}*`> extends BaseObject<T
 
     @memoize
     get class() {
-        return this.object.class;
+        return this.object.class as PointerClass<T>;
     }
 
     valueToString(): string {

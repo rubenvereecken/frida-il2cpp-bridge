@@ -18,8 +18,19 @@ import { Class } from './class.js';
 import type { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import { Type } from './type.js';
-import { ValueType } from './value-type.js';
+import { UnboxedValueType } from './value-type.js';
 
+/**
+ * ```c
+ * typedef struct FieldInfo
+ * {
+ *     const char* name;
+ *     const Il2CppType* type;
+ *     Il2CppClass *parent;
+ *     int32_t offset; // If offset is -1, then it's thread static
+ *     uint32_t token;
+ * } FieldInfo;
+ */
 export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
     constructor(native: NativePointerValue) {
         super(native);
@@ -99,7 +110,11 @@ export class Field<T extends Il2CppValue = Il2CppValue> extends NativeStruct {
         return getNativeFieldGetName()(this).readUtf8String()!;
     }
 
-    /** Gets the offset of this field, calculated as the difference with its owner virtual address. */
+    /**
+     * Gets the offset of this field, calculated as the difference with its owner virtual address.
+     *
+     * In case of value types, returns the boxed offset, so needs to be adjusted for unboxed value types.
+     */
     @memoize
     get offset(): number {
         return getNativeFieldGetOffset()(this).toNumber();
@@ -195,10 +210,16 @@ export class BoundField<T extends Il2CppValue = Il2CppValue> extends Field<T> {
         return `${super.toString()} (bound @ ${this.instance.handle})`;
     }
 
-    get valueHandle(): NativePointer {
-        return this.instance.handle.add(
-            this.offset - (this.instance instanceof ValueType ? Object_.headerSize : 0)
-        );
+    get instanceHandle() {
+        // TODO: support older versions of Unity
+        // Value types are expected to be boxed. The header isn't actually used, so simply subtract it
+        const headerSize = this.instance.class.isValueType() ? Object_.headerSize : 0;
+
+        return this.instance.handle.sub(headerSize);
+    }
+
+    get valueHandle() {
+        return this.instanceHandle.add(this.offset);
     }
 
     /** Gets the value of this field. */
