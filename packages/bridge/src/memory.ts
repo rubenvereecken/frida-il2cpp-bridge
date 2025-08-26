@@ -497,6 +497,7 @@ export function coerceJSPrimitive(
 }
 
 // TODO have a complementary function that also parses value types to plain JS objects -> toJs
+// For example for Int64 -> parse to number (and warn if lossy)
 /**
  * Turns either a JS or Il2Cpp value into a Frida value.
  * For use as a parameter to a native function.

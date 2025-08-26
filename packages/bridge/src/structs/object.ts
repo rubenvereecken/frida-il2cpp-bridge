@@ -22,7 +22,7 @@ import { GCHandle } from './gc-handle.js';
 import type { BoundMethod, MethodReturnType } from './method.js';
 import type { String } from './string.js';
 import type { Type } from './type.js';
-import type { Class } from './class.js';
+import type { Class, ValueTypeClass } from './class.js';
 import type { Method } from './method.js';
 import type { UnboxedValueType } from './value-type.js';
 import { LazyClass, LazyUnboxedValueType, LazyMethod } from './common/lazy.js';
@@ -56,6 +56,20 @@ export class Object_<T extends string = string> extends BaseObject<T> {
 
     toString(): string {
         return this.valueToString();
+    }
+
+    get _isBoxed() {
+        return true as const;
+    }
+
+    // TODO: ensure value type includes primitives here
+    // TODO: type helpers for value type objects
+    isBoxed(this: Object_ & { class: ValueTypeClass }): true;
+    isBoxed(this: Object_): never;
+    isBoxed() {
+        if (!this.class.isValueType())
+            raise(`Non-value type class '${this.class.name}' does not support isBoxed check`);
+        return this._isBoxed;
     }
 
     /**

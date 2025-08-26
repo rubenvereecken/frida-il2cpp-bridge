@@ -1,5 +1,6 @@
 import { getNativeValueTypeBox } from '../native/index.js';
-import type { Class } from './class.js';
+import { raise } from '../utils/error.js';
+import type { Class, ValueTypeClass } from './class.js';
 import { BaseObject } from './common/base-object.js';
 import { Object_ } from './object.js';
 import type { String } from './string.js';
@@ -23,6 +24,20 @@ export class UnboxedValueType<T extends string = string> extends BaseObject<T> {
 
     get type(): Type<T> {
         return this._type;
+    }
+
+    get _isBoxed() {
+        return false as const;
+    }
+
+    // TODO: ensure value type includes primitives here
+    // TODO: type helpers for value type objects
+    isBoxed(this: UnboxedValueType & { class: ValueTypeClass }): false;
+    isBoxed(this: UnboxedValueType): never;
+    isBoxed() {
+        if (!this.class.isValueType())
+            raise(`Non-value type class '${this.class.name}' does not support isBoxed check`);
+        return this._isBoxed;
     }
 
     /** Boxes the current value type in a object. */

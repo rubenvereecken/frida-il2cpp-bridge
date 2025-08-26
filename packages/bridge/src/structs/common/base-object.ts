@@ -34,8 +34,9 @@ export abstract class BaseObject<T extends string = string> extends NativeStruct
 
     abstract get class(): Class<T>;
     abstract get type(): Type<T>;
-
     abstract get constructorName(): string;
+
+    abstract isBoxed(): boolean;
 
     /** Gets the field with the given name. */
     field<T extends Il2CppValue>(name: string): BoundField<T> {

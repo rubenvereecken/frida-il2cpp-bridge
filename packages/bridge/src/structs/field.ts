@@ -212,10 +212,11 @@ export class BoundField<T extends Il2CppValue = Il2CppValue> extends Field<T> {
 
     get instanceHandle() {
         // TODO: support older versions of Unity
-        // Value types are expected to be boxed. The header isn't actually used, so simply subtract it
-        const headerSize = this.instance.class.isValueType() ? Object_.headerSize : 0;
+        // Value types are expected to be boxed. The header isn't actually used, so simply pretend there's a header.
+        if (this.instance.class.isValueType() && !this.instance.isBoxed())
+            return this.instance.handle.sub(Object_.headerSize);
 
-        return this.instance.handle.sub(headerSize);
+        return this.instance.handle;
     }
 
     get valueHandle() {

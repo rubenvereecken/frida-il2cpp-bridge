@@ -33,11 +33,13 @@ export const getNativeObjectGetVirtualMethod = memoize(() =>
 );
 
 /**
- * Allocates a new object of the specified class.
+ * Allocates a new object of the specified class, after first initializing the class.
  * @param klass Il2CppClass* - The class to instantiate
  * @returns Il2CppObject* - The newly allocated object
  */
-export const getNativeObjectNew = memoize(() => lookup('il2cpp_object_new', 'pointer', ['pointer']));
+export const getNativeObjectNew = memoize(() =>
+    lookup('il2cpp_object_new', 'pointer', ['pointer'])
+);
 
 /**
  * Unboxes a boxed value type object.

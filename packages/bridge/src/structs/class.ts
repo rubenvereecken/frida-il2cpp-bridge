@@ -59,6 +59,7 @@ import type { DynamicFields } from './common/dynamic-fields.js';
 import { DynamicFieldsLookup } from './common/dynamic-fields.js';
 import type { StripArraySuffix } from '../utils/type-helpers.js';
 import { getCorlib, System } from '../corlib.js';
+import { UnboxedValueType } from './value-type.js';
 
 /**
  * TODO: document byval_arg (the usual type) vs this_arg (for functions maybe?)
@@ -330,10 +331,20 @@ export class Class<T extends string = string> extends NativeStruct {
         return new Image(getNativeClassGetImage()(this));
     }
 
-    /** Gets the size of the instance of the current class. */
+    /** Gets the size of an instance of this class, including the object header */
     @memoize
     get instanceSize(): number {
         return getNativeClassGetInstanceSize()(this);
+    }
+
+    /** Gets the size of the instance - as a value type - of the current class. */
+    @memoize
+    get valueTypeSize(): number {
+        // il2cpp_class_value_size returns `-8` for pointer types, so we need to handle it separately
+        if (this.type.isPointer()) {
+            return Process.pointerSize;
+        }
+        return getNativeClassGetValueTypeSize()(this, NULL);
     }
 
     /** Determines whether the current class is abstract. */
@@ -450,18 +461,11 @@ export class Class<T extends string = string> extends NativeStruct {
         return getNativeClassGetStaticFieldData()(this);
     }
 
-    /** Gets the size of the instance - as a value type - of the current class. */
-    @memoize
-    get valueTypeSize(): number {
-        // il2cpp_class_value_size returns `-8` for pointer types, so we need to handle it separately
-        if (this.type.isPointer()) {
-            return Process.pointerSize;
-        }
-        return getNativeClassGetValueTypeSize()(this, NULL);
-    }
-
-    /** Allocates a new object of the current class. */
-    alloc(): Object_ {
+    /**
+     * Allocates a new object of the current class of size `instanceSize`, including object header.
+     * Also initializes the class.
+     */
+    allocateObject(): Object_ {
         return new Object_(getNativeObjectNew()(this));
     }
 
@@ -547,9 +551,17 @@ export class Class<T extends string = string> extends NativeStruct {
         );
     }
 
-    /** Allocates a new object of the current class and calls its default constructor. */
-    defaultNew(): Object_ {
-        const object = this.alloc();
+    // TODO: do I need ValueTypeClass to also cover primitives etc?
+    /**
+     * Allocates a new object of the current class and calls its default constructor.
+     *
+     * In case of value types, returns unboxed.
+     */
+    defaultNew(this: ReferenceTypeClass): Object_;
+    defaultNew(this: ValueTypeClass): UnboxedValueType;
+    defaultNew(this: ReferenceTypeClass | ValueTypeClass): Object_ | UnboxedValueType;
+    defaultNew(): Object_ | UnboxedValueType {
+        const object = this.allocateObject();
 
         const exceptionArray = Memory.alloc(Process.pointerSize);
 
@@ -561,6 +573,9 @@ export class Class<T extends string = string> extends NativeStruct {
             raise(new Object_(exception).toString());
         }
 
+        if (this.isValueType()) {
+        }
+
         return object;
     }
 
@@ -568,15 +583,28 @@ export class Class<T extends string = string> extends NativeStruct {
      * Finds the best fit constructor given the parameter types.
      * Doesn't cover constructors with default parameters – all parameters must be provided.
      *
-     * In case of value types, returns unboxed value type.
+     * In case of value types, returns unboxed.
      */
-    new(...parameters: ParameterLike[]): Object_ {
+    new(this: ReferenceTypeClass): Object_;
+    new(this: ValueTypeClass): UnboxedValueType;
+    new(this: ReferenceTypeClass | ValueTypeClass): Object_ | UnboxedValueType;
+    new(
+        this: ReferenceTypeClass | ValueTypeClass,
+        ...parameters: ParameterLike[]
+    ): Object_ | UnboxedValueType {
         if (parameters.length == 0) return this.defaultNew();
 
-        const object = this.alloc();
-        object.m['.ctor'](...parameters);
+        // TODO: might want to consider not going through object allocation for value types
+        const object = this.allocateObject();
 
-        return object;
+        if (this.isValueType()) {
+            const unboxed = object.unbox();
+            unboxed.m['.ctor'](...parameters);
+            return unboxed;
+        } else {
+            object.m['.ctor'](...parameters);
+            return object;
+        }
     }
 
     /** Gets the field with the given name. */

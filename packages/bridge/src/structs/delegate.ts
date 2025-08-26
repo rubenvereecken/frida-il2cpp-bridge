@@ -20,7 +20,7 @@ export function delegate<P extends ParameterLike[], R extends MethodReturnType>(
             `cannot create a delegate for neither ${SystemDelegate.type.name} nor ${SystemMulticastDelegate.type.name}, use a subclass instead`
         );
     }
-    const delegate = klass.alloc();
+    const delegate = klass.allocateObject();
     const key = delegate.handle.toString();
     const Invoke =
         delegate.tryMethod('Invoke') ??

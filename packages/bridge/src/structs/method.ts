@@ -552,24 +552,11 @@ export class BoundMethod<T extends MethodReturnType = MethodReturnType> extends 
 
     get instanceHandle() {
         // TODO: support older versions of Unity
-        // Note: unlike fields, value type methods expect unboxed value types
-        const headerSize = this.instance.class.isValueType() ? 0 : 0;
+        // Note: unlike fields, value type methods expect unboxed value types. So unbox first.
+        if (this.instance.class.isValueType() && this.instance.isBoxed())
+            return this.instance.handle.add(Object_.headerSize);
 
-        return this.instance.handle.sub(headerSize);
-
-        // TODO: improve is value type check
-        if (this.instance instanceof UnboxedValueType && this.class._isValueType) {
-            return this.instance.handle.add(maybeObjectHeaderSize() - Object_.headerSize);
-        } else if (this.instance instanceof UnboxedValueType && !this.class._isValueType) {
-            // TODO look into this – pretty sure unboxed methods are a thing
-            raise(
-                `cannot invoke method ${this.class.type.name}::${this.name} against a value type, you must box it first`
-            );
-        } else if (this.class._isValueType) {
-            return this.instance.handle.add(maybeObjectHeaderSize());
-        } else {
-            return this.instance.handle;
-        }
+        return this.instance.handle;
     }
 
     /** Invokes this method. */
@@ -595,8 +582,9 @@ export class BoundMethod<T extends MethodReturnType = MethodReturnType> extends 
     }
 }
 
+// TODO: remove
 const maybeObjectHeaderSize = memoize(() => {
-    const struct = getCorlib().class('System.RuntimeTypeHandle').initialize().alloc();
+    const struct = getCorlib().class('System.RuntimeTypeHandle').initialize().allocateObject();
     struct.method('.ctor').invokeRaw(struct, ptr(0xdeadbeef));
 
     // Here we check where the sentinel value is
