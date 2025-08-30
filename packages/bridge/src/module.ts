@@ -84,7 +84,11 @@ function getExpectedModuleNames(): string[] {
         case 'windows':
             return ['GameAssembly.dll'];
         case 'darwin':
-            return ['UnityFramework', 'GameAssembly.dylib'];
+            return [
+                // TODO: do we need this?
+                // 'UnityFramework',
+                'GameAssembly.dylib',
+            ];
     }
 
     raise(`${Process.platform} is not supported yet`);
