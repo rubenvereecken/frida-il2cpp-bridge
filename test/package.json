@@ -1,9 +1,12 @@
 {
-    "name": "test",
+    "name": "@frida-il2cpp/test",
     "private": true,
     "version": "0.1.0",
     "license": "MIT",
     "author": "vfsfitvnm",
+    "contributors": [
+        "vfsfitvnm"
+    ],
     "main": "index.js",
     "type": "module",
     "types": "dist/index.d.ts",
@@ -18,6 +21,13 @@
         "trailingComma": "none"
     },
     "dependencies": {
-        "frida": "^16.1.3"
+        "frida": "^17.2.17",
+        "tap-mocha-reporter": "^5.0.4",
+        "tap-parser": "^18.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^24.3.0",
+        "esbuild": "^0.25.9",
+        "zora": "^6.0.0"
     }
 }

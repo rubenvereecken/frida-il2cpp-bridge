@@ -1,0 +1,14 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "types": ["node"],
+        "lib": ["esnext"],
+        "typeRoots": ["./node_modules/@types", "./@types", "."],
+        // For tap-mocha-reporter
+        "allowSyntheticDefaultImports": true
+    },
+    "include": ["*.ts"]
+}

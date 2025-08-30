@@ -1,0 +1,11 @@
+ASSEMBLY_TARGET_CMD = $(IL2CPP) \
+	--compile-cpp \
+	--libil2cpp-static \
+	--configuration=Release \
+	--platform=Linux \
+	--architecture=x64 \
+	--dotnetprofile=$(DOTNET_PROFILE) \
+	--cachedirectory="$(@D)/.." \
+	--generatedcppdir="$(<D)" \
+	--baselib-directory="$(EDITOR_DIR)/Data/PlaybackEngines/LinuxStandaloneSupport/Variations/linux64_player_nondevelopment_il2cpp/" \
+	--outputpath="$@"

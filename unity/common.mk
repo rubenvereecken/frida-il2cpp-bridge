@@ -25,6 +25,9 @@ endif
 # Pull in platform-specific path/layout definitions (MONO_DIR, IL2CPP_DIR, …)
 include ../$(PLATFORM_MAKEFILE)
 
+# $(STRIP) is set by platform-specific common-*.mk; default to plain strip
+STRIP ?= strip
+
 MONO := $(MAYBE_STRACE) $(MONOBL_DIR)/bin/mono
 MCS := $(MONO) $(MONOBL_DIR)/lib/mono/4.5/mcs.exe
 
@@ -48,7 +51,7 @@ CURL := curl -L -s -A "" --fail
 $(ASSEMBLY_TARGET): $(CPP_TARGET)
 	@ $(ECHO) compiling $(<F)
 	@ $(ASSEMBLY_TARGET_CMD)
-	@ strip "$@"
+	@ $(STRIP) "$@"
 
 $(CPP_TARGET): $(LINKED_DLL_TARGET)
 	@ $(ECHO) generating $(@F)

@@ -14,6 +14,7 @@
 int
 main (int argc, char ** argv)
 {
+  printf ("Hosting...\n");
   char * path = argv[1];
   char * so = LIB_NAME;
   char * data = "Data";
@@ -55,6 +56,7 @@ main (int argc, char ** argv)
 
   printf ("pid: %d\n", getpid ());
 
-  int status;
-  wait (&status);
+  // int status;
+  // wait (&status);
+  pause ();
 }

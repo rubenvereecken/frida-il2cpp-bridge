@@ -249,6 +249,7 @@ Il2Cpp.perform(() => {
         });
     });
 
+    // TODO: clarify unboxed and put next to boxed variant
     test("Structs fields are read correctly", () => {
         assert(ptr(0xdeadbeef), () => {
             const runtimeTypeHandle = Il2Cpp.corlib.class("System.RuntimeTypeHandle").alloc();
@@ -272,6 +273,7 @@ Il2Cpp.perform(() => {
         });
     });
 
+    // TODO: variant for unboxed
     test("Boxed structs methods are invoked correctly", () => {
         assert(ptr(0xdeadbeef), () => {
             const runtimeTypeHandle = Il2Cpp.corlib.class("System.RuntimeTypeHandle").alloc();

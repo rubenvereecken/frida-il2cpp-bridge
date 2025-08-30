@@ -9,6 +9,9 @@ DYNAMIC_LIB_EXT = dylib
 PLATFORM := MacOS
 DOTNET_PROFILE := unityaot-macos
 
+# Use safe strip that keeps indirect symbol table
+STRIP ?= strip -x
+
 # macOS: we only support Apple-silicon arm64 for now
 ifeq ($(ARCH), arm64)
     EDITOR_SUFFIX := Arm64

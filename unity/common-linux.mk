@@ -8,6 +8,9 @@ DYNAMIC_LIB_EXT = so
 PLATFORM := Linux
 DOTNET_PROFILE := unityaot-linux
 
+# On Linux plain strip is fine
+STRIP ?= strip
+
 # Linux: we only support x64
 ifneq ($(ARCH), x86_64)
     $(error "Only x64 is supported for Linux")
