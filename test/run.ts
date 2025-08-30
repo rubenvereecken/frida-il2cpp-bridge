@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import frida, { Stdio } from 'frida';
 import TapMochaReporter from 'tap-mocha-reporter'; // function returning a transform stream
 
-import type { AgentOutboundMessage } from './shared.js';
+import type { AgentTap, AgentDebug, AgentComplete } from './shared.js';
 
 async function main() {
     const root = path.join(path.dirname(import.meta.url.replace(/^file:\/\//, '')), '..');
@@ -44,25 +44,51 @@ async function main() {
     // Feed TAP lines from the agent
     script.message.connect(message => {
         if (message.type !== 'send') return;
-        if (!message.payload || typeof message.payload.tap !== 'string') {
-            throw new Error(`Unexpected message payload: ${message.payload}`);
+        console.dir(message.payload, { depth: null });
+
+        if (!message.payload) {
+            throw new Error('Got frida message without payload');
         }
-        const payload = message.payload as AgentOutboundMessage;
-        tapStream.write(payload.tap.replace(/\r?\n$/, '') + '\n');
+
+        if (message.payload.debug) {
+            // console.dir(message.payload as AgentDebugMessage, { depth: null });
+            return;
+        } else if (typeof message.payload.tap === 'string') {
+            const payload = message.payload as AgentTap;
+            tapStream.write(payload.tap.replace(/\r?\n$/, '') + '\n');
+        } else if (typeof message.payload.complete === 'boolean') {
+            const payload = message.payload as AgentComplete;
+            console.log(`🥹 Got finished`);
+        } else {
+            throw new Error(`Got unexpected payload: ${JSON.stringify(message.payload)}`);
+        }
     });
 
     // Close stream if the script dies
     script.destroyed.connect(() => {
+        console.log('script destroyed');
         return tapStream.end();
+    });
+
+    tapStream.on('finish', () => {
+        console.log('tap stream finished');
     });
 
     await script.load();
 
+    console.log('finished loading');
+
     // Important: spawned process is suspended until resumed
     await frida.resume(pid);
+
+    console.log('finished resuming');
 }
 
-main().catch(err => {
-    console.error(err?.stack || String(err));
-    process.exit(1);
-});
+(async () => {
+    try {
+        await main();
+    } catch (err: any) {
+        console.error(err?.stack || String(err));
+        process.exit(1);
+    }
+})();

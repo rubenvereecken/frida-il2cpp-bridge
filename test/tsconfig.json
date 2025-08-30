@@ -10,5 +10,5 @@
         // For tap-mocha-reporter
         "allowSyntheticDefaultImports": true
     },
-    "include": ["*.ts", "tests/tests.ts"]
+    "include": ["*.ts", "tests/index.ts"]
 }

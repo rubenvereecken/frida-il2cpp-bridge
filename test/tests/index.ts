@@ -1,44 +1,64 @@
 // Build this with esbuild into a single JS file for Frida.
 // Example: esbuild agent.ts --bundle --platform=browser --format=iife --target=es2018 --outfile=dist/agent.bundle.js
 
-import { test } from 'zora';
-import type { AgentOutboundMessage } from '../shared.js';
+import { createHarness, createTAPReporter } from 'zora';
+import type { AgentComplete, AgentDebug, AgentDone, AgentTap } from '../shared.js';
+import { getUnityVersionRaw, perform } from '@frida-il2cpp/bridge';
 
 // Frida provides `send()` in the agent; declare for TypeScript.
-declare function send(payload: AgentOutboundMessage): void;
+declare function send(payload: AgentTap | AgentDebug | AgentComplete | AgentDone): void;
 
-// Forward any console output as TAP lines via Frida messages
-(function wireConsoleToFrida() {
-    const origLog = console.log.bind(console);
-    const origErr = console.error.bind(console);
+function writeTap(message: any) {
+    message
+        .toString()
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .forEach((line: string) => {
+            send({ tap: line } satisfies AgentTap);
+        });
+}
 
-    function forward(line: string) {
-        if (!line) return;
-        // Each call sends exactly one TAP line to the host
-        send({ tap: line });
-    }
+function performAsync(cb: () => void) {
+    return new Promise<void>(res =>
+        perform(() => {
+            cb();
+            res();
+        })
+    );
+}
 
-    function splitAndForward(text: string) {
-        text.split(/\r?\n/)
-            .map(s => s.trimEnd())
-            .filter(Boolean)
-            .forEach(forward);
-    }
+// Create a custom harness instead of using the global one
+const harness = createHarness({});
+const { test } = harness;
 
-    // Replace console methods used by zora reporters
-    console.log = (...args: any[]) => splitAndForward(args.map(String).join(' '));
-    console.error = (...args: any[]) => splitAndForward(args.map(String).join(' '));
-
-    // Keep warn/info quiet or route them as comments if needed later
-    // console.warn = console.info = console.log;
-})();
-
-// A tiny demo test so you can see it working
+// Your tests
 test('zora in Frida emits TAP', t => {
-    t.eq(1 + 1, 2, '1 + 1 = 2');
-    t.ok(true, 'truth holds');
+    t.eq(1 + 1, 2, 'TAP works');
 });
 
-// zora auto-runs and prints TAP to console; our console shim forwards lines via send()
-// If you ever want JSON events instead of TAP, zora supports a JSON reporter via env/config,
-// but TAP keeps the runner-deps tiny. :contentReference[oaicite:2]{index=2}
+test('unity version', async t => {
+    t.eq(1 + 1, 2, 'async test');
+
+    await new Promise(res => setTimeout(res, 1000));
+    send({ debug: 'Finished promise' });
+    t.truthy('hello', 'great');
+    // await performAsync(() => {
+    //     t.eq(1 + 1, 2, 'async il2cpp test');
+    // });
+});
+
+// Run tests and signal completion
+(async () => {
+    try {
+        const reporter = createTAPReporter({ log: writeTap });
+
+        // Start the test run
+        await harness.report({ reporter });
+    } catch (error) {
+        send({ debug: `Error: ${error}` } satisfies AgentDebug);
+    } finally {
+        send({ debug: 'Finished!' });
+        // Signal completion to the host
+        send({ complete: true } satisfies AgentComplete);
+    }
+})();
