@@ -3,7 +3,7 @@
     "private": true,
     "version": "0.1.0",
     "license": "MIT",
-    "author": "vfsfitvnm",
+    "author": "rubenvereecken",
     "contributors": [
         "vfsfitvnm"
     ],
@@ -13,17 +13,9 @@
     "files": [
         "dist"
     ],
-    "prettier": {
-        "arrowParens": "avoid",
-        "bracketSpacing": true,
-        "printWidth": 160,
-        "tabWidth": 4,
-        "trailingComma": "none"
-    },
     "dependencies": {
         "frida": "^17.2.17",
-        "tap-mocha-reporter": "^5.0.4",
-        "tap-parser": "^18.0.0"
+        "tap-mocha-reporter": "^5.0.4"
     },
     "devDependencies": {
         "@types/node": "^24.3.0",
