@@ -13,6 +13,11 @@
     "files": [
         "dist"
     ],
+    "scripts": {
+        "build": "esbuild tests/index.ts --bundle --platform=node --outfile=dist/tests.js",
+        "test": "yarn build && node --experimental-strip-types run.ts",
+        "dev": "nodemon --watch tests --ext ts --exec \"yarn test\""
+    },
     "dependencies": {
         "frida": "^17.2.17",
         "tap-mocha-reporter": "^5.0.4"
@@ -20,6 +25,7 @@
     "devDependencies": {
         "@types/node": "^24.3.0",
         "esbuild": "^0.25.9",
+        "nodemon": "^3.1.10",
         "zora": "^6.0.0"
     }
 }
