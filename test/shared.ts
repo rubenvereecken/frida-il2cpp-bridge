@@ -4,14 +4,14 @@ export type AgentTap = {
     tap: string; // Single TAP line, no trailing newline
 };
 
+export function isAgentTap(obj: unknown): obj is AgentTap {
+    return !!obj && typeof obj === 'object' && 'tap' in obj;
+}
+
 export type AgentDebug = {
     debug: any;
 };
 
-export type AgentDone = {
-    done: true;
-};
-
-export type AgentComplete = {
-    complete: true;
-};
+export function isAgentDebug(obj: unknown): obj is AgentDebug {
+    return !!obj && typeof obj === 'object' && 'debug' in obj;
+}

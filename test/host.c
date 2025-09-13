@@ -39,8 +39,6 @@ main (int argc, char ** argv)
     return -1;
   }
 
-  usleep (100000); // 100ms
-
   void (*il2cpp_set_data_dir) (const char *) =
       dlsym (handle, "il2cpp_set_data_dir");
 
@@ -64,9 +62,5 @@ main (int argc, char ** argv)
     printf ("❌ il2cpp_init failed (return value: %d)\n", res);
   }
 
-  // printf ("pid: %d\n", getpid ());
-
-  // int status;
-  // wait (&status);
   pause ();
 }

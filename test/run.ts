@@ -3,10 +3,11 @@ import { PassThrough } from 'node:stream';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import frida, { Stdio } from 'frida';
+import frida, { ScriptRuntime, Stdio } from 'frida';
 import TapMochaReporter from 'tap-mocha-reporter'; // function returning a transform stream
 
-import type { AgentTap, AgentDebug, AgentComplete } from './shared.js';
+import { type AgentTap, type AgentDebug, isAgentDebug, isAgentTap } from './shared.ts';
+import { spawn } from 'node:child_process';
 
 async function main() {
     const root = path.join(path.dirname(import.meta.url.replace(/^file:\/\//, '')), '..');
@@ -23,16 +24,44 @@ async function main() {
     const libraryPath = path.join(buildPath, '2022.3.62f1', 'out');
 
     // Spawn target suspended
-    const pid = await frida.spawn(execPath, {
-        argv: [libraryPath],
-        stdio: Stdio.Pipe,
+    // const hostProcess = await frida.spawn(execPath, {
+    //     argv: [libraryPath],
+    //     stdio: Stdio.Inherit,
+    // });
+
+    // Use Node.js spawn (bypasses Frida's spawn issues)
+    const hostProcess = spawn(execPath, [libraryPath], {
+        stdio: ['pipe', 'pipe', 'pipe'], // inherit stdout/stderr for debugging
+        detached: false,
     });
 
-    // Attach to the spawned process instead
-    const session = await frida.attach(pid);
+    hostProcess.on('error', err => {
+        console.error('[SPAWN ERROR]', err);
+        throw err;
+    });
+
+    // TODO get this part to work in order to wait for il2cpp to be loaded – replaces the 250ms wait
+    hostProcess.stdout.on('data', data => {
+        console.log('[HOST]', data);
+    });
+    hostProcess.stderr.on('data', data => {
+        console.error('[HOST]', data);
+    });
+
+    // Wait for process to start
+    await new Promise(resolve => setTimeout(resolve, 250));
+
+    if (!hostProcess.pid) {
+        throw new Error('Failed to get child process PID');
+    }
+
+    console.log('Spawned process PID:', hostProcess.pid);
+
+    // Now attach Frida (this usually works fine)
+    const session = await frida.attach(hostProcess.pid);
 
     // Attach and load the agent (suspended)
-    const script = await session.createScript(agentSource);
+    const script = await session.createScript(agentSource, { runtime: ScriptRuntime.V8 });
 
     // TAP pipeline
     const tapStream = new PassThrough();
@@ -42,52 +71,43 @@ async function main() {
     tapStream.pipe(pretty);
 
     // Feed TAP lines from the agent
-    script.message.connect(message => {
-        if (message.type !== 'send') return;
-        console.dir(message.payload, { depth: null });
+    // Create a promise that resolves when tests complete
+    const testsComplete = new Promise<void>((resolve, reject) => {
+        script.message.connect(message => {
+            if (message.type !== 'send') {
+                console.error(`[ERROR] Ignoring unexpected message type ${message.type}`);
+                return;
+            }
 
-        if (!message.payload) {
-            throw new Error('Got frida message without payload');
-        }
+            const payload = message.payload;
 
-        if (message.payload.debug) {
-            // console.dir(message.payload as AgentDebugMessage, { depth: null });
-            return;
-        } else if (typeof message.payload.tap === 'string') {
-            const payload = message.payload as AgentTap;
-            tapStream.write(payload.tap.replace(/\r?\n$/, '') + '\n');
-        } else if (typeof message.payload.complete === 'boolean') {
-            const payload = message.payload as AgentComplete;
-            console.log(`🥹 Got finished`);
-        } else {
-            throw new Error(`Got unexpected payload: ${JSON.stringify(message.payload)}`);
-        }
+            if (isAgentDebug(payload)) {
+                console.log('[DEBUG]', payload.debug);
+                return;
+            }
+
+            if (isAgentTap(payload)) {
+                tapStream.write(payload.tap.replace(/\r?\n$/, '') + '\n');
+            }
+        });
     });
 
-    // Close stream if the script dies
-    script.destroyed.connect(() => {
-        console.log('script destroyed');
-        return tapStream.end();
-    });
-
-    tapStream.on('finish', () => {
-        console.log('tap stream finished');
-    });
+    // script.destroyed.connect(() => {
+    //     // TODO: do we need to close the stream if the script dies?
+    // });
 
     await script.load();
+    await script.exports.runTests();
 
-    console.log('finished loading');
-
-    // Important: spawned process is suspended until resumed
-    await frida.resume(pid);
-
-    console.log('finished resuming');
+    hostProcess.kill();
+    // process.exit();
 }
 
 (async () => {
     try {
         await main();
     } catch (err: any) {
+        console.error(`[ERROR] Uncaught exception`);
         console.error(err?.stack || String(err));
         process.exit(1);
     }

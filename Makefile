@@ -18,7 +18,7 @@ test: test/main.py test/agent.js dist build/host
 
 build/host: test/host.c
 	@ mkdir -p build
-	@ gcc -o "$(@)" "$<"
+	@ clang -o "$(@)" "$<"
 
 $(UNITY_DIRS):
 	make -C "$@" assembly
