@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "typeRoots": ["./node_modules/@types", "./@types", "."]
+    "typeRoots": ["./node_modules/@types", "./@types"],
+    "paths": {
+      "zora": ["./node_modules/zora/dist/declarations/index.d.ts"]
+    }
   },
-  "include": ["*.ts"]
+  "include": ["*.ts", "*.d.ts"]
 }

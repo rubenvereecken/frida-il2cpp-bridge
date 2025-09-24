@@ -1,27 +1,29 @@
-import { Writable } from 'stream';
+declare module "tap-mocha-reporter" {
+  import { Writable } from "stream";
 
-type ReporterType =
-    | 'classic'
-    | 'doc'
-    | 'dot'
-    | 'dump'
-    | 'json'
-    | 'jsonstream'
-    | 'landing'
-    | 'list'
-    | 'markdown'
-    | 'min'
-    | 'nyan'
-    | 'progress'
-    | 'silent'
-    | 'spec'
-    | 'tap'
-    | 'xunit';
+  type ReporterType =
+    | "classic"
+    | "doc"
+    | "dot"
+    | "dump"
+    | "json"
+    | "jsonstream"
+    | "landing"
+    | "list"
+    | "markdown"
+    | "min"
+    | "nyan"
+    | "progress"
+    | "silent"
+    | "spec"
+    | "tap"
+    | "xunit";
 
-declare function TapMochaReporter(type: ReporterType, options?: any): Writable;
+  function TapMochaReporter(type: ReporterType, options?: any): Writable;
 
-declare namespace TapMochaReporter {
+  namespace TapMochaReporter {
     const types: ReporterType[];
-}
+  }
 
-export = TapMochaReporter;
+  export default TapMochaReporter;
+}

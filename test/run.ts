@@ -72,7 +72,7 @@ async function main() {
   const tapStream = new PassThrough();
 
   // Pretty reporter (Mocha-style)
-  const pretty = TapMochaReporter("tap");
+  const pretty = TapMochaReporter("spec");
   tapStream.pipe(pretty);
 
   // Feed TAP lines from the agent
@@ -83,6 +83,7 @@ async function main() {
         console.error(
           `[ERROR] Ignoring unexpected message type ${message.type}`
         );
+        console.dir(message, { depth: null });
         return;
       }
 

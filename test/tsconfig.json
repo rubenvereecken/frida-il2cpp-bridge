@@ -11,5 +11,5 @@
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["*.ts", "tests/*.ts"]
+  "include": ["*.ts", "*.d.ts"]
 }

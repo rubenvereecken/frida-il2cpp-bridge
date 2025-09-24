@@ -64,8 +64,11 @@ importers:
         specifier: workspace:*
         version: link:../../packages/bridge
       zora:
-        specifier: ^6.0.0
-        version: 6.0.0
+        specifier: ^4.1.0
+        version: 4.1.0
+      zora-tap-reporter:
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@types/frida-gum':
         specifier: ^19.0.0
@@ -1058,8 +1061,11 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zora@6.0.0:
-    resolution: {integrity: sha512-uDOZ5VwwURiU9B+5BY5z/ByM9WWC1A5SJpEBg0HL9Qy2zsKnzfizsa+ABWZFJ8onGN1MU2evzAGAuAxybjoYEQ==}
+  zora-tap-reporter@2.0.0:
+    resolution: {integrity: sha512-Gdj03EdaH3b8JimaaAwBlqrtknj/z7WcBLaQO1rWdf5PIZAeR33EKPllIOZAiUXVukmJdPkIT16VsPYLXE76OA==}
+
+  zora@4.1.0:
+    resolution: {integrity: sha512-tFowFksaFIwp0hzZ9dhM1rlaicS6VNjNMxEH3phgR5Glz3EMAoRujjJ50aTLAsl//SArTdG/kBt5EuvhqS6mww==}
 
 snapshots:
 
@@ -2018,4 +2024,6 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zora@6.0.0: {}
+  zora-tap-reporter@2.0.0: {}
+
+  zora@4.1.0: {}
