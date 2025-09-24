@@ -1,5 +1,6 @@
 /// <reference types="frida-gum" />
 
+
 // Main modules
 export * from './application.js';
 export * from './corlib.js';

@@ -1,12 +1,11 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "moduleResolution": "node",
         "outDir": "dist",
         "rootDir": "src",
         "composite": true,
         "incremental": true,
-        "typeRoots": ["../../node_modules/@types", "./node_modules/@types", "./src/types"]
+        "types": ["frida-gum"]
     },
     "include": ["src"]
 }

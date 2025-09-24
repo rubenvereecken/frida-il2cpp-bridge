@@ -161,13 +161,13 @@ export class Thread extends NativeStruct {
     }
 }
 
-export const getAttachedThreads = memoize(() => {
+export const getAttachedThreads = () => {
     return readNativeList(getNativeThreadGetAttachedThreads).map(_ => new Thread(_));
-});
+};
 
-export const getCurrentThread = memoize(() => {
+export const getCurrentThread = () => {
     return new Thread(getNativeThreadGetCurrent()()).asNullable();
-});
+};
 
 export const getMainThread = memoize(() => {
     // I'm not sure if this is always the case. Typically, the main

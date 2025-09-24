@@ -1,9 +1,6 @@
-// Build this with esbuild into a single JS file for Frida.
-// Example: esbuild agent.ts --bundle --platform=browser --format=iife --target=es2018 --outfile=dist/agent.bundle.js
-
 import { createHarness, createTAPReporter } from 'zora';
 import type { AgentDebug, AgentTap } from '../shared.js';
-import { getUnityVersionRaw, perform } from '@frida-il2cpp/bridge';
+import { unityTests } from './unity.js';
 
 // Frida provides `send()` in the agent; declare for TypeScript.
 declare function send(payload: AgentTap | AgentDebug): void;
@@ -12,10 +9,6 @@ declare const rpc: {
         runTests: () => Promise<void>;
     };
 };
-
-function sendDebug(debug: unknown) {
-    send({ debug } satisfies AgentDebug);
-}
 
 function writeTap(message: any) {
     message
@@ -27,29 +20,16 @@ function writeTap(message: any) {
         });
 }
 
-function performAsync(cb: () => void) {
-    return new Promise<void>(res =>
-        perform(() => {
-            cb();
-            res();
-        })
-    );
-}
-
 // Create a custom harness instead of using the global one
 const harness = createHarness({});
 const { test } = harness;
 
-// Your tests
+// Make sure the basics work
 test('zora in Frida emits TAP', t => {
     t.eq(1 + 1, 2, 'TAP works');
 });
 
-test('unity version', async t => {
-    await performAsync(() => {
-        t.eq(getUnityVersionRaw(), '2022.3.62f1', 'read Unity version');
-    });
-});
+unityTests(test);
 
 // Run tests and signal completion
 rpc.exports = {

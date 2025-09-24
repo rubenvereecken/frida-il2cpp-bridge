@@ -1,0 +1,21 @@
+{
+    "name": "@frida-il2cpp/tests",
+    "private": true,
+    "version": "0.1.0",
+    "type": "module",
+    "main": "dist/tests.js",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "mkdir -p dist && esbuild index.ts --bundle --platform=node --outfile=dist/tests.js"
+    },
+    "dependencies": {
+        "@frida-il2cpp/bridge": "workspace:*",
+        "zora": "^6.0.0"
+    },
+    "devDependencies": {
+        "@types/frida-gum": "^19.0.0",
+        "esbuild": "^0.25.9"
+    }
+}

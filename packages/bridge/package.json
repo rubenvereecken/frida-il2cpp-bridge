@@ -48,13 +48,13 @@
         "build": "tsc -b",
         "build:global": "esbuild src/index-global.ts --bundle --platform=node --outfile=dist/global.js",
         "dev": "tsc -b -w",
-        "clean": "rm -rf dist",
-        "prepare-TODO": "make dist",
-        "test-TODO": "make test"
+        "clean": "rm -rf dist"
+    },
+    "dependencies": {
+        "@types/frida-gum": "^19.0.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.33.0",
-        "@types/frida-gum": "^19.0.0",
         "eslint": "^9.33.0",
         "eslint-plugin-file-extension-in-import-ts": "^2.1.1",
         "prettier": "^3.5.3",

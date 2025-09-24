@@ -1,5 +1,5 @@
 {
-    "name": "@frida-il2cpp/test",
+    "name": "@frida-il2cpp/test-runner",
     "private": true,
     "version": "0.1.0",
     "license": "MIT",
@@ -14,19 +14,18 @@
         "dist"
     ],
     "scripts": {
-        "build": "esbuild tests/index.ts --bundle --platform=node --outfile=dist/tests.js",
-        "test": "yarn build && node --experimental-strip-types run.ts",
-        "dev": "nodemon --watch tests --ext ts --exec \"yarn test\""
+        "postinstall": "cd node_modules/frida && PATH=\"$(pwd)/../.bin:$PATH\" node scripts/install.js",
+        "build": "pushd tests && pnpm run build && popd",
+        "test": "pnpm run build && node --experimental-strip-types run.ts",
+        "dev": "nodemon --watch tests --ext ts --exec \"pnpm run test\""
     },
     "dependencies": {
         "frida": "^17.2.17",
-        "tap-mocha-reporter": "^5.0.4",
-        "@frida-il2cpp/bridge": "workspace:*"
+        "tap-mocha-reporter": "^5.0.4"
     },
     "devDependencies": {
         "@types/node": "^24.3.0",
-        "esbuild": "^0.25.9",
         "nodemon": "^3.1.10",
-        "zora": "^6.0.0"
+        "prebuild-install": "^7.1.3"
     }
 }

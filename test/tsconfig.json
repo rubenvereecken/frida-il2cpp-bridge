@@ -1,14 +1,15 @@
 {
-    "extends": "../tsconfig.base.json",
-    "compilerOptions": {
-        "noEmit": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "types": ["node"],
-        "lib": ["esnext"],
-        "typeRoots": ["./node_modules/@types", "./@types", "."],
-        // For tap-mocha-reporter
-        "allowSyntheticDefaultImports": true
-    },
-    "include": ["*.ts", "tests/index.ts"]
+  // Don't extend base config because it's for Node.js, not Frida
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "lib": ["esnext"],
+    "typeRoots": ["./node_modules/@types", "./@types", "."],
+    // For tap-mocha-reporter
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["*.ts", "tests/*.ts"]
 }

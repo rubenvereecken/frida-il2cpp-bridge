@@ -1,6 +1,5 @@
 type KeyFn<Args extends unknown[]> = (...args: Readonly<Args>) => unknown;
 
-/** @internal */
 export interface MemoizedFunction<Args extends unknown[], R, This = unknown> {
     (this: This, ...args: Args): R;
     clear(): void;
@@ -13,7 +12,7 @@ const defaultKey: KeyFn<unknown[]> = (...a) => (a.length ? JSON.stringify(a) : '
 // Memoization utilities
 // -----------------------------------------------------------------------------
 
-/** @internal Memoize a standalone function (no _propertyCache involved). */
+/**  Memoize a standalone function (no _propertyCache involved). */
 function memoizeFunction<Args extends unknown[], R, This = unknown>(
     fn: (this: This, ...args: Args) => R,
     key: KeyFn<Args> = defaultKey as KeyFn<Args>
@@ -46,7 +45,7 @@ function ensurePropertyCache(host: unknown & { _propertyCache?: Record<PropertyK
 }
 
 /**
- * @internal Decorator that memoizes the result of a method (instance or static).
+ * Decorator that memoizes the result of a method (instance or static).
  * The cache lives inside `_propertyCache` so it is transferable just like `cached`.
  *
  * Usage:
@@ -154,6 +153,7 @@ export function memoize(
 ): void;
 
 // Implementation
+/** @internal */
 export function memoize(...args: any[]): any {
     // 1. Direct decorator form: (target, propertyKey, descriptor)
     if (
@@ -179,7 +179,6 @@ export function memoize(...args: any[]): any {
 // Lazy-load an object or function on first use.
 type NonPrimitive = object | ((...args: unknown[]) => unknown);
 
-/** @internal */
 export function lazy<T extends NonPrimitive>(factory: () => T): T {
     let inited = false;
     let value!: T;

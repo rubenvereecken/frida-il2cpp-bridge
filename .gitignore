@@ -1,6 +1,8 @@
 .claude
 cursor
 
+tsconfig.tsbuildinfo
+
 package-lock.json
 build
 dist
